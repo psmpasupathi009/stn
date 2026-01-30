@@ -4,7 +4,7 @@ import nodemailer from 'nodemailer'
 const getTransporter = () => {
   // Priority: EMAIL_* first, then SMTP_* as fallback
   const emailUser = process.env.EMAIL_USER || process.env.SMTP_USER
-  const emailPass = process.env.EMAIL_PASS || process.env.SMTP_PASS
+  let emailPass = process.env.EMAIL_PASS || process.env.SMTP_PASS
   const emailHost = process.env.EMAIL_HOST || process.env.SMTP_HOST || 'smtp.gmail.com'
   const emailPort = process.env.EMAIL_PORT || process.env.SMTP_PORT || '587'
   const emailSecure = process.env.EMAIL_SECURE || process.env.SMTP_SECURE || 'false'
@@ -12,6 +12,11 @@ const getTransporter = () => {
   if (!emailUser || !emailPass) {
     console.log('⚠️  Email credentials not found. Using EMAIL_USER/EMAIL_PASS or SMTP_USER/SMTP_PASS')
     return null
+  }
+
+  // Remove spaces from App Password if present (Gmail App Passwords sometimes have spaces)
+  if (emailPass) {
+    emailPass = emailPass.replace(/\s+/g, '')
   }
 
   console.log(`📧 Configuring email transporter: ${emailUser} @ ${emailHost}:${emailPort}`)
