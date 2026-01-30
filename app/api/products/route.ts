@@ -8,26 +8,32 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get('search')
     const limit = searchParams.get('limit')
 
-    const where: any = {}
+    let products = await prisma.product.findMany({
+      orderBy: { createdAt: 'desc' },
+    })
+
+    // Filter by category (case-insensitive)
     if (category) {
-      // Support both exact match and partial match for category
-      where.category = {
-        contains: category,
-        mode: 'insensitive',
-      }
-    }
-    if (search) {
-      where.name = {
-        contains: search,
-        mode: 'insensitive',
-      }
+      const categoryLower = category.toLowerCase()
+      products = products.filter((p) =>
+        p.category.toLowerCase().includes(categoryLower)
+      )
     }
 
-    const products = await prisma.product.findMany({
-      where,
-      orderBy: { createdAt: 'desc' },
-      take: limit ? parseInt(limit) : undefined,
-    })
+    // Filter by search term (case-insensitive)
+    if (search) {
+      const searchLower = search.toLowerCase()
+      products = products.filter(
+        (p) =>
+          p.name.toLowerCase().includes(searchLower) ||
+          p.itemCode.toLowerCase().includes(searchLower)
+      )
+    }
+
+    // Apply limit
+    if (limit) {
+      products = products.slice(0, parseInt(limit))
+    }
 
     return NextResponse.json(products)
   } catch (error: any) {

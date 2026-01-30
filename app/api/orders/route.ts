@@ -5,6 +5,42 @@ import { createRazorpayOrder } from '@/lib/razorpay'
 
 export async function GET(request: NextRequest) {
   try {
+    const searchParams = request.nextUrl.searchParams
+    const orderId = searchParams.get('orderId')
+    const email = searchParams.get('email')
+
+    // If orderId and email are provided, track specific order
+    if (orderId && email) {
+      const user = await prisma.user.findUnique({
+        where: { email },
+      })
+
+      if (!user) {
+        return NextResponse.json({ error: 'Order not found' }, { status: 404 })
+      }
+
+      const order = await prisma.order.findFirst({
+        where: {
+          id: orderId,
+          userId: user.id,
+        },
+        include: {
+          items: {
+            include: {
+              product: true,
+            },
+          },
+        },
+      })
+
+      if (!order) {
+        return NextResponse.json({ error: 'Order not found' }, { status: 404 })
+      }
+
+      return NextResponse.json(order)
+    }
+
+    // Otherwise, return user's orders (requires auth)
     const token = request.headers.get('authorization')?.replace('Bearer ', '')
 
     if (!token) {

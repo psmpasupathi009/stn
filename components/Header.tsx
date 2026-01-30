@@ -171,7 +171,7 @@ export default function Header() {
                     Profile
                   </Link>
                 {user?.role === 'admin' && (
-                  <Link href="/admin/dashboard" className="text-amber-900 hover:text-amber-800 text-sm font-medium font-semibold">
+                  <Link href="/admin/dashboard" className="text-amber-900 hover:text-amber-800 text-sm font-semibold">
                     Admin Dashboard
                   </Link>
                 )}
