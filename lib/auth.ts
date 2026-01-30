@@ -40,6 +40,13 @@ export function generateResetToken(): string {
 }
 
 export async function isAdminEmail(email: string): Promise<boolean> {
+  // Check if email matches ADMIN_EMAIL from .env
+  const adminEmail = process.env.ADMIN_EMAIL
+  if (adminEmail && email.toLowerCase() === adminEmail.toLowerCase()) {
+    return true
+  }
+  
+  // Also check Admin table for backward compatibility
   const admin = await prisma.admin.findUnique({
     where: { email },
   })

@@ -22,14 +22,33 @@ export async function POST(request: NextRequest) {
 
     const hashedPassword = await hashPassword(password)
 
+    // Check if user is admin
+    const userBeforeUpdate = await prisma.user.findUnique({
+      where: { email },
+    })
+
+    if (!userBeforeUpdate) {
+      return NextResponse.json(
+        { error: 'User not found' },
+        { status: 404 }
+      )
+    }
+
+    // For admins, don't update name/phone. For users, update if provided
+    const updateData: any = {
+      password: hashedPassword,
+      isVerified: true,
+    }
+
+    // Only update name and phone for regular users (not admins)
+    if (userBeforeUpdate.role !== 'admin') {
+      if (name) updateData.name = name
+      if (phone) updateData.phone = phone
+    }
+
     const user = await prisma.user.update({
       where: { email },
-      data: {
-        password: hashedPassword,
-        isVerified: true,
-        ...(name && { name }),
-        ...(phone && { phone }),
-      },
+      data: updateData,
     })
 
     const token = generateToken({

@@ -36,22 +36,38 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    const token = generateToken({
-      userId: user.id,
-      email: user.email,
-      role: user.role,
-    })
-
-    return NextResponse.json({
-      success: true,
-      token,
-      user: {
-        id: user.id,
+    // Only return token if user has password set (for existing users)
+    // If no password, user needs to complete signup
+    if (user.password) {
+      const token = generateToken({
+        userId: user.id,
         email: user.email,
-        name: user.name,
         role: user.role,
-      },
-    })
+      })
+
+      return NextResponse.json({
+        success: true,
+        token,
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+        },
+      })
+    } else {
+      // User doesn't have password yet, return user info without token
+      return NextResponse.json({
+        success: true,
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+          password: false, // Indicate password not set
+        },
+      })
+    }
   } catch (error: any) {
     console.error('Verify OTP error:', error)
     return NextResponse.json(

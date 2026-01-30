@@ -19,6 +19,7 @@ export default function SignupPage() {
     confirmPassword: '',
   })
   const [otp, setOtp] = useState('')
+  const [isAdmin, setIsAdmin] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
@@ -47,6 +48,7 @@ export default function SignupPage() {
       const data = await res.json()
 
       if (res.ok) {
+        setIsAdmin(data.isAdmin || false)
         setSuccess('OTP sent to your email!')
         setStep('otp')
       } else {
@@ -82,7 +84,9 @@ export default function SignupPage() {
 
       if (res.ok) {
         setSuccess('OTP verified successfully!')
-        setStep('details')
+        // If admin, go directly to password step (skip name/phone)
+        // If user, go to details step (name, phone, password)
+        setStep(isAdmin ? 'password' : 'details')
       } else {
         setError(data.error || 'Invalid OTP')
       }
@@ -100,7 +104,8 @@ export default function SignupPage() {
     setSuccess('')
 
     // Validation
-    if (!formData.name || formData.name.trim().length < 2) {
+    // For users, name is required. For admins, name is optional
+    if (!isAdmin && (!formData.name || formData.name.trim().length < 2)) {
       setError('Name must be at least 2 characters')
       setLoading(false)
       return
@@ -163,7 +168,9 @@ export default function SignupPage() {
           <CardDescription className="text-center">
             {step === 'email' && 'Enter your email to get started'}
             {step === 'otp' && 'Verify your email with OTP'}
-            {step === 'details' && 'Complete your profile'}
+            {step === 'password' && isAdmin && 'Create your admin password'}
+            {step === 'details' && !isAdmin && 'Complete your profile'}
+            {step === 'password' && !isAdmin && 'Create your password'}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -240,7 +247,63 @@ export default function SignupPage() {
             </form>
           )}
 
-          {step === 'details' && (
+          {step === 'password' && isAdmin && (
+            <form onSubmit={handleSignup} className="space-y-4">
+              <div className="mb-4 p-3 bg-amber-50 border border-amber-200 text-amber-800 rounded-md text-sm">
+                <strong>Admin Account:</strong> You're signing up as an administrator.
+              </div>
+              <div>
+                <Label htmlFor="password">Password *</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  required
+                  placeholder="Enter password (min 6 characters)"
+                  className="mt-1"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Password must be at least 6 characters
+                </p>
+              </div>
+              <div>
+                <Label htmlFor="confirmPassword">Confirm Password *</Label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  value={formData.confirmPassword}
+                  onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                  required
+                  placeholder="Confirm your password"
+                  className="mt-1"
+                />
+                {formData.password && formData.confirmPassword && formData.password !== formData.confirmPassword && (
+                  <p className="text-xs text-red-500 mt-1">Passwords do not match</p>
+                )}
+              </div>
+              <Button 
+                type="submit" 
+                className="w-full" 
+                disabled={loading || formData.password !== formData.confirmPassword}
+              >
+                {loading ? 'Creating Account...' : 'Create Admin Account'}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={() => {
+                  setStep('otp')
+                  setFormData({ ...formData, password: '', confirmPassword: '' })
+                }}
+              >
+                Back
+              </Button>
+            </form>
+          )}
+
+          {step === 'details' && !isAdmin && (
             <form onSubmit={handleSignup} className="space-y-4">
               <div>
                 <Label htmlFor="name">Full Name *</Label>
