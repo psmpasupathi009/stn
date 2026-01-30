@@ -28,15 +28,24 @@
    npm run db:seed
    ```
 
-4. **Create Admin User**
+4. **Configure Admin Email**
+
+   Add the admin email to your `.env` file:
+   ```env
+   ADMIN_EMAIL=psmpasupathi009@gmail.com
+   ```
+
+   **Optional:** Create admin user with password:
    ```bash
    npm run admin:create <admin-email> <password>
    ```
-   
+
    Example:
    ```bash
-   npm run admin:create admin@example.com mypassword123
+   npm run admin:create psmpasupathi009@gmail.com mypassword123
    ```
+
+   **Note:** The email must match `ADMIN_EMAIL` in your `.env` file. The script creates a user with `role: 'admin'` in the User table.
 
 5. **Start Development Server**
    ```bash
