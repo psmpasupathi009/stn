@@ -4,7 +4,7 @@ import { hashPassword, generateToken } from '@/lib/auth'
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, password } = await request.json()
+    const { email, password, name, phone } = await request.json()
 
     if (!email || !password) {
       return NextResponse.json(
@@ -27,6 +27,8 @@ export async function POST(request: NextRequest) {
       data: {
         password: hashedPassword,
         isVerified: true,
+        ...(name && { name }),
+        ...(phone && { phone }),
       },
     })
 

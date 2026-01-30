@@ -259,35 +259,33 @@ export default function CartPage() {
                     </div>
                   </div>
                 </div>
-              </div>
             ))}
           </div>
           <div>
             <div className="bg-white border border-gray-200 rounded-lg p-6 sticky top-24">
-                <h2 className="text-xl font-bold mb-4">Order Summary</h2>
-                <div className="space-y-2 mb-4">
-                  <div className="flex justify-between">
-                    <span>Subtotal</span>
-                    <span>₹{calculateTotal().toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between font-bold text-lg pt-4 border-t">
-                    <span>Total</span>
-                    <span>₹{calculateTotal().toFixed(2)}</span>
-                  </div>
+              <h2 className="text-xl font-bold mb-4">Order Summary</h2>
+              <div className="space-y-2 mb-4">
+                <div className="flex justify-between">
+                  <span>Subtotal</span>
+                  <span>₹{calculateTotal().toFixed(2)}</span>
                 </div>
-                <Button
-                  className="w-full"
-                  onClick={handleCheckout}
-                  disabled={processing}
-                >
-                  {processing ? 'Processing...' : 'Proceed to Checkout'}
-                </Button>
+                <div className="flex justify-between font-bold text-lg pt-4 border-t">
+                  <span>Total</span>
+                  <span>₹{calculateTotal().toFixed(2)}</span>
+                </div>
               </div>
+              <Button
+                className="w-full"
+                onClick={handleCheckout}
+                disabled={processing}
+              >
+                {processing ? 'Processing...' : 'Proceed to Checkout'}
+              </Button>
             </div>
           </div>
         </div>
-        </div>
       </div>
+    </div>
     </>
   )
 }

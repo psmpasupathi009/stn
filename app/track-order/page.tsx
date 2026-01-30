@@ -8,7 +8,13 @@ import { Label } from '@/components/ui/label'
 export default function TrackOrderPage() {
   const [orderId, setOrderId] = useState('')
   const [email, setEmail] = useState('')
-  const [order, setOrder] = useState(null)
+  const [order, setOrder] = useState<{
+    id: string
+    status: string
+    paymentStatus: string
+    totalAmount: number
+    createdAt: string
+  } | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 

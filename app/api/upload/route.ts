@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
 
-    const imageUrl = await uploadImage(buffer)
+    const imageUrl = await uploadImage(buffer as Buffer)
 
     return NextResponse.json({ url: imageUrl })
   } catch (error: any) {

@@ -38,7 +38,7 @@ export default function RootLayout({
           <Header />
           <CategoryIcons />
           <main className="min-h-screen">
-            {children}
+        {children}
           </main>
           <Footer />
           <WhatsAppButton />

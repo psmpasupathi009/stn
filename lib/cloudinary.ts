@@ -24,13 +24,15 @@ export async function uploadImage(file: File | Buffer, folder?: string): Promise
       }
     )
 
-    if (file instanceof Buffer) {
+    if (Buffer.isBuffer(file)) {
       uploadStream.end(file)
-    } else {
+    } else if (file instanceof File) {
       // For File objects, we need to convert to buffer
       file.arrayBuffer().then(buffer => {
         uploadStream.end(Buffer.from(buffer))
       }).catch(reject)
+    } else {
+      reject(new Error('Invalid file type'))
     }
   })
 }

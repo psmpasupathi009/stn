@@ -49,7 +49,7 @@ const categoryTitles: Record<string, { title: string; description: string }> = {
 
 export default function CategoryPage() {
   const params = useParams()
-  const categorySlug = params.category as string
+  const categorySlug = (params.category as string) || ''
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const { isAuthenticated } = useAuth()
