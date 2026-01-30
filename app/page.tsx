@@ -17,15 +17,49 @@ interface Product {
   reviewCount?: number
 }
 
+const heroSlides = [
+  {
+    title: 'Authentic Oils, Pure from Within.',
+    description: 'Made with traditional wood-pressing — rich in flavor, clean in nature.',
+    buttonText: 'Shop Now',
+    buttonLink: '/products',
+    icon: '🛢️',
+  },
+  {
+    title: 'Pure Ghee, Crafted with Care.',
+    description: 'Buffalo & Cow Ghee, slow-prepared the traditional way — rich, wholesome, and full of flavor.',
+    buttonText: 'Shop Ghee',
+    buttonLink: '/collections/wood-pressed-oils',
+    icon: '🥛',
+  },
+  {
+    title: 'Snacks Made From the Heart.',
+    description: 'Homemade bites crafted with love — from sesame laddus to millet cookies.',
+    buttonText: 'Shop Snacks',
+    buttonLink: '/collections/kovilpatti-special',
+    icon: '🍪',
+  },
+]
+
 export default function HomePage() {
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([])
   const [healthyMixes, setHealthyMixes] = useState<Product[]>([])
   const [kovilpattiSpecial, setKovilpattiSpecial] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
+  const [currentSlide, setCurrentSlide] = useState(0)
   const { isAuthenticated } = useAuth()
 
   useEffect(() => {
     fetchProducts()
+  }, [])
+
+  useEffect(() => {
+    // Auto-play carousel
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % heroSlides.length)
+    }, 5000) // Change slide every 5 seconds
+
+    return () => clearInterval(interval)
   }, [])
 
   const fetchProducts = async () => {
@@ -76,31 +110,93 @@ export default function HomePage() {
     }
   }
 
+  const goToSlide = (index: number) => {
+    setCurrentSlide(index)
+  }
+
+  const goToNext = () => {
+    setCurrentSlide((prev) => (prev + 1) % heroSlides.length)
+  }
+
+  const goToPrev = () => {
+    setCurrentSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length)
+  }
+
   return (
     <div className="min-h-screen bg-white">
-      {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100 py-20 md:py-32">
+      {/* Hero Carousel Section */}
+      <section className="relative bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100 py-20 md:py-32 overflow-hidden">
         <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div className="text-center md:text-left">
-              <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-                Authentic Oils, Pure from Within.
-              </h1>
-              <p className="text-xl md:text-2xl text-gray-700 mb-8">
-                Made with traditional wood-pressing — rich in flavor, clean in nature.
-              </p>
-              <Link href="/products">
-                <Button size="lg" className="bg-black text-white hover:bg-gray-800 px-8 py-6 text-lg">
-                  Shop Now
-                </Button>
-              </Link>
-            </div>
-            <div className="relative">
-              <div className="aspect-square bg-amber-200 rounded-lg overflow-hidden shadow-2xl">
-                <div className="w-full h-full flex items-center justify-center text-6xl">
-                  🛢️
+          <div className="relative">
+            {/* Slides */}
+            <div className="relative h-[500px] md:h-[600px]">
+              {heroSlides.map((slide, index) => (
+                <div
+                  key={index}
+                  className={`absolute inset-0 transition-opacity duration-1000 ${
+                    index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'
+                  }`}
+                >
+                  <div className="grid md:grid-cols-2 gap-12 items-center h-full">
+                    <div className="text-center md:text-left">
+                      <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+                        {slide.title}
+                      </h1>
+                      <p className="text-xl md:text-2xl text-gray-700 mb-8">
+                        {slide.description}
+                      </p>
+                      <Link href={slide.buttonLink}>
+                        <Button size="lg" className="bg-black text-white hover:bg-gray-800 px-8 py-6 text-lg">
+                          {slide.buttonText}
+                        </Button>
+                      </Link>
+                    </div>
+                    <div className="relative">
+                      <div className="aspect-square bg-amber-200 rounded-lg overflow-hidden shadow-2xl">
+                        <div className="w-full h-full flex items-center justify-center text-6xl md:text-8xl">
+                          {slide.icon}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              ))}
+            </div>
+
+            {/* Navigation Arrows */}
+            <button
+              onClick={goToPrev}
+              className="absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-white/80 hover:bg-white rounded-full p-3 shadow-lg transition-all"
+              aria-label="Previous slide"
+            >
+              <svg className="w-6 h-6 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <button
+              onClick={goToNext}
+              className="absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-white/80 hover:bg-white rounded-full p-3 shadow-lg transition-all"
+              aria-label="Next slide"
+            >
+              <svg className="w-6 h-6 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+
+            {/* Dots Indicator */}
+            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex gap-2">
+              {heroSlides.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => goToSlide(index)}
+                  className={`h-2 rounded-full transition-all ${
+                    index === currentSlide
+                      ? 'w-8 bg-amber-900'
+                      : 'w-2 bg-gray-400 hover:bg-gray-600'
+                  }`}
+                  aria-label={`Go to slide ${index + 1}`}
+                />
+              ))}
             </div>
           </div>
         </div>
