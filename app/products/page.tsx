@@ -2,8 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Card, CardContent, CardFooter } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useAuth } from '@/lib/context'
 
@@ -83,9 +81,9 @@ export default function ProductsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-white py-8">
       <div className="container mx-auto px-4">
-        <h1 className="text-4xl font-bold mb-8">All Products</h1>
+        <h1 className="text-4xl font-bold mb-8 text-gray-900">All Products</h1>
 
         {/* Search and Filter */}
         <div className="mb-8 space-y-4">
@@ -134,9 +132,9 @@ export default function ProductsPage() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {products.map((product) => (
-              <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+              <div key={product.id} className="group">
                 <Link href={`/products/${product.id}`}>
-                  <div className="aspect-square bg-gray-200 relative">
+                  <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden mb-4 group-hover:opacity-90 transition-opacity">
                     {product.image ? (
                       <img
                         src={product.image}
@@ -144,39 +142,41 @@ export default function ProductsPage() {
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-400">
-                        No Image
+                      <div className="w-full h-full flex items-center justify-center text-gray-400 text-4xl">
+                        🛢️
                       </div>
                     )}
                   </div>
                 </Link>
-                <CardContent className="p-4">
+                <div className="text-center">
                   <Link href={`/products/${product.id}`}>
-                    <h3 className="font-semibold text-lg mb-2 hover:text-green-600">
+                    <h3 className="font-semibold text-lg mb-2 hover:text-amber-900">
                       {product.name}
                     </h3>
                   </Link>
-                  <p className="text-sm text-gray-600 mb-2">{product.itemCode}</p>
-                  <div className="flex items-center gap-2 mb-4">
-                    <span className="text-2xl font-bold text-green-600">
+                  <div className="flex items-center justify-center gap-2 mb-3">
+                    <span className="text-xl font-bold text-gray-900">
                       ₹{product.salePrice}
                     </span>
                     {product.mrp > product.salePrice && (
-                      <span className="text-sm text-gray-500 line-through">
-                        ₹{product.mrp}
-                      </span>
+                      <>
+                        <span className="text-sm text-gray-500 line-through">
+                          ₹{product.mrp}
+                        </span>
+                        <span className="bg-black text-white text-xs px-2 py-1">
+                          Sale
+                        </span>
+                      </>
                     )}
                   </div>
-                </CardContent>
-                <CardFooter className="p-4 pt-0">
-                  <Button
-                    className="w-full"
+                  <button
                     onClick={() => addToCart(product.id)}
+                    className="w-full bg-black text-white py-2 px-4 rounded hover:bg-gray-800 transition-colors"
                   >
-                    Add to Cart
-                  </Button>
-                </CardFooter>
-              </Card>
+                    Add to cart
+                  </button>
+                </div>
+              </div>
             ))}
           </div>
         )}

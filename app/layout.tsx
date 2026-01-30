@@ -4,6 +4,9 @@ import "./globals.css";
 import { AuthProvider } from "@/lib/context";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import AnnouncementBar from "@/components/AnnouncementBar";
+import CategoryIcons from "@/components/CategoryIcons";
+import WhatsAppButton from "@/components/WhatsAppButton";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,11 +34,14 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AuthProvider>
+          <AnnouncementBar />
           <Header />
+          <CategoryIcons />
           <main className="min-h-screen">
             {children}
           </main>
           <Footer />
+          <WhatsAppButton />
         </AuthProvider>
       </body>
     </html>

@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
 import { useAuth } from '@/lib/context'
 import Script from 'next/script'
 
@@ -183,11 +182,15 @@ export default function CartPage() {
 
   if (!cart || cart.items.length === 0) {
     return (
-      <div className="container mx-auto px-4 py-12">
-        <h1 className="text-3xl font-bold mb-8">Shopping Cart</h1>
-        <div className="text-center py-12">
-          <p className="text-gray-600 mb-4">Your cart is empty</p>
-          <Button onClick={() => router.push('/')}>Continue Shopping</Button>
+      <div className="bg-white min-h-screen">
+        <div className="container mx-auto px-4 py-12">
+          <h1 className="text-3xl md:text-4xl font-bold mb-8 text-gray-900">Shopping Cart</h1>
+          <div className="text-center py-12">
+            <p className="text-gray-600 mb-4">Your cart is empty</p>
+            <Button onClick={() => router.push('/')} className="bg-black text-white hover:bg-gray-800">
+              Continue Shopping
+            </Button>
+          </div>
         </div>
       </div>
     )
@@ -196,13 +199,13 @@ export default function CartPage() {
   return (
     <>
       <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
-      <div className="container mx-auto px-4 py-12">
-        <h1 className="text-3xl font-bold mb-8">Shopping Cart</h1>
+      <div className="bg-white min-h-screen">
+        <div className="container mx-auto px-4 py-12">
+          <h1 className="text-3xl md:text-4xl font-bold mb-8 text-gray-900">Shopping Cart</h1>
         <div className="grid md:grid-cols-3 gap-8">
           <div className="md:col-span-2 space-y-4">
             {cart.items.map((item) => (
-              <Card key={item.id}>
-                <CardContent className="p-6">
+              <div key={item.id} className="bg-white border border-gray-200 rounded-lg p-6">
                   <div className="flex gap-4">
                     <div className="w-24 h-24 bg-gray-200 rounded overflow-hidden flex-shrink-0">
                       {item.product.image ? (
@@ -255,13 +258,12 @@ export default function CartPage() {
                       </p>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             ))}
           </div>
           <div>
-            <Card>
-              <CardContent className="p-6">
+            <div className="bg-white border border-gray-200 rounded-lg p-6 sticky top-24">
                 <h2 className="text-xl font-bold mb-4">Order Summary</h2>
                 <div className="space-y-2 mb-4">
                   <div className="flex justify-between">
@@ -280,9 +282,10 @@ export default function CartPage() {
                 >
                   {processing ? 'Processing...' : 'Proceed to Checkout'}
                 </Button>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </div>
+        </div>
         </div>
       </div>
     </>

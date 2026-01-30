@@ -89,109 +89,149 @@ export default function ProductDetailPage() {
     : 0
 
   return (
-    <div className="container mx-auto px-4 py-12">
-      <div className="grid md:grid-cols-2 gap-8">
-        {/* Product Images */}
-        <div>
-          <div className="aspect-square bg-gray-200 rounded-lg overflow-hidden mb-4">
-            {product.image ? (
-              <img
-                src={product.image}
-                alt={product.name}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-gray-400">
-                No Image
+    <div className="bg-white min-h-screen">
+      <div className="container mx-auto px-4 py-12">
+        <div className="grid md:grid-cols-2 gap-12">
+          {/* Product Images */}
+          <div>
+            <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden mb-4">
+              {product.image ? (
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-gray-400 text-6xl">
+                  🛢️
+                </div>
+              )}
+            </div>
+            {product.images && product.images.length > 0 && (
+              <div className="grid grid-cols-4 gap-2">
+                {product.images.map((img, idx) => (
+                  <div key={idx} className="aspect-square bg-gray-100 rounded overflow-hidden cursor-pointer hover:opacity-75 transition-opacity">
+                    <img src={img} alt={`${product.name} ${idx + 1}`} className="w-full h-full object-cover" />
+                  </div>
+                ))}
               </div>
             )}
           </div>
-          {product.images && product.images.length > 0 && (
-            <div className="grid grid-cols-4 gap-2">
-              {product.images.map((img, idx) => (
-                <div key={idx} className="aspect-square bg-gray-200 rounded overflow-hidden">
-                  <img src={img} alt={`${product.name} ${idx + 1}`} className="w-full h-full object-cover" />
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
 
-        {/* Product Info */}
-        <div>
-          <h1 className="text-4xl font-bold mb-4">{product.name}</h1>
-          <p className="text-gray-600 mb-4">Item Code: {product.itemCode}</p>
-          <p className="text-gray-600 mb-4">Weight: {product.weight}</p>
-          <p className="text-gray-600 mb-4">Category: {product.category}</p>
-
-          <div className="mb-6">
-            <div className="flex items-center gap-4 mb-2">
-              <span className="text-4xl font-bold text-green-600">
-                ₹{product.salePrice}
-              </span>
-              {product.mrp > product.salePrice && (
-                <>
-                  <span className="text-2xl text-gray-500 line-through">
-                    ₹{product.mrp}
-                  </span>
-                  {discount > 0 && (
-                    <span className="bg-red-100 text-red-600 px-2 py-1 rounded text-sm font-semibold">
-                      {discount}% OFF
-                    </span>
-                  )}
-                </>
-              )}
-            </div>
-            <p className="text-sm text-gray-600">GST: {product.gst * 100}%</p>
-            <p className="text-sm text-gray-600">HSN Code: {product.hsnCode}</p>
-          </div>
-
-          {product.description && (
+          {/* Product Info */}
+          <div>
             <div className="mb-6">
-              <h2 className="text-xl font-semibold mb-2">Description</h2>
-              <p className="text-gray-700">{product.description}</p>
+              <div className="w-20 h-20 rounded-full bg-amber-900 text-white flex items-center justify-center text-2xl font-bold mb-4">
+                A
+              </div>
+              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">{product.name}</h1>
             </div>
-          )}
 
-          <div className="mb-6">
-            <label className="block text-sm font-medium mb-2">Quantity</label>
-            <div className="flex items-center gap-4">
-              <Button
-                variant="outline"
-                onClick={() => setQuantity(Math.max(1, quantity - 1))}
-              >
-                -
-              </Button>
-              <span className="text-lg font-semibold w-12 text-center">{quantity}</span>
-              <Button
-                variant="outline"
-                onClick={() => setQuantity(quantity + 1)}
-              >
-                +
-              </Button>
+            <div className="mb-6">
+              <div className="flex items-center gap-4 mb-2">
+                <span className="text-3xl font-bold text-gray-900">
+                  ₹{product.salePrice}
+                </span>
+                {product.mrp > product.salePrice && (
+                  <>
+                    <span className="text-xl text-gray-500 line-through">
+                      ₹{product.mrp}
+                    </span>
+                    <span className="bg-black text-white text-sm px-3 py-1">
+                      Sale
+                    </span>
+                  </>
+                )}
+              </div>
+              <p className="text-sm text-gray-600 mb-4">Shipping calculated at checkout.</p>
             </div>
-          </div>
 
-          <div className="flex gap-4">
-            <Button
-              className="flex-1"
-              onClick={addToCart}
-              disabled={!product.inStock}
-            >
-              {product.inStock ? 'Add to Cart' : 'Out of Stock'}
-            </Button>
-            <Button
-              variant="outline"
-              className="flex-1"
-              onClick={() => router.push('/cart')}
-            >
-              View Cart
-            </Button>
-          </div>
+            <div className="mb-6">
+              <label className="block text-sm font-medium mb-2 text-gray-900">Quantity</label>
+              <div className="flex items-center gap-2 border border-gray-300 rounded w-fit">
+                <button
+                  className="px-4 py-2 hover:bg-gray-100"
+                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                >
+                  -
+                </button>
+                <input
+                  type="number"
+                  value={quantity}
+                  readOnly
+                  className="w-16 text-center border-0 focus:ring-0"
+                />
+                <button
+                  className="px-4 py-2 hover:bg-gray-100"
+                  onClick={() => setQuantity(quantity + 1)}
+                >
+                  +
+                </button>
+              </div>
+            </div>
 
-          {!product.inStock && (
-            <p className="text-red-600 mt-4">This product is currently out of stock</p>
-          )}
+            {product.salePrice < 299 && (
+              <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded">
+                <p className="text-sm text-gray-700">
+                  Cash on Delivery is available only for orders above ₹299. Please add more items to proceed.
+                </p>
+              </div>
+            )}
+
+            {/* Value Propositions */}
+            <div className="grid grid-cols-5 gap-4 mb-6">
+              <div className="text-center">
+                <div className="text-2xl mb-2">💎</div>
+                <p className="text-xs text-gray-600">PREMIUM QUALITY</p>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl mb-2">✓</div>
+                <p className="text-xs text-gray-600">SATISFACTION GUARANTEED</p>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl mb-2">💰</div>
+                <p className="text-xs text-gray-600">CASH ON DELIVERY</p>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl mb-2">🚚</div>
+                <p className="text-xs text-gray-600">FREE SHIPPING</p>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl mb-2">🔒</div>
+                <p className="text-xs text-gray-600">SECURE ONLINE SHOPPING</p>
+              </div>
+            </div>
+
+            <div className="flex gap-4 mb-6">
+              <button
+                onClick={addToCart}
+                disabled={!product.inStock}
+                className="flex-1 border-2 border-black text-black py-3 px-6 rounded hover:bg-black hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Add to cart
+              </button>
+              <button
+                onClick={() => {
+                  addToCart()
+                  router.push('/cart')
+                }}
+                className="flex-1 bg-black text-white py-3 px-6 rounded hover:bg-gray-800 transition-colors"
+              >
+                Buy it now
+              </button>
+            </div>
+
+            {product.description && (
+              <div className="border-t pt-6">
+                <h2 className="text-lg font-semibold mb-2">Description</h2>
+                <p className="text-gray-700">{product.description}</p>
+              </div>
+            )}
+
+            {!product.inStock && (
+              <p className="text-red-600 mt-4">This product is currently out of stock</p>
+            )}
+          </div>
         </div>
       </div>
     </div>
