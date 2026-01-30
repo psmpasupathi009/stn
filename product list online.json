@@ -1,0 +1,1249 @@
+[{
+  "Product Name": "Beetroot Malt ",
+  "CATEGORY": "HEALTHY  MIXES",
+  "ITEM CODE": "STNHM001",
+  "Weight": "250 gms",
+  "MRP": 355,
+  "SALE PRICE": 245,
+  "GST": 0.05,
+  "HSN CODE": 1107
+ },
+ {
+  "Product Name": "Carrot Malt",
+  "CATEGORY": "HEALTHY  MIXES",
+  "ITEM CODE": "STNHM002",
+  "Weight": "250 gms",
+  "MRP": 355,
+  "SALE PRICE": 255,
+  "GST": 0.05,
+  "HSN CODE": 1107
+ },
+ {
+  "Product Name": "ABC Malt ",
+  "CATEGORY": "HEALTHY  MIXES",
+  "ITEM CODE": "STNHM003",
+  "Weight": "250 gms",
+  "MRP": 399,
+  "SALE PRICE": 280,
+  "GST": 0.05,
+  "HSN CODE": 1107
+ },
+ {
+  "Product Name": "Red banana Malt ",
+  "CATEGORY": "HEALTHY  MIXES",
+  "ITEM CODE": "STNHM004",
+  "Weight": "250 gms",
+  "MRP": 399,
+  "SALE PRICE": 280,
+  "GST": 0.05,
+  "HSN CODE": 1107
+ },
+ {
+  "Product Name": "Nendran Banana Malt",
+  "CATEGORY": "HEALTHY  MIXES",
+  "ITEM CODE": "STNHM005",
+  "Weight": "250 gms",
+  "MRP": 399,
+  "SALE PRICE": 280,
+  "GST": 0.05,
+  "HSN CODE": 1107
+ },
+ {
+  "Product Name": "Raw Banana Powder",
+  "CATEGORY": "HEALTHY  MIXES",
+  "ITEM CODE": "STNHM006",
+  "Weight": "250 gms",
+  "MRP": 399,
+  "SALE PRICE": 328,
+  "GST": 0.05,
+  "HSN CODE": "O803"
+ },
+ {
+  "Product Name": "Health Mix ",
+  "CATEGORY": "HEALTHY  MIXES",
+  "ITEM CODE": "STNHM007",
+  "Weight": "250 gms",
+  "MRP": 199,
+  "SALE PRICE": 155,
+  "GST": 0.05,
+  "HSN CODE": 1901
+ },
+ {
+  "Product Name": "Health Mix ",
+  "CATEGORY": "HEALTHY  MIXES",
+  "ITEM CODE": "STNHM008",
+  "Weight": "500 gms",
+  "MRP": 399,
+  "SALE PRICE": 290,
+  "GST": 0.05,
+  "HSN CODE": 1901
+ },
+ {
+  "Product Name": "Sweet pottato flour",
+  "CATEGORY": "HEALTHY  MIXES",
+  "ITEM CODE": "STNHM009",
+  "Weight": "250 gms",
+  "MRP": 230,
+  "SALE PRICE": 180,
+  "GST": 0.05,
+  "HSN CODE": "07142OOO"
+ },
+ {
+  "Product Name": "Green gram flour",
+  "CATEGORY": "HEALTHY  MIXES",
+  "ITEM CODE": "STNHM010",
+  "Weight": "250 gms",
+  "MRP": 175,
+  "SALE PRICE": 145,
+  "GST": 0.05,
+  "HSN CODE": "11061OOO"
+ },
+ {
+  "Product Name": "Amla Idly powder",
+  "CATEGORY": "IDLY PODI VARIETIES",
+  "ITEM CODE": "STNIP011",
+  "Weight": "100 gms",
+  "MRP": 88,
+  "SALE PRICE": 75,
+  "GST": 0.05,
+  "HSN CODE": 1901
+ },
+ {
+  "Product Name": "Amla Idly powder",
+  "CATEGORY": "IDLY PODI VARIETIES",
+  "ITEM CODE": "STNIP012",
+  "Weight": "250 gms",
+  "MRP": 199,
+  "SALE PRICE": 155,
+  "GST": 0.05,
+  "HSN CODE": 1901
+ },
+ {
+  "Product Name": "Sesame Idly Powder",
+  "CATEGORY": "IDLY PODI VARIETIES",
+  "ITEM CODE": "STNIP013",
+  "Weight": "100 gms",
+  "MRP": 88,
+  "SALE PRICE": 75,
+  "GST": 0.05,
+  "HSN CODE": 1901
+ },
+ {
+  "Product Name": "Sesame Idly Powder ",
+  "CATEGORY": "IDLY PODI VARIETIES",
+  "ITEM CODE": "STNIP014",
+  "Weight": "250 gms",
+  "MRP": 199,
+  "SALE PRICE": 158,
+  "GST": 0.05,
+  "HSN CODE": 1901
+ },
+ {
+  "Product Name": "Curry leaf Idly Powder ",
+  "CATEGORY": "IDLY PODI VARIETIES",
+  "ITEM CODE": "STNIP015",
+  "Weight": "100 gms",
+  "MRP": 88,
+  "SALE PRICE": 75,
+  "GST": 0.05,
+  "HSN CODE": 1901
+ },
+ {
+  "Product Name": "Curry leaf Idly Powder ",
+  "CATEGORY": "IDLY PODI VARIETIES",
+  "ITEM CODE": "STNIP016",
+  "Weight": "250 gms",
+  "MRP": 199,
+  "SALE PRICE": 155,
+  "GST": 0.05,
+  "HSN CODE": 1901
+ },
+ {
+  "Product Name": "Moringa Idly powder ",
+  "CATEGORY": "IDLY PODI VARIETIES",
+  "ITEM CODE": "STNIP017",
+  "Weight": "100 gms",
+  "MRP": 98,
+  "SALE PRICE": 78,
+  "GST": 0.05,
+  "HSN CODE": 1901
+ },
+ {
+  "Product Name": "Moringa Idly powder ",
+  "CATEGORY": "IDLY PODI VARIETIES",
+  "ITEM CODE": "STNIP018",
+  "Weight": "250 gms",
+  "MRP": 199,
+  "SALE PRICE": 155,
+  "GST": 0.05,
+  "HSN CODE": 1901
+ },
+ {
+  "Product Name": "Dhall Rice Powder ",
+  "CATEGORY": "IDLY PODI VARIETIES",
+  "ITEM CODE": "STNIP019",
+  "Weight": "100 gms",
+  "MRP": 88,
+  "SALE PRICE": 72,
+  "GST": 0.05,
+  "HSN CODE": 1901
+ },
+ {
+  "Product Name": "Dhall Rice Powder ",
+  "CATEGORY": "IDLY PODI VARIETIES",
+  "ITEM CODE": "STNIP020",
+  "Weight": "250 gms",
+  "MRP": 199,
+  "SALE PRICE": 155,
+  "GST": 0.05,
+  "HSN CODE": 1901
+ },
+ {
+  "Product Name": "Mint Idly Powder ",
+  "CATEGORY": "IDLY PODI VARIETIES",
+  "ITEM CODE": "STNIP021",
+  "Weight": "100 gms",
+  "MRP": 99,
+  "SALE PRICE": 75,
+  "GST": 0.05,
+  "HSN CODE": 1901
+ },
+ {
+  "Product Name": "Mint Idly Powder ",
+  "CATEGORY": "IDLY PODI VARIETIES",
+  "ITEM CODE": "STNIP022",
+  "Weight": "250 gms",
+  "MRP": 160,
+  "SALE PRICE": 155,
+  "GST": 0.05,
+  "HSN CODE": 1901
+ },
+ {
+  "Product Name": "Avarampoo Idly Powder ",
+  "CATEGORY": "IDLY PODI VARIETIES",
+  "ITEM CODE": "STNIP023",
+  "Weight": "100 gms",
+  "MRP": 99,
+  "SALE PRICE": 78,
+  "GST": 0.05,
+  "HSN CODE": 1901
+ },
+ {
+  "Product Name": "Avarampoo Idly Powder ",
+  "CATEGORY": "IDLY PODI VARIETIES",
+  "ITEM CODE": "STNIP024",
+  "Weight": "250 gms",
+  "MRP": 199,
+  "SALE PRICE": 165,
+  "GST": 0.05,
+  "HSN CODE": 1901
+ },
+ {
+  "Product Name": "Idly Powder ",
+  "CATEGORY": "IDLY PODI VARIETIES",
+  "ITEM CODE": "STNIP025",
+  "Weight": "100 gms",
+  "MRP": 88,
+  "SALE PRICE": 65,
+  "GST": 0.05,
+  "HSN CODE": 1901
+ },
+ {
+  "Product Name": "Idly Powder ",
+  "CATEGORY": "IDLY PODI VARIETIES",
+  "ITEM CODE": "STNIP026",
+  "Weight": "250 gms",
+  "MRP": 199,
+  "SALE PRICE": 138,
+  "GST": 0.05,
+  "HSN CODE": 1901
+ },
+ {
+  "Product Name": "Sesame Garlic Idly Powder ",
+  "CATEGORY": "IDLY PODI VARIETIES",
+  "ITEM CODE": "STNIP027",
+  "Weight": "100 gms",
+  "MRP": 88,
+  "SALE PRICE": 78,
+  "GST": 0.05,
+  "HSN CODE": 1901
+ },
+ {
+  "Product Name": "Sesame Garlic Idly Powder ",
+  "CATEGORY": "IDLY PODI VARIETIES",
+  "ITEM CODE": "STNIP028",
+  "Weight": "250 gms",
+  "MRP": 199,
+  "SALE PRICE": 160,
+  "GST": 0.05,
+  "HSN CODE": 1901
+ },
+ {
+  "Product Name": "Garlic Idly Powder ",
+  "CATEGORY": "IDLY PODI VARIETIES",
+  "ITEM CODE": "STNIP029",
+  "Weight": "100 gms",
+  "MRP": 88,
+  "SALE PRICE": 75,
+  "GST": 0.05,
+  "HSN CODE": 1901
+ },
+ {
+  "Product Name": "Garlic Idly Powder ",
+  "CATEGORY": "IDLY PODI VARIETIES",
+  "ITEM CODE": "STNIP030",
+  "Weight": "250 gms",
+  "MRP": 199,
+  "SALE PRICE": 155,
+  "GST": 0.05,
+  "HSN CODE": 1901
+ },
+ {
+  "Product Name": "Horse Gram Idly Powder ",
+  "CATEGORY": "IDLY PODI VARIETIES",
+  "ITEM CODE": "STNIP031",
+  "Weight": "100 gms",
+  "MRP": 88,
+  "SALE PRICE": 72,
+  "GST": 0.05,
+  "HSN CODE": 1901
+ },
+ {
+  "Product Name": "Horse Gram Idly Powder ",
+  "CATEGORY": "IDLY PODI VARIETIES",
+  "ITEM CODE": "STNIP032",
+  "Weight": "250 gms",
+  "MRP": 199,
+  "SALE PRICE": 155,
+  "GST": 0.05,
+  "HSN CODE": 1901
+ },
+ {
+  "Product Name": "Vallarai Idly Powder",
+  "CATEGORY": "IDLY PODI VARIETIES",
+  "ITEM CODE": "STNIP033",
+  "Weight": "100 gms",
+  "MRP": 99,
+  "SALE PRICE": 75,
+  "GST": 0.05,
+  "HSN CODE": 1901
+ },
+ {
+  "Product Name": "Vallarai Idly Powder",
+  "CATEGORY": "IDLY PODI VARIETIES",
+  "ITEM CODE": "STNIP034",
+  "Weight": "250 gms",
+  "MRP": 199,
+  "SALE PRICE": 155,
+  "GST": 0.05,
+  "HSN CODE": 1901
+ },
+ {
+  "Product Name": "Biriyani Masala ",
+  "CATEGORY": "HOME MADE MASALA",
+  "ITEM CODE": "STNHMM035",
+  "Weight": "50 gms",
+  "MRP": 110,
+  "SALE PRICE": 83,
+  "GST": 0.05,
+  "HSN CODE": "O910"
+ },
+ {
+  "Product Name": "Biriyani Masala ",
+  "CATEGORY": "HOME MADE MASALA",
+  "ITEM CODE": "STNHMM036",
+  "Weight": "100 gms",
+  "MRP": 199,
+  "SALE PRICE": 145,
+  "GST": 0.05,
+  "HSN CODE": "O910"
+ },
+ {
+  "Product Name": "Curry Masala ",
+  "CATEGORY": "HOME MADE MASALA",
+  "ITEM CODE": "STNHMM037",
+  "Weight": "50 gms",
+  "MRP": 88,
+  "SALE PRICE": 55,
+  "GST": 0.05,
+  "HSN CODE": "O910"
+ },
+ {
+  "Product Name": "Curry Masala ",
+  "CATEGORY": "HOME MADE MASALA",
+  "ITEM CODE": "STNHMM038",
+  "Weight": "100 gms",
+  "MRP": 145,
+  "SALE PRICE": 99,
+  "GST": 0.05,
+  "HSN CODE": "O910"
+ },
+ {
+  "Product Name": "Muton Masala",
+  "CATEGORY": "HOME MADE MASALA",
+  "ITEM CODE": "STNHMM039",
+  "Weight": "50 gms",
+  "MRP": 88,
+  "SALE PRICE": 55,
+  "GST": 0.05,
+  "HSN CODE": "O910"
+ },
+ {
+  "Product Name": "Mutton Masala",
+  "CATEGORY": "HOME MADE MASALA",
+  "ITEM CODE": "STNHMM040",
+  "Weight": "100 gms",
+  "MRP": 128,
+  "SALE PRICE": 95,
+  "GST": 0.05,
+  "HSN CODE": "O910"
+ },
+ {
+  "Product Name": "Chicken Masala ",
+  "CATEGORY": "HOME MADE MASALA",
+  "ITEM CODE": "STNHMM041",
+  "Weight": "50 gms",
+  "MRP": 88,
+  "SALE PRICE": 52,
+  "GST": 0.05,
+  "HSN CODE": "O910"
+ },
+ {
+  "Product Name": "Chicken Masala ",
+  "CATEGORY": "HOME MADE MASALA",
+  "ITEM CODE": "STNHMM042",
+  "Weight": "100 gms",
+  "MRP": 120,
+  "SALE PRICE": 88,
+  "GST": 0.05,
+  "HSN CODE": "O910"
+ },
+ {
+  "Product Name": "Sambar Powder ",
+  "CATEGORY": "HOME MADE MASALA",
+  "ITEM CODE": "STNHMM043",
+  "Weight": "100 Gms",
+  "MRP": 115,
+  "SALE PRICE": 85,
+  "GST": 0.05,
+  "HSN CODE": "O910"
+ },
+ {
+  "Product Name": "Sambar Powder ",
+  "CATEGORY": "HOME MADE MASALA",
+  "ITEM CODE": "STNHMM044",
+  "Weight": "200 gms",
+  "MRP": 199,
+  "SALE PRICE": 155,
+  "GST": 0.05,
+  "HSN CODE": "O910"
+ },
+ {
+  "Product Name": "Sambar Powder ",
+  "CATEGORY": "HOME MADE MASALA",
+  "ITEM CODE": "STNHMM045",
+  "Weight": "500 gms",
+  "MRP": 355,
+  "SALE PRICE": 310,
+  "GST": 0.05,
+  "HSN CODE": "O910"
+ },
+ {
+  "Product Name": "Kulambu Powder ",
+  "CATEGORY": "HOME MADE MASALA",
+  "ITEM CODE": "STNHMM046",
+  "Weight": "100 gms",
+  "MRP": 115,
+  "SALE PRICE": 80,
+  "GST": 0.05,
+  "HSN CODE": "O910"
+ },
+ {
+  "Product Name": "Kulambu Powder ",
+  "CATEGORY": "HOME MADE MASALA",
+  "ITEM CODE": "STNHMM047",
+  "Weight": "200 gms",
+  "MRP": 199,
+  "SALE PRICE": 149,
+  "GST": 0.05,
+  "HSN CODE": "O910"
+ },
+ {
+  "Product Name": "Kulambu Powder ",
+  "CATEGORY": "HOME MADE MASALA",
+  "ITEM CODE": "STNHMM048",
+  "Weight": "500 gms",
+  "MRP": 355,
+  "SALE PRICE": 299,
+  "GST": 0.05,
+  "HSN CODE": "O910"
+ },
+ {
+  "Product Name": "Groundnut Oil ",
+  "CATEGORY": "VAGAI WOOD PERSSED OIL \/ COLD PRESSED OIL",
+  "ITEM CODE": "STNWPO049",
+  "Weight": "500 ml",
+  "MRP": 185,
+  "SALE PRICE": 160,
+  "GST": 0.05,
+  "HSN CODE": 1508
+ },
+ {
+  "Product Name": "Groundnut Oil ",
+  "CATEGORY": "VAGAI WOOD PERSSED OIL \/ COLD PRESSED OIL",
+  "ITEM CODE": "STNWPO050",
+  "Weight": "1 ltr",
+  "MRP": 355,
+  "SALE PRICE": 330,
+  "GST": 0.05,
+  "HSN CODE": 1508
+ },
+ {
+  "Product Name": "Groundnut Oil ",
+  "CATEGORY": "VAGAI WOOD PERSSED OIL \/ COLD PRESSED OIL",
+  "ITEM CODE": "STNWPO051",
+  "Weight": "2 ltr",
+  "MRP": 670,
+  "SALE PRICE": 650,
+  "GST": 0.05,
+  "HSN CODE": 1508
+ },
+ {
+  "Product Name": "Groundnut Oil  ",
+  "CATEGORY": "VAGAI WOOD PERSSED OIL \/ COLD PRESSED OIL",
+  "ITEM CODE": "STNWPO052",
+  "Weight": "5 ltr",
+  "MRP": 1750,
+  "SALE PRICE": 1625,
+  "GST": 0.05,
+  "HSN CODE": 1508
+ },
+ {
+  "Product Name": "Sesame Oil",
+  "CATEGORY": "VAGAI WOOD PERSSED OIL \/ COLD PRESSED OIL",
+  "ITEM CODE": "STNWPO053",
+  "Weight": "500 ml",
+  "MRP": 290,
+  "SALE PRICE": 260,
+  "GST": 0.05,
+  "HSN CODE": 1515
+ },
+ {
+  "Product Name": "Sesame Oil ",
+  "CATEGORY": "VAGAI WOOD PERSSED OIL \/ COLD PRESSED OIL",
+  "ITEM CODE": "STNWPO054",
+  "Weight": "1ltr",
+  "MRP": 560,
+  "SALE PRICE": 510,
+  "GST": 0.05,
+  "HSN CODE": 1515
+ },
+ {
+  "Product Name": "Sesame Oil",
+  "CATEGORY": "VAGAI WOOD PERSSED OIL \/ COLD PRESSED OIL",
+  "ITEM CODE": "STNWPO055",
+  "Weight": "2 ltr",
+  "MRP": 1100,
+  "SALE PRICE": 1010,
+  "GST": 0.05,
+  "HSN CODE": 1515
+ },
+ {
+  "Product Name": "Sesame Oil ",
+  "CATEGORY": "VAGAI WOOD PERSSED OIL \/ COLD PRESSED OIL",
+  "ITEM CODE": "STNWPO056",
+  "Weight": "5 ltr",
+  "MRP": 2600,
+  "SALE PRICE": 2525,
+  "GST": 0.05,
+  "HSN CODE": 1515
+ },
+ {
+  "Product Name": "Coconut Oil ",
+  "CATEGORY": "VAGAI WOOD PERSSED OIL \/ COLD PRESSED OIL",
+  "ITEM CODE": "STNWPO057",
+  "Weight": "500 ml",
+  "MRP": 310,
+  "SALE PRICE": 255,
+  "GST": 0.05,
+  "HSN CODE": 1513
+ },
+ {
+  "Product Name": "Coconut Oil ",
+  "CATEGORY": "VAGAI WOOD PERSSED OIL \/ COLD PRESSED OIL",
+  "ITEM CODE": "STNWPO058",
+  "Weight": "1 ltr",
+  "MRP": 630,
+  "SALE PRICE": 490,
+  "GST": 0.05,
+  "HSN CODE": 1513
+ },
+ {
+  "Product Name": "Coconut Oil ",
+  "CATEGORY": "VAGAI WOOD PERSSED OIL \/ COLD PRESSED OIL",
+  "ITEM CODE": "STNWPO059",
+  "Weight": "2 ltr",
+  "MRP": 1050,
+  "SALE PRICE": 980,
+  "GST": 0.05,
+  "HSN CODE": 1513
+ },
+ {
+  "Product Name": "Coconut Oil ",
+  "CATEGORY": "VAGAI WOOD PERSSED OIL \/ COLD PRESSED OIL",
+  "ITEM CODE": "STNWPO060",
+  "Weight": "5 ltr",
+  "MRP": 2600,
+  "SALE PRICE": 2450,
+  "GST": 0.05,
+  "HSN CODE": 1513
+ },
+ {
+  "Product Name": "Sesame Oil & Groundnut Oil Combo",
+  "CATEGORY": "VAGAI WOOD PERSSED OIL \/ COLD PRESSED OIL",
+  "ITEM CODE": "STNWPO061",
+  "Weight": "1 ltr + 1 ltr",
+  "MRP": 920,
+  "SALE PRICE": 830,
+  "GST": 0.05,
+  "HSN CODE": 151590
+ },
+ {
+  "Product Name": "Coconut Oil & Groundnut Oil Combo",
+  "CATEGORY": "VAGAI WOOD PERSSED OIL \/ COLD PRESSED OIL",
+  "ITEM CODE": "STNWPO062",
+  "Weight": "1 ltr + 1 ltr",
+  "MRP": 850,
+  "SALE PRICE": 810,
+  "GST": 0.05,
+  "HSN CODE": 151620
+ },
+ {
+  "Product Name": "Sesame Oil & Coconut Oil Combo",
+  "CATEGORY": "VAGAI WOOD PERSSED OIL \/ COLD PRESSED OIL",
+  "ITEM CODE": "STNWPO063",
+  "Weight": "1 ltr + 1 ltr",
+  "MRP": 1190,
+  "SALE PRICE": 1000,
+  "GST": 0.05,
+  "HSN CODE": 151590
+ },
+ {
+  "Product Name": "Sesame Oil , Groundnut Oil & Coconut oil combo",
+  "CATEGORY": "VAGAI WOOD PERSSED OIL \/ COLD PRESSED OIL",
+  "ITEM CODE": "STNWPO064",
+  "Weight": "Each 1 ltr",
+  "MRP": 1545,
+  "SALE PRICE": 1330,
+  "GST": 0.05,
+  "HSN CODE": 15159099
+ },
+ {
+  "Product Name": "Sesame Oil , Groundnut Oil & Coconut oil combo",
+  "CATEGORY": "VAGAI WOOD PERSSED OIL \/ COLD PRESSED OIL",
+  "ITEM CODE": "STNWPO065",
+  "Weight": "Each 500 ml",
+  "MRP": 785,
+  "SALE PRICE": 675,
+  "GST": 0.05,
+  "HSN CODE": 15159099
+ },
+ {
+  "Product Name": "Sesame Oil & Groundnut Oil Combo",
+  "CATEGORY": "VAGAI WOOD PERSSED OIL \/ COLD PRESSED OIL",
+  "ITEM CODE": "STNWPO066",
+  "Weight": "500 ml + 1ltr",
+  "MRP": 645,
+  "SALE PRICE": 590,
+  "GST": 0.05,
+  "HSN CODE": 151590
+ },
+ {
+  "Product Name": "Coconut Oil & Groundnut Oil Combo",
+  "CATEGORY": "VAGAI WOOD PERSSED OIL \/ COLD PRESSED OIL",
+  "ITEM CODE": "STNWPO067",
+  "Weight": "500 ml + 1 ltr",
+  "MRP": 665,
+  "SALE PRICE": 585,
+  "GST": 0.05,
+  "HSN CODE": 151620
+ },
+ {
+  "Product Name": "Sesame Oil & Coconut Oil Combo",
+  "CATEGORY": "VAGAI WOOD PERSSED OIL \/ COLD PRESSED OIL",
+  "ITEM CODE": "STNWPO068",
+  "Weight": "1 ltr + 500 ml",
+  "MRP": 870,
+  "SALE PRICE": 765,
+  "GST": 0.05,
+  "HSN CODE": 151590
+ },
+ {
+  "Product Name": "Sesame Oil & Groundnut Oil Combo",
+  "CATEGORY": "VAGAI WOOD PERSSED OIL \/ COLD PRESSED OIL",
+  "ITEM CODE": "STNWPO069",
+  "Weight": "500 ml + 500 ml",
+  "MRP": 475,
+  "SALE PRICE": 420,
+  "GST": 0.05,
+  "HSN CODE": 151590
+ },
+ {
+  "Product Name": "Coconut Oil & Groundnut Oil Combo",
+  "CATEGORY": "VAGAI WOOD PERSSED OIL \/ COLD PRESSED OIL",
+  "ITEM CODE": "STNWPO070",
+  "Weight": "500 ml + 500 ml",
+  "MRP": 495,
+  "SALE PRICE": 415,
+  "GST": 0.05,
+  "HSN CODE": 151620
+ },
+ {
+  "Product Name": "Sesame Oil & Coconut Oil Combo",
+  "CATEGORY": "VAGAI WOOD PERSSED OIL \/ COLD PRESSED OIL",
+  "ITEM CODE": "STNWPO071",
+  "Weight": "500 ml + 500 ml",
+  "MRP": 600,
+  "SALE PRICE": 515,
+  "GST": 0.05,
+  "HSN CODE": 151590
+ },
+ {
+  "Product Name": "Kovilpatti Peanut candy ",
+  "CATEGORY": "KOVILPATTI SPECIAL",
+  "ITEM CODE": "STNKVP072",
+  "Weight": "200 gms",
+  "MRP": 90,
+  "SALE PRICE": 70,
+  "GST": 0.05,
+  "HSN CODE": 1704
+ },
+ {
+  "Product Name": "Sesame candy ",
+  "CATEGORY": "KOVILPATTI SPECIAL",
+  "ITEM CODE": "STNKVP073",
+  "Weight": "200 gms",
+  "MRP": 95,
+  "SALE PRICE": 75,
+  "GST": 0.05,
+  "HSN CODE": 1704
+ },
+ {
+  "Product Name": "Koko candy ",
+  "CATEGORY": "KOVILPATTI SPECIAL",
+  "ITEM CODE": "STNKVP074",
+  "Weight": "200 gms",
+  "MRP": 90,
+  "SALE PRICE": 65,
+  "GST": 0.05,
+  "HSN CODE": 1704
+ },
+ {
+  "Product Name": "kai suthu murukku ",
+  "CATEGORY": "KOVILPATTI SPECIAL",
+  "ITEM CODE": "STNKVP075",
+  "Weight": "200 gms",
+  "MRP": 110,
+  "SALE PRICE": 85,
+  "GST": 0.05,
+  "HSN CODE": 21069099
+ },
+ {
+  "Product Name": "kara kai suthu murukku",
+  "CATEGORY": "KOVILPATTI SPECIAL",
+  "ITEM CODE": "STNKVP076",
+  "Weight": "200 gms",
+  "MRP": 110,
+  "SALE PRICE": 85,
+  "GST": 0.05,
+  "HSN CODE": 21069099
+ },
+ {
+  "Product Name": "Onion murukku",
+  "CATEGORY": "KOVILPATTI SPECIAL",
+  "ITEM CODE": "STNKVP077",
+  "Weight": "200 gms",
+  "MRP": 110,
+  "SALE PRICE": 85,
+  "GST": 0.05,
+  "HSN CODE": 21069099
+ },
+ {
+  "Product Name": "Thean kuzlal murukku",
+  "CATEGORY": "KOVILPATTI SPECIAL",
+  "ITEM CODE": "STNKVP078",
+  "Weight": "200 gms",
+  "MRP": 110,
+  "SALE PRICE": 85,
+  "GST": 0.05,
+  "HSN CODE": 21069099
+ },
+ {
+  "Product Name": "Pepper sevu ",
+  "CATEGORY": "KOVILPATTI SPECIAL",
+  "ITEM CODE": "STNKVP079",
+  "Weight": "200 gms",
+  "MRP": 99,
+  "SALE PRICE": 85,
+  "GST": 0.05,
+  "HSN CODE": 21069099
+ },
+ {
+  "Product Name": "Pepper seeval ",
+  "CATEGORY": "KOVILPATTI SPECIAL",
+  "ITEM CODE": "STNKVP080",
+  "Weight": "200 gms",
+  "MRP": 99,
+  "SALE PRICE": 85,
+  "GST": 0.05,
+  "HSN CODE": 21069099
+ },
+ {
+  "Product Name": "Ragi flour",
+  "CATEGORY": "HEALTHY FLOUR & KALI MIXES",
+  "ITEM CODE": "STNHF084",
+  "Weight": "500 gms",
+  "MRP": 88,
+  "SALE PRICE": 48,
+  "GST": 0.05,
+  "HSN CODE": 11029090
+ },
+ {
+  "Product Name": "Mappilai Samba Flour",
+  "CATEGORY": "HEALTHY FLOUR & KALI MIXES",
+  "ITEM CODE": "STNHF085",
+  "Weight": "500 gms",
+  "MRP": 199,
+  "SALE PRICE": 145,
+  "GST": 0.05,
+  "HSN CODE": 1102
+ },
+ {
+  "Product Name": "Black Urad kali mix ",
+  "CATEGORY": "HEALTHY FLOUR & KALI MIXES",
+  "ITEM CODE": "STNHF086",
+  "Weight": "250 gms",
+  "MRP": 155,
+  "SALE PRICE": 105,
+  "GST": 0.05,
+  "HSN CODE": "O714"
+ },
+ {
+  "Product Name": "Karuppu kavuni kali mix ",
+  "CATEGORY": "HEALTHY FLOUR & KALI MIXES",
+  "ITEM CODE": "STNHF087",
+  "Weight": "250 gms",
+  "MRP": 180,
+  "SALE PRICE": 155,
+  "GST": 0.05,
+  "HSN CODE": "O714"
+ },
+ {
+  "Product Name": "Multi grain atta ",
+  "CATEGORY": "HEALTHY FLOUR & KALI MIXES",
+  "ITEM CODE": "STNHF088",
+  "Weight": "500 gms",
+  "MRP": 165,
+  "SALE PRICE": 110,
+  "GST": 0.05,
+  "HSN CODE": 1105
+ },
+ {
+  "Product Name": "Original vembar Karuppatti ",
+  "CATEGORY": "NATURAL SWEETNERS",
+  "ITEM CODE": "STNNS089",
+  "Weight": "1 kgs",
+  "MRP": 420,
+  "SALE PRICE": 385,
+  "GST": 0.05,
+  "HSN CODE": 1702
+ },
+ {
+  "Product Name": "Original vembar Karuppatti ",
+  "CATEGORY": "NATURAL SWEETNERS",
+  "ITEM CODE": "STNNS090",
+  "Weight": "500 GMS",
+  "MRP": 218,
+  "SALE PRICE": 199,
+  "GST": 0.05,
+  "HSN CODE": 1702
+ },
+ {
+  "Product Name": "Jaggery powder",
+  "CATEGORY": "NATURAL SWEETNERS",
+  "ITEM CODE": "STNNS091",
+  "Weight": "500 gms",
+  "MRP": 78,
+  "SALE PRICE": 60,
+  "GST": 0.05,
+  "HSN CODE": 1701
+ },
+ {
+  "Product Name": "Jaggery powder",
+  "CATEGORY": "NATURAL SWEETNERS",
+  "ITEM CODE": "STNNS092",
+  "Weight": "1 kgs",
+  "MRP": 145,
+  "SALE PRICE": 120,
+  "GST": 0.05,
+  "HSN CODE": 1701
+ },
+ {
+  "Product Name": "Jaggery Ball ",
+  "CATEGORY": "NATURAL SWEETNERS",
+  "ITEM CODE": "STNNS093",
+  "Weight": "1 kgs",
+  "MRP": 110,
+  "SALE PRICE": 90,
+  "GST": 0.05,
+  "HSN CODE": 1701
+ },
+ {
+  "Product Name": "Pangarkandu \"A\"Grade ",
+  "CATEGORY": "NATURAL SWEETNERS",
+  "ITEM CODE": "STNNS094",
+  "Weight": "200 gms",
+  "MRP": 188,
+  "SALE PRICE": 155,
+  "GST": 0.05,
+  "HSN CODE": 17029010
+ },
+ {
+  "Product Name": "ABC Malt  ",
+  "CATEGORY": "Explorer pack \/ Trail pack",
+  "ITEM CODE": "STNTP137",
+  "Weight": "100 gms",
+  "MRP": 128,
+  "SALE PRICE": 98,
+  "GST": 0.18,
+  "HSN CODE": 1107
+ },
+ {
+  "Product Name": "Red Banana Malt ",
+  "CATEGORY": "Explorer pack \/ Trail pack",
+  "ITEM CODE": "STNTP138",
+  "Weight": "100 gms",
+  "MRP": 128,
+  "SALE PRICE": 98,
+  "GST": 0.18,
+  "HSN CODE": 1107
+ },
+ {
+  "Product Name": "Beetroot Malt",
+  "CATEGORY": "Explorer pack \/ Trail pack",
+  "ITEM CODE": "STNTP139",
+  "Weight": "100 gms",
+  "MRP": 110,
+  "SALE PRICE": 79,
+  "GST": 0.18,
+  "HSN CODE": 1107
+ },
+ {
+  "Product Name": "Carrot Malt ",
+  "CATEGORY": "Explorer pack \/ Trail pack",
+  "ITEM CODE": "STNTP140",
+  "Weight": "100 gms",
+  "MRP": 110,
+  "SALE PRICE": 89,
+  "GST": 0.18,
+  "HSN CODE": 1107
+ },
+ {
+  "Product Name": "Nendran Banana Malt ",
+  "CATEGORY": "Explorer pack \/ Trail pack",
+  "ITEM CODE": "STNTP141",
+  "Weight": "100 gms",
+  "MRP": 128,
+  "SALE PRICE": 98,
+  "GST": 0.18,
+  "HSN CODE": 1107
+ },
+ {
+  "Product Name": "Groundnut Oil",
+  "CATEGORY": "Explorer pack \/ Trail pack",
+  "ITEM CODE": "STNTP142",
+  "Weight": "200 ml",
+  "MRP": 110,
+  "SALE PRICE": 76,
+  "GST": 0.05,
+  "HSN CODE": 1508
+ },
+ {
+  "Product Name": "Sesame Oil ",
+  "CATEGORY": "Explorer pack \/ Trail pack",
+  "ITEM CODE": "STNTP143",
+  "Weight": "200 ml",
+  "MRP": 145,
+  "SALE PRICE": 112,
+  "GST": 0.05,
+  "HSN CODE": 1515
+ },
+ {
+  "Product Name": "Coconut Oil",
+  "CATEGORY": "Explorer pack \/ Trail pack",
+  "ITEM CODE": "STNTP144",
+  "Weight": "200 ml",
+  "MRP": 138,
+  "SALE PRICE": 108,
+  "GST": 0.05,
+  "HSN CODE": 1513
+ },
+ {
+  "Product Name": "Pearl Millet",
+  "CATEGORY": "Essential Millets",
+  "ITEM CODE": "STNEM145",
+  "Weight": "1 kgs",
+  "MRP": 110,
+  "SALE PRICE": 78,
+  "GST": 0.05,
+  "HSN CODE": 100820
+ },
+ {
+  "Product Name": "Pearl Millet",
+  "CATEGORY": "Essential Millets",
+  "ITEM CODE": "STNEM146",
+  "Weight": "500 gms",
+  "MRP": 55,
+  "SALE PRICE": 38,
+  "GST": 0.05,
+  "HSN CODE": 100820
+ },
+ {
+  "Product Name": "Pearl Millet",
+  "CATEGORY": "Essential Millets",
+  "ITEM CODE": "STNEM147",
+  "Weight": "1 kgs",
+  "MRP": 88,
+  "SALE PRICE": 65,
+  "GST": 0.05,
+  "HSN CODE": 100820
+ },
+ {
+  "Product Name": "Finger Millet",
+  "CATEGORY": "Essential Millets",
+  "ITEM CODE": "STNEM148",
+  "Weight": "500 gms",
+  "MRP": 55,
+  "SALE PRICE": 32,
+  "GST": 0.05,
+  "HSN CODE": 10082130
+ },
+ {
+  "Product Name": "Finger Millet",
+  "CATEGORY": "Essential Millets",
+  "ITEM CODE": "STNEM149",
+  "Weight": "1 kgs",
+  "MRP": 75,
+  "SALE PRICE": 55,
+  "GST": 0.05,
+  "HSN CODE": 10082130
+ },
+ {
+  "Product Name": "Little Millet",
+  "CATEGORY": "Essential Millets",
+  "ITEM CODE": "STNEM150",
+  "Weight": "500 gms",
+  "MRP": 88,
+  "SALE PRICE": 62,
+  "GST": 0.05,
+  "HSN CODE": 1008
+ },
+ {
+  "Product Name": "Little Millet",
+  "CATEGORY": "Essential Millets",
+  "ITEM CODE": "STNEM151",
+  "Weight": "1 kgs",
+  "MRP": 130,
+  "SALE PRICE": 115,
+  "GST": 0.05,
+  "HSN CODE": 1008
+ },
+ {
+  "Product Name": "Emperor's Rice ",
+  "CATEGORY": "Essential Millets",
+  "ITEM CODE": "STNEM152",
+  "Weight": "500 gms",
+  "MRP": 145,
+  "SALE PRICE": 110,
+  "GST": 0.05,
+  "HSN CODE": 1006
+ },
+ {
+  "Product Name": "Emperor's Rice ",
+  "CATEGORY": "Essential Millets",
+  "ITEM CODE": "STNEM153",
+  "Weight": "1 kgs",
+  "MRP": 255,
+  "SALE PRICE": 210,
+  "GST": 0.05,
+  "HSN CODE": 1006
+ },
+ {
+  "Product Name": "Kodo Millet",
+  "CATEGORY": "Essential Millets",
+  "ITEM CODE": "STNEM154",
+  "Weight": "500 gms",
+  "MRP": 75,
+  "SALE PRICE": 60,
+  "GST": 0.05,
+  "HSN CODE": 1008
+ },
+ {
+  "Product Name": "Kodo Millet",
+  "CATEGORY": "Essential Millets",
+  "ITEM CODE": "STNEM155",
+  "Weight": "1 kgs",
+  "MRP": 135,
+  "SALE PRICE": 110,
+  "GST": 0.05,
+  "HSN CODE": 1008
+ },
+ {
+  "Product Name": "Foxtail Millet",
+  "CATEGORY": "Essential Millets",
+  "ITEM CODE": "STNEM156",
+  "Weight": "500 gms",
+  "MRP": 78,
+  "SALE PRICE": 58,
+  "GST": 0.05,
+  "HSN CODE": 10089090
+ },
+ {
+  "Product Name": "Foxtail Millet",
+  "CATEGORY": "Essential Millets",
+  "ITEM CODE": "STNEM157",
+  "Weight": "1 kgs",
+  "MRP": 130,
+  "SALE PRICE": 105,
+  "GST": 0.05,
+  "HSN CODE": 10089090
+ },
+ {
+  "Product Name": "Barnyard Millet",
+  "CATEGORY": "Essential Millets",
+  "ITEM CODE": "STNEM158",
+  "Weight": "500 gms",
+  "MRP": 75,
+  "SALE PRICE": 62,
+  "GST": 0.05,
+  "HSN CODE": 10082140
+ },
+ {
+  "Product Name": "Barnyard Millet",
+  "CATEGORY": "Essential Millets",
+  "ITEM CODE": "STNEM159",
+  "Weight": "1 kgs",
+  "MRP": 130,
+  "SALE PRICE": 115,
+  "GST": 0.05,
+  "HSN CODE": 10082140
+ },
+ {
+  "Product Name": "White Sorghum",
+  "CATEGORY": "Essential Millets",
+  "ITEM CODE": "STNEM160",
+  "Weight": "500 gms",
+  "MRP": 90,
+  "SALE PRICE": 52,
+  "GST": 0.05,
+  "HSN CODE": 1007
+ },
+ {
+  "Product Name": "White Sorghum",
+  "CATEGORY": "Essential Millets",
+  "ITEM CODE": "STNEM161",
+  "Weight": "1 kgs",
+  "MRP": 120,
+  "SALE PRICE": 98,
+  "GST": 0.05,
+  "HSN CODE": 1007
+ },
+ {
+  "Product Name": "Red Sorghum",
+  "CATEGORY": "Essential Millets",
+  "ITEM CODE": "STNEM162",
+  "Weight": "500 gms",
+  "MRP": 90,
+  "SALE PRICE": 55,
+  "GST": 0.05,
+  "HSN CODE": 1007
+ },
+ {
+  "Product Name": "Red Sorghum",
+  "CATEGORY": "Essential Millets",
+  "ITEM CODE": "STNEM163",
+  "Weight": "1 kgs",
+  "MRP": 120,
+  "SALE PRICE": 95,
+  "GST": 0.05,
+  "HSN CODE": 1007
+ },
+ {
+  "Product Name": "Women's Rice",
+  "CATEGORY": "Essential Millets",
+  "ITEM CODE": "STNEM164",
+  "Weight": "500 gms",
+  "MRP": 88,
+  "SALE PRICE": 70,
+  "GST": 0.05,
+  "HSN CODE": 1006
+ },
+ {
+  "Product Name": "Women's Rice",
+  "CATEGORY": "Essential Millets",
+  "ITEM CODE": "STNEM165",
+  "Weight": "1 kgs",
+  "MRP": 155,
+  "SALE PRICE": 130,
+  "GST": 0.05,
+  "HSN CODE": 1006
+ },
+ {
+  "Product Name": "Kattu yanam Rice ",
+  "CATEGORY": "Essential Millets",
+  "ITEM CODE": "STNEM166",
+  "Weight": "500 gms",
+  "MRP": 98,
+  "SALE PRICE": 80,
+  "GST": 0.05,
+  "HSN CODE": 1006
+ },
+ {
+  "Product Name": "Kattu yanam rice 1 kg",
+  "CATEGORY": "Essential Millets",
+  "ITEM CODE": "STNEM167",
+  "Weight": "1 kgs",
+  "MRP": 172,
+  "SALE PRICE": 150,
+  "GST": 0.05,
+  "HSN CODE": 1006
+ },
+ {
+  "Product Name": "Bride Groom Rice",
+  "CATEGORY": "Essential Millets",
+  "ITEM CODE": "STNEM168",
+  "Weight": "500 gms",
+  "MRP": 88,
+  "SALE PRICE": 68,
+  "GST": 0.05,
+  "HSN CODE": 10063090
+ },
+ {
+  "Product Name": "Bride Groom Rice",
+  "CATEGORY": "Essential Millets",
+  "ITEM CODE": "STNEM169",
+  "Weight": "1 kgs",
+  "MRP": 165,
+  "SALE PRICE": 130,
+  "GST": 0.05,
+  "HSN CODE": 10063090
+ },
+ {
+  "Product Name": "Thooya malli rice",
+  "CATEGORY": "Essential Millets",
+  "ITEM CODE": "STNEM170",
+  "Weight": "1 kg",
+  "MRP": 110,
+  "SALE PRICE": 99,
+  "GST": 0.05
+ }]

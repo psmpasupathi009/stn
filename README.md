@@ -1,36 +1,177 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# STN Products E-Commerce Website
 
-## Getting Started
+A full-featured e-commerce website built with Next.js, React, TypeScript, MongoDB, and Prisma.
 
-First, run the development server:
+## Features
+
+- 🔐 **Authentication System**
+  - User and Admin roles
+  - OTP-based email verification
+  - Password reset functionality
+  - Secure JWT token-based authentication
+
+- 🛍️ **E-Commerce Features**
+  - Product listing with categories
+  - Product detail pages
+  - Shopping cart
+  - Order management
+  - Razorpay payment integration
+
+- 👨‍💼 **Admin Dashboard**
+  - Product management (Create, Read, Update, Delete)
+  - Image upload to Cloudinary
+  - Admin-only access
+
+- 🎨 **Modern UI**
+  - Responsive design
+  - Clean and intuitive interface
+  - Built with shadcn/ui components
+
+## Tech Stack
+
+- **Framework**: Next.js 16
+- **Language**: TypeScript
+- **Database**: MongoDB
+- **ORM**: Prisma
+- **Styling**: Tailwind CSS
+- **UI Components**: shadcn/ui
+- **Payment**: Razorpay
+- **Image Storage**: Cloudinary
+- **Email**: Nodemailer
+
+## Setup Instructions
+
+### 1. Install Dependencies
+
+```bash
+npm install
+```
+
+### 2. Environment Variables
+
+Create a `.env` file in the root directory:
+
+```env
+# Database
+DATABASE_URL="mongodb://localhost:27017/stn_products"
+
+# JWT Secret
+JWT_SECRET="your-secret-key-change-in-production"
+
+# Cloudinary
+CLOUDINARY_URL=""
+CLOUDINARY_CLOUD_NAME=""
+CLOUDINARY_API_KEY=""
+CLOUDINARY_API_SECRET=""
+
+# Razorpay
+RAZORPAY_KEY_ID=""
+RAZORPAY_KEY_SECRET=""
+
+# SMTP (for email)
+SMTP_HOST="smtp.gmail.com"
+SMTP_PORT="587"
+SMTP_USER=""
+SMTP_PASS=""
+
+# App URL
+NEXT_PUBLIC_APP_URL="http://localhost:3000"
+```
+
+### 3. Database Setup
+
+```bash
+# Generate Prisma Client
+npm run db:generate
+
+# Push schema to database
+npm run db:push
+
+# Seed products from JSON file
+npm run db:seed
+```
+
+### 4. Create Admin User
+
+To create an admin user, you need to:
+
+1. Add an admin email to the `Admin` table in MongoDB
+2. Or use Prisma Studio to add an admin:
+
+```bash
+npx prisma studio
+```
+
+Then add an admin record with:
+- `email`: Your admin email
+- `password`: Hashed password (use bcrypt to hash)
+
+Alternatively, you can create an admin via the database directly or create a script.
+
+### 5. Run Development Server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Visit [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Project Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+├── app/
+│   ├── api/              # API routes
+│   ├── admin/            # Admin dashboard
+│   ├── cart/             # Shopping cart page
+│   ├── login/            # Authentication pages
+│   ├── orders/           # Order history
+│   ├── products/         # Product pages
+│   ├── profile/          # User profile
+│   └── layout.tsx        # Root layout
+├── components/
+│   ├── ui/               # shadcn/ui components
+│   └── Header.tsx        # Navigation header
+├── lib/
+│   ├── auth.ts           # Authentication utilities
+│   ├── cloudinary.ts     # Cloudinary integration
+│   ├── context.tsx       # Auth context
+│   ├── email.ts          # Email utilities
+│   ├── prisma.ts         # Prisma client
+│   ├── razorpay.ts       # Razorpay integration
+│   └── utils.ts          # Utility functions
+├── prisma/
+│   └── schema.prisma     # Database schema
+└── scripts/
+    └── seed-products.ts  # Product seeding script
+```
 
-## Learn More
+## Admin Access
 
-To learn more about Next.js, take a look at the following resources:
+1. Register/login with an admin email (must be in the Admin table)
+2. After OTP verification, set your password
+3. Access the admin dashboard from the profile page or directly at `/admin/dashboard`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Payment Integration
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The website uses Razorpay for payments. Make sure to:
+1. Set up a Razorpay account
+2. Get your API keys
+3. Add them to the `.env` file
+4. Configure webhooks if needed
 
-## Deploy on Vercel
+## Image Upload
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Images are uploaded to Cloudinary. Make sure to:
+1. Set up a Cloudinary account
+2. Get your credentials
+3. Add them to the `.env` file
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Email Configuration
+
+For OTP and password reset emails, configure SMTP settings:
+- Gmail: Use App Password for SMTP_PASS
+- Other providers: Update SMTP_HOST and SMTP_PORT accordingly
+
+## License
+
+MIT
