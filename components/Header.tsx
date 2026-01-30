@@ -97,10 +97,12 @@ export default function Header() {
           </button>
 
           {/* Logo */}
-          <Link href="/" className="flex-1 text-center">
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">
-              STN Golden Healthy Foods
-            </h1>
+          <Link href="/" className="flex-1 flex items-center justify-center">
+            <img 
+              src="/STN LOGO.png" 
+              alt="STN Golden Healthy Foods" 
+              className="h-16 md:h-20 w-auto object-contain"
+            />
           </Link>
 
           {/* Right Icons */}
