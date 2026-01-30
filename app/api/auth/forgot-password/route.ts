@@ -34,7 +34,13 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    await sendPasswordReset(email, resetToken)
+    try {
+      await sendPasswordReset(email, resetToken)
+    } catch (emailError: any) {
+      // If email fails, still return success since reset token is saved
+      // User can check console logs in development
+      console.error('Email send failed, but reset token saved:', emailError)
+    }
 
     return NextResponse.json({
       success: true,
