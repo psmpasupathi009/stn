@@ -42,32 +42,35 @@ export default function Header() {
               </Link>
               <div className="absolute top-full left-0 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
                 <div className="py-2">
-                  <Link href="/collections/oils" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                    Oils & Ghee
+                  <Link href="/collections/wood-pressed-oils" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                    Wood Pressed Oils
                   </Link>
-                  <Link href="/collections/snacks" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                    Traditional Foods - Homemade Specialties
+                  <Link href="/collections/healthy-mixes" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                    Healthy Mixes
                   </Link>
-                  <Link href="/collections/malt" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                    Palm & Malt Wellness Range
+                  <Link href="/collections/idly-podi" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                    Idly Podi Varieties
                   </Link>
-                  <Link href="/products?category=IDLY PODI VARIETIES" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                    Podi Varieties
+                  <Link href="/collections/home-made-masala" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                    Home Made Masala
                   </Link>
-                  <Link href="/products?category=HOME MADE MASALA" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                    Homemade Pickle
+                  <Link href="/collections/kovilpatti-special" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                    Kovilpatti Special
                   </Link>
-                  <Link href="/products?category=Essential Millets" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                    Traditional Rice & Unpolished Millets
+                  <Link href="/collections/flour-kali-mixes" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                    Flour & Kali Mixes
                   </Link>
-                  <Link href="/collections/skin-hair" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                    Wellness & Care
+                  <Link href="/collections/natural-sweeteners" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                    Natural Sweeteners
                   </Link>
-                  <Link href="/combos" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                    Special Packs
+                  <Link href="/collections/essential-millets" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                    Essential Millets
+                  </Link>
+                  <Link href="/collections/explorer-pack" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                    Explorer Pack
                   </Link>
                   <Link href="/products" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 border-t border-gray-200 mt-2 pt-2">
-                    Shop All products
+                    Shop All Products
                   </Link>
                 </div>
               </div>

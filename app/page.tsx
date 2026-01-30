@@ -19,6 +19,8 @@ interface Product {
 
 export default function HomePage() {
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([])
+  const [healthyMixes, setHealthyMixes] = useState<Product[]>([])
+  const [kovilpattiSpecial, setKovilpattiSpecial] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const { isAuthenticated } = useAuth()
 
@@ -28,10 +30,20 @@ export default function HomePage() {
 
   const fetchProducts = async () => {
     try {
-      // Fetch oils category products
-      const res = await fetch('/api/products?category=VAGAI WOOD PERSSED OIL / COLD PRESSED OIL&limit=8')
-      const data = await res.json()
-      setFeaturedProducts(data.slice(0, 8))
+      // Fetch wood pressed oils for featured section
+      const oilsRes = await fetch('/api/products?category=' + encodeURIComponent('VAGAI WOOD PERSSED OIL / COLD PRESSED OIL'))
+      const oilsData = await oilsRes.json()
+      setFeaturedProducts(oilsData.slice(0, 8))
+      
+      // Fetch healthy mixes
+      const mixesRes = await fetch('/api/products?category=' + encodeURIComponent('HEALTHY  MIXES'))
+      const mixesData = await mixesRes.json()
+      setHealthyMixes(mixesData.slice(0, 4))
+      
+      // Fetch Kovilpatti special
+      const kovilpattiRes = await fetch('/api/products?category=' + encodeURIComponent('KOVILPATTI SPECIAL'))
+      const kovilpattiData = await kovilpattiRes.json()
+      setKovilpattiSpecial(kovilpattiData.slice(0, 4))
     } catch (error) {
       console.error('Error fetching products:', error)
     } finally {
@@ -94,7 +106,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Featured Products - Oils */}
+      {/* Featured Products - Wood Pressed Oils */}
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
@@ -169,37 +181,22 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Ghee Section */}
+      {/* Healthy Mixes Section */}
       <section className="py-16 bg-amber-50">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Pure Ghee, Crafted with Care.
-          </h2>
-          <p className="text-lg text-gray-600 mb-8">
-            Buffalo & Cow Ghee, slow-prepared the traditional way — rich, wholesome, and full of flavor.
-          </p>
-          <Link href="/collections/ghee">
-            <Button size="lg" className="bg-black text-white hover:bg-gray-800">
-              Shop Now
-            </Button>
-          </Link>
-        </div>
-      </section>
-
-      {/* Snacks Section */}
-      <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Snacks Made From the Heart.
+              Healthy Mixes & Malt
             </h2>
             <p className="text-lg text-gray-600">
-              Homemade bites crafted with love — from sesame laddus to millet cookies.
+              Nutritious malt mixes and health powders for your daily wellness needs.
             </p>
           </div>
-          {!loading && (
+          {loading ? (
+            <div className="text-center py-12">Loading products...</div>
+          ) : healthyMixes.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {featuredProducts.slice(0, 4).map((product) => (
+              {healthyMixes.map((product) => (
                 <div key={product.id} className="group">
                   <Link href={`/products/${product.id}`}>
                     <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden mb-4 group-hover:opacity-90 transition-opacity">
@@ -210,8 +207,8 @@ export default function HomePage() {
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-gray-400">
-                          No Image
+                        <div className="w-full h-full flex items-center justify-center text-gray-400 text-4xl">
+                          🌾
                         </div>
                       )}
                     </div>
@@ -222,37 +219,124 @@ export default function HomePage() {
                         {product.name}
                       </h3>
                     </Link>
-                    <div className="flex items-center justify-center gap-2 mb-3">
+                    <div className="flex items-center justify-center gap-2 mb-2">
                       <span className="text-xl font-bold text-gray-900">
                         ₹{product.salePrice}
                       </span>
                       {product.mrp > product.salePrice && (
-                        <span className="text-sm text-gray-500 line-through">
-                          ₹{product.mrp}
-                        </span>
-                      )}
-                      {product.mrp > product.salePrice && (
-                        <span className="bg-black text-white text-xs px-2 py-1">
-                          Sale
-                        </span>
+                        <>
+                          <span className="text-sm text-gray-500 line-through">
+                            ₹{product.mrp}
+                          </span>
+                          <span className="bg-black text-white text-xs px-2 py-1">
+                            Sale
+                          </span>
+                        </>
                       )}
                     </div>
+                    {product.rating && product.rating > 0 && (
+                      <div className="flex items-center justify-center gap-1 mb-3">
+                        <span className="text-yellow-400">⭐</span>
+                        <span className="text-sm font-semibold">{product.rating.toFixed(1)}</span>
+                        <span className="text-xs text-gray-500">({product.reviewCount || 0})</span>
+                      </div>
+                    )}
                     <button
                       onClick={() => addToCart(product.id)}
                       className="w-full bg-black text-white py-2 px-4 rounded hover:bg-gray-800 transition-colors"
                     >
                       Add to cart
                     </button>
-                    <p className="text-sm text-gray-500 mt-2">Sold out</p>
                   </div>
                 </div>
               ))}
             </div>
-          )}
+          ) : null}
           <div className="text-center mt-8">
-            <Link href="/products">
+            <Link href="/collections/healthy-mixes">
               <span className="text-amber-900 font-semibold hover:underline">
-                View all →
+                View all Healthy Mixes →
+              </span>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Kovilpatti Special Section */}
+      <section className="py-16 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Kovilpatti Special
+            </h2>
+            <p className="text-lg text-gray-600">
+              Authentic regional specialties from Kovilpatti — unique flavors and traditional recipes.
+            </p>
+          </div>
+          {loading ? (
+            <div className="text-center py-12">Loading products...</div>
+          ) : kovilpattiSpecial.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {kovilpattiSpecial.map((product) => (
+                <div key={product.id} className="group">
+                  <Link href={`/products/${product.id}`}>
+                    <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden mb-4 group-hover:opacity-90 transition-opacity">
+                      {product.image ? (
+                        <img
+                          src={product.image}
+                          alt={product.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-400 text-4xl">
+                          🍪
+                        </div>
+                      )}
+                    </div>
+                  </Link>
+                  <div className="text-center">
+                    <Link href={`/products/${product.id}`}>
+                      <h3 className="font-semibold text-lg mb-2 hover:text-amber-900">
+                        {product.name}
+                      </h3>
+                    </Link>
+                    <div className="flex items-center justify-center gap-2 mb-2">
+                      <span className="text-xl font-bold text-gray-900">
+                        ₹{product.salePrice}
+                      </span>
+                      {product.mrp > product.salePrice && (
+                        <>
+                          <span className="text-sm text-gray-500 line-through">
+                            ₹{product.mrp}
+                          </span>
+                          <span className="bg-black text-white text-xs px-2 py-1">
+                            Sale
+                          </span>
+                        </>
+                      )}
+                    </div>
+                    {product.rating && product.rating > 0 && (
+                      <div className="flex items-center justify-center gap-1 mb-3">
+                        <span className="text-yellow-400">⭐</span>
+                        <span className="text-sm font-semibold">{product.rating.toFixed(1)}</span>
+                        <span className="text-xs text-gray-500">({product.reviewCount || 0})</span>
+                      </div>
+                    )}
+                    <button
+                      onClick={() => addToCart(product.id)}
+                      className="w-full bg-black text-white py-2 px-4 rounded hover:bg-gray-800 transition-colors"
+                    >
+                      Add to cart
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : null}
+          <div className="text-center mt-8">
+            <Link href="/collections/kovilpatti-special">
+              <span className="text-amber-900 font-semibold hover:underline">
+                View all Kovilpatti Special →
               </span>
             </Link>
           </div>

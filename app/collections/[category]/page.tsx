@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/lib/context'
+import { categoryMapping } from '@/components/CategoryIcons'
 
 interface Product {
   id: string
@@ -17,41 +18,49 @@ interface Product {
   reviewCount?: number
 }
 
-const categoryMap: Record<string, string> = {
-  'oils': 'VAGAI WOOD PERSSED OIL / COLD PRESSED OIL',
-  'ghee': 'Premium Ghee',
-  'snacks': 'KOVILPATTI SPECIAL',
-  'skin-hair': 'Wellness & Care',
-  'malt': 'HEALTHY MIXES',
-  'all': '',
-}
-
 const categoryTitles: Record<string, { title: string; description: string }> = {
-  'oils': {
+  'healthy-mixes': {
+    title: 'Healthy Mixes & Malt',
+    description: 'Nutritious malt mixes and health powders for your daily wellness needs.',
+  },
+  'wood-pressed-oils': {
     title: 'Authentic Oils, Pure from Within.',
     description: 'Made with traditional wood-pressing — rich in flavor, clean in nature.',
   },
-  'ghee': {
-    title: 'Pure Ghee, Crafted with Care.',
-    description: 'Buffalo & Cow Ghee, slow-prepared the traditional way — rich, wholesome, and full of flavor.',
+  'idly-podi': {
+    title: 'Idly Podi Varieties',
+    description: 'Traditional South Indian spice powders to enhance your breakfast experience.',
   },
-  'snacks': {
-    title: 'Snacks Made From the Heart.',
-    description: 'Homemade bites crafted with love — from sesame laddus to millet cookies.',
+  'home-made-masala': {
+    title: 'Home Made Masala',
+    description: 'Freshly ground spices and masala blends made with traditional methods.',
   },
-  'skin-hair': {
-    title: 'Wellness & Care',
-    description: 'Natural products for your skin and hair care needs.',
+  'kovilpatti-special': {
+    title: 'Kovilpatti Special',
+    description: 'Authentic regional specialties from Kovilpatti — unique flavors and traditional recipes.',
   },
-  'malt': {
-    title: 'Healthy Mixes & Malt',
-    description: 'Nutritious mixes and malt products for your daily wellness.',
+  'flour-kali-mixes': {
+    title: 'Healthy Flour & Kali Mixes',
+    description: 'Nutritious flour blends and kali mixes for wholesome cooking.',
+  },
+  'natural-sweeteners': {
+    title: 'Natural Sweeteners',
+    description: 'Pure, unrefined sweeteners for a healthier lifestyle.',
+  },
+  'explorer-pack': {
+    title: 'Explorer Pack / Trail Pack',
+    description: 'Sample packs to explore our range of products.',
+  },
+  'essential-millets': {
+    title: 'Essential Millets',
+    description: 'Nutritious millets for a healthy and balanced diet.',
   },
 }
 
 export default function CategoryPage() {
   const params = useParams()
   const categorySlug = (params.category as string) || ''
+  const actualCategory = categoryMapping[categorySlug] || categorySlug
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const { isAuthenticated } = useAuth()
@@ -62,13 +71,15 @@ export default function CategoryPage() {
 
   const fetchProducts = async () => {
     try {
-      const category = categoryMap[categorySlug] || categorySlug
-      const url = category
-        ? `/api/products?category=${encodeURIComponent(category)}`
+      setLoading(true)
+      const url = actualCategory
+        ? `/api/products?category=${encodeURIComponent(actualCategory)}`
         : '/api/products'
       const res = await fetch(url)
-      const data = await res.json()
-      setProducts(data)
+      if (res.ok) {
+        const data = await res.json()
+        setProducts(data)
+      }
     } catch (error) {
       console.error('Error fetching products:', error)
     } finally {
@@ -95,15 +106,18 @@ export default function CategoryPage() {
 
       if (res.ok) {
         alert('Product added to cart!')
+      } else {
+        alert('Failed to add product to cart')
       }
     } catch (error) {
       console.error('Error adding to cart:', error)
+      alert('Failed to add product to cart')
     }
   }
 
   const categoryInfo = categoryTitles[categorySlug] || {
-    title: 'All Products',
-    description: 'Explore our complete collection',
+    title: actualCategory || 'All Products',
+    description: 'Browse our collection of premium products.',
   }
 
   return (
@@ -113,7 +127,7 @@ export default function CategoryPage() {
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
             {categoryInfo.title}
           </h1>
-          <p className="text-lg text-gray-600">
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             {categoryInfo.description}
           </p>
         </div>
@@ -122,54 +136,53 @@ export default function CategoryPage() {
           <div className="text-center py-12">Loading products...</div>
         ) : products.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-gray-600 mb-4">No products found in this category</p>
+            <p className="text-gray-600 mb-4">No products found in this category.</p>
             <Link href="/products">
-              <button className="text-amber-900 font-semibold hover:underline">
-                View All Products →
+              <button className="bg-black text-white px-6 py-2 rounded hover:bg-gray-800">
+                View All Products
               </button>
             </Link>
           </div>
         ) : (
-          <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {products.map((product) => (
-                <div key={product.id} className="group">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {products.map((product) => (
+              <div key={product.id} className="group">
+                <Link href={`/products/${product.id}`}>
+                  <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden mb-4 group-hover:opacity-90 transition-opacity">
+                    {product.image ? (
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-400 text-4xl">
+                        🛢️
+                      </div>
+                    )}
+                  </div>
+                </Link>
+                <div className="text-center">
                   <Link href={`/products/${product.id}`}>
-                    <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden mb-4 group-hover:opacity-90 transition-opacity">
-                      {product.image ? (
-                        <img
-                          src={product.image}
-                          alt={product.name}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-gray-400 text-4xl">
-                          🛢️
-                        </div>
-                      )}
-                    </div>
+                    <h3 className="font-semibold text-lg mb-2 hover:text-amber-900">
+                      {product.name}
+                    </h3>
                   </Link>
-                  <div className="text-center">
-                    <Link href={`/products/${product.id}`}>
-                      <h3 className="font-semibold text-lg mb-2 hover:text-amber-900">
-                        {product.name}
-                      </h3>
-                    </Link>
-                    <div className="flex items-center justify-center gap-2 mb-2">
-                      <span className="text-xl font-bold text-gray-900">
-                        ₹{product.salePrice}
-                      </span>
-                      {product.mrp > product.salePrice && (
-                        <>
-                          <span className="text-sm text-gray-500 line-through">
-                            ₹{product.mrp}
-                          </span>
-                          <span className="bg-black text-white text-xs px-2 py-1">
-                            Sale
-                          </span>
-                        </>
-                      )}
-                    </div>
+                  <div className="flex items-center justify-center gap-2 mb-2">
+                    <span className="text-xl font-bold text-gray-900">
+                      ₹{product.salePrice}
+                    </span>
+                    {product.mrp > product.salePrice && (
+                      <>
+                        <span className="text-sm text-gray-500 line-through">
+                          ₹{product.mrp}
+                        </span>
+                        <span className="bg-black text-white text-xs px-2 py-1">
+                          Sale
+                        </span>
+                      </>
+                    )}
+                  </div>
                     {product.rating && product.rating > 0 && (
                       <div className="flex items-center justify-center gap-1 mb-3">
                         <span className="text-yellow-400">⭐</span>
@@ -177,24 +190,16 @@ export default function CategoryPage() {
                         <span className="text-xs text-gray-500">({product.reviewCount || 0})</span>
                       </div>
                     )}
-                    <button
-                      onClick={() => addToCart(product.id)}
-                      className="w-full bg-black text-white py-2 px-4 rounded hover:bg-gray-800 transition-colors"
-                    >
-                      Add to cart
-                    </button>
-                  </div>
+                  <button
+                    onClick={() => addToCart(product.id)}
+                    className="w-full bg-black text-white py-2 px-4 rounded hover:bg-gray-800 transition-colors"
+                  >
+                    Add to cart
+                  </button>
                 </div>
-              ))}
-            </div>
-            <div className="text-center mt-12">
-              <Link href="/products">
-                <span className="text-amber-900 font-semibold hover:underline">
-                  View all products →
-                </span>
-              </Link>
-            </div>
-          </>
+              </div>
+            ))}
+          </div>
         )}
       </div>
     </div>
