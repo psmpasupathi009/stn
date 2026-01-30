@@ -19,25 +19,46 @@ interface Product {
 
 const heroSlides = [
   {
-    title: 'Authentic Oils, Pure from Within.',
-    description: 'Made with traditional wood-pressing — rich in flavor, clean in nature.',
-    buttonText: 'Shop Now',
-    buttonLink: '/products',
+    title: 'Authentic Wood Pressed Oils, Pure from Within.',
+    description: 'Made with traditional wood-pressing — rich in flavor, clean in nature. Cold-pressed oils that preserve the true goodness of nature.',
+    buttonText: 'Shop Wood Pressed Oils',
+    buttonLink: '/collections/wood-pressed-oils',
     icon: '🛢️',
   },
   {
-    title: 'Pure Ghee, Crafted with Care.',
-    description: 'Buffalo & Cow Ghee, slow-prepared the traditional way — rich, wholesome, and full of flavor.',
-    buttonText: 'Shop Ghee',
-    buttonLink: '/collections/wood-pressed-oils',
-    icon: '🥛',
+    title: 'Healthy Mixes & Malt for Daily Wellness.',
+    description: 'Nutritious malt mixes and health powders crafted the traditional way — from beetroot malt to ABC malt, nourishing your family every day.',
+    buttonText: 'Shop Healthy Mixes',
+    buttonLink: '/collections/healthy-mixes',
+    icon: '🌾',
   },
   {
-    title: 'Snacks Made From the Heart.',
-    description: 'Homemade bites crafted with love — from sesame laddus to millet cookies.',
-    buttonText: 'Shop Snacks',
+    title: 'Kovilpatti Special - Authentic Regional Flavors.',
+    description: 'Authentic regional specialties from Kovilpatti — unique flavors and traditional recipes that bring the taste of home to your kitchen.',
+    buttonText: 'Shop Kovilpatti Special',
     buttonLink: '/collections/kovilpatti-special',
     icon: '🍪',
+  },
+  {
+    title: 'Idly Podi Varieties - Traditional South Indian Spices.',
+    description: 'Traditional South Indian spice powders to enhance your breakfast experience — authentic flavors that make every meal special.',
+    buttonText: 'Shop Idly Podi',
+    buttonLink: '/collections/idly-podi',
+    icon: '🌶️',
+  },
+  {
+    title: 'Home Made Masala - Freshly Ground Spices.',
+    description: 'Freshly ground spices and masala blends made with traditional methods — bringing authentic flavors to your kitchen.',
+    buttonText: 'Shop Masala',
+    buttonLink: '/collections/home-made-masala',
+    icon: '🧂',
+  },
+  {
+    title: 'Essential Millets - Nutritious & Wholesome.',
+    description: 'Nutritious millets for a healthy and balanced diet — traditional grains that have been nourishing families for generations.',
+    buttonText: 'Shop Millets',
+    buttonLink: '/collections/essential-millets',
+    icon: '🌾',
   },
 ]
 
