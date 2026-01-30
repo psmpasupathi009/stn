@@ -74,7 +74,7 @@
 2. **Email**: Configure SMTP for OTP and password reset emails
 3. **Cloudinary**: Required for image uploads
 4. **Razorpay**: Required for payment processing
-5. **Admin Email**: Must be added to Admin table before login
+5. **Admin Email**: Must match `ADMIN_EMAIL` in `.env` file (e.g., `ADMIN_EMAIL=psmpasupathi009@gmail.com`)
 
 ## Troubleshooting
 

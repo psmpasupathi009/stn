@@ -1,50 +1,46 @@
-import { PrismaClient } from '@prisma/client'
-import bcrypt from 'bcryptjs'
-
-const prisma = new PrismaClient()
-
-async function hashPassword(password: string): Promise<string> {
-  return bcrypt.hash(password, 10)
-}
-
-const prisma = new PrismaClient()
+import { prisma } from '../lib/prisma'
+import { hashPassword } from '../lib/auth'
 
 async function main() {
-  const email = process.argv[2]
-  const password = process.argv[3]
-
-  if (!email || !password) {
+  const args = process.argv.slice(2)
+  
+  if (args.length < 2) {
     console.error('Usage: tsx scripts/create-admin.ts <email> <password>')
+    console.error('Note: The email must match ADMIN_EMAIL in your .env file')
     process.exit(1)
   }
+
+  const [email, password] = args
 
   try {
     const hashedPassword = await hashPassword(password)
 
-    // Create admin in Admin table
-    await prisma.admin.upsert({
+    // Create or update user with admin role
+    const user = await prisma.user.upsert({
       where: { email },
       update: {
         password: hashedPassword,
+        role: 'admin',
+        isVerified: true,
       },
       create: {
         email,
         password: hashedPassword,
+        role: 'admin',
+        isVerified: true,
       },
     })
 
-    console.log(`✓ Admin created/updated: ${email}`)
+    console.log(`✓ Admin user created/updated: ${email}`)
+    console.log(`  User ID: ${user.id}`)
+    console.log(`  Role: ${user.role}`)
+    console.log(`\n⚠️  Make sure ADMIN_EMAIL=${email} is set in your .env file`)
   } catch (error) {
     console.error('Error creating admin:', error)
     process.exit(1)
+  } finally {
+    await prisma.$disconnect()
   }
 }
 
 main()
-  .catch((e) => {
-    console.error(e)
-    process.exit(1)
-  })
-  .finally(async () => {
-    await prisma.$disconnect()
-  })

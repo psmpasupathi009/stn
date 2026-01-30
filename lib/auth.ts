@@ -46,9 +46,11 @@ export async function isAdminEmail(email: string): Promise<boolean> {
     return true
   }
   
-  // Also check Admin table for backward compatibility
-  const admin = await prisma.admin.findUnique({
+  // Also check if user exists with admin role
+  const user = await prisma.user.findUnique({
     where: { email },
+    select: { role: true },
   })
-  return !!admin
+  
+  return user?.role === 'admin'
 }
