@@ -6,10 +6,15 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams
     const category = searchParams.get('category')
     const search = searchParams.get('search')
+    const limit = searchParams.get('limit')
 
     const where: any = {}
     if (category) {
-      where.category = category
+      // Support both exact match and partial match for category
+      where.category = {
+        contains: category,
+        mode: 'insensitive',
+      }
     }
     if (search) {
       where.name = {
@@ -21,6 +26,7 @@ export async function GET(request: NextRequest) {
     const products = await prisma.product.findMany({
       where,
       orderBy: { createdAt: 'desc' },
+      take: limit ? parseInt(limit) : undefined,
     })
 
     return NextResponse.json(products)

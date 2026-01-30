@@ -26,7 +26,8 @@ export default function HomePage() {
 
   const fetchProducts = async () => {
     try {
-      const res = await fetch('/api/products?limit=8')
+      // Fetch oils category products
+      const res = await fetch('/api/products?category=VAGAI WOOD PERSSED OIL / COLD PRESSED OIL&limit=8')
       const data = await res.json()
       setFeaturedProducts(data.slice(0, 8))
     } catch (error) {
@@ -194,9 +195,9 @@ export default function HomePage() {
               Homemade bites crafted with love — from sesame laddus to millet cookies.
             </p>
           </div>
-          {!loading && featuredProducts.length > 4 && (
+          {!loading && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {featuredProducts.slice(4, 8).map((product) => (
+              {featuredProducts.slice(0, 4).map((product) => (
                 <div key={product.id} className="group">
                   <Link href={`/products/${product.id}`}>
                     <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden mb-4 group-hover:opacity-90 transition-opacity">

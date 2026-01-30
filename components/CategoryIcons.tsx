@@ -11,6 +11,15 @@ const categories = [
   { name: 'Shop All', icon: '📦', href: '/products', dashed: true },
 ]
 
+// Map to reference website categories
+export const categoryMapping = {
+  'Oils': 'VAGAI WOOD PERSSED OIL / COLD PRESSED OIL',
+  'Ghee': 'Premium Ghee',
+  'Snacks': 'KOVILPATTI SPECIAL',
+  'Skin & Hair': 'Wellness & Care',
+  'Malt': 'HEALTHY MIXES',
+}
+
 export default function CategoryIcons() {
   return (
     <div className="bg-white border-b py-6">
