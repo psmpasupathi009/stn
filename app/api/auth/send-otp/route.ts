@@ -44,15 +44,16 @@ export async function POST(request: NextRequest) {
 
     // Send OTP via email
     try {
-      await sendOTP(email, otp)
-      console.log(`✅ OTP sent successfully to ${email}`)
+      const emailResult = await sendOTP(email, otp)
+      if (emailResult.messageId && emailResult.messageId !== 'console-log-fallback') {
+        console.log(`✅ OTP sent successfully to ${email}`)
+      } else {
+        console.log(`⚠️  OTP saved in database but email failed - check console for OTP`)
+      }
     } catch (emailError: any) {
-      // Log the error but don't fail the request - OTP is saved in database
+      // This should rarely happen now since we return resolved promise
       console.error('❌ Email send failed, but OTP saved in database:', emailError.message)
       console.error('Full error:', emailError)
-      
-      // Still return success since OTP is saved - user can check console or email
-      // In production, you might want to return an error here
     }
 
     return NextResponse.json({ 
