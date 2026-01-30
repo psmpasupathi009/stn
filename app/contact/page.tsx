@@ -39,8 +39,8 @@ export default function ContactPage() {
               <div className="space-y-6">
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-2">Email</h3>
-                  <a href="mailto:info@aishwaryamoils.com" className="text-amber-900 hover:underline">
-                    info@aishwaryamoils.com
+                  <a href="mailto:info@stngoldenhealthyfoods.com" className="text-amber-900 hover:underline">
+                    info@stngoldenhealthyfoods.com
                   </a>
                 </div>
                 <div>

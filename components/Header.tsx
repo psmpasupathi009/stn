@@ -99,7 +99,7 @@ export default function Header() {
           {/* Logo */}
           <Link href="/" className="flex-1 text-center">
             <h1 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">
-              Aishwaryam Oils
+              STN Golden Healthy Foods
             </h1>
           </Link>
 
