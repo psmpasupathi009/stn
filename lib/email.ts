@@ -2,20 +2,20 @@ import nodemailer from 'nodemailer'
 
 // Only create transporter if credentials are provided
 const getTransporter = () => {
-  const smtpUser = process.env.SMTP_USER
-  const smtpPass = process.env.SMTP_PASS
+  const emailUser = process.env.EMAIL_USER || process.env.SMTP_USER
+  const emailPass = process.env.EMAIL_PASS || process.env.SMTP_PASS
   
-  if (!smtpUser || !smtpPass) {
+  if (!emailUser || !emailPass) {
     return null
   }
 
   return nodemailer.createTransport({
-    host: process.env.SMTP_HOST || 'smtp.gmail.com',
-    port: parseInt(process.env.SMTP_PORT || '587'),
-    secure: false,
+    host: process.env.EMAIL_HOST || process.env.SMTP_HOST || 'smtp.gmail.com',
+    port: parseInt(process.env.EMAIL_PORT || process.env.SMTP_PORT || '587'),
+    secure: process.env.EMAIL_SECURE === 'true' || false,
     auth: {
-      user: smtpUser,
-      pass: smtpPass,
+      user: emailUser,
+      pass: emailPass,
     },
   })
 }
@@ -32,13 +32,13 @@ export async function sendOTP(email: string, otp: string) {
     console.log(`Subject: OTP for Login Verification`)
     console.log(`OTP: ${otp}`)
     console.log('='.repeat(50))
-    console.log('⚠️  In production, configure SMTP_USER and SMTP_PASS in .env')
+    console.log('⚠️  In production, configure EMAIL_USER and EMAIL_PASS in .env')
     console.log('='.repeat(50))
     return Promise.resolve({ messageId: 'console-log' })
   }
 
   const mailOptions = {
-    from: process.env.SMTP_USER,
+    from: process.env.EMAIL_FROM || process.env.EMAIL_USER || process.env.SMTP_USER,
     to: email,
     subject: 'OTP for Login Verification - STN Golden Healthy Foods',
     html: `
@@ -89,13 +89,13 @@ export async function sendPasswordReset(email: string, resetToken: string) {
     console.log(`Subject: Password Reset Request`)
     console.log(`Reset URL: ${resetUrl}`)
     console.log('='.repeat(50))
-    console.log('⚠️  In production, configure SMTP_USER and SMTP_PASS in .env')
+    console.log('⚠️  In production, configure EMAIL_USER and EMAIL_PASS in .env')
     console.log('='.repeat(50))
     return Promise.resolve({ messageId: 'console-log' })
   }
 
   const mailOptions = {
-    from: process.env.SMTP_USER,
+    from: process.env.EMAIL_FROM || process.env.EMAIL_USER || process.env.SMTP_USER,
     to: email,
     subject: 'Password Reset Request - STN Golden Healthy Foods',
     html: `
