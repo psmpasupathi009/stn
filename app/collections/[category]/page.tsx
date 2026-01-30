@@ -13,6 +13,8 @@ interface Product {
   mrp: number
   image?: string
   itemCode: string
+  rating?: number
+  reviewCount?: number
 }
 
 const categoryMap: Record<string, string> = {
@@ -153,7 +155,7 @@ export default function CategoryPage() {
                         {product.name}
                       </h3>
                     </Link>
-                    <div className="flex items-center justify-center gap-2 mb-3">
+                    <div className="flex items-center justify-center gap-2 mb-2">
                       <span className="text-xl font-bold text-gray-900">
                         ₹{product.salePrice}
                       </span>
@@ -168,6 +170,13 @@ export default function CategoryPage() {
                         </>
                       )}
                     </div>
+                    {product.rating && product.rating > 0 && (
+                      <div className="flex items-center justify-center gap-1 mb-3">
+                        <span className="text-yellow-400">⭐</span>
+                        <span className="text-sm font-semibold">{product.rating.toFixed(1)}</span>
+                        <span className="text-xs text-gray-500">({product.reviewCount || 0})</span>
+                      </div>
+                    )}
                     <button
                       onClick={() => addToCart(product.id)}
                       className="w-full bg-black text-white py-2 px-4 rounded hover:bg-gray-800 transition-colors"

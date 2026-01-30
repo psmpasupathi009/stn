@@ -13,6 +13,8 @@ interface Product {
   mrp: number
   image?: string
   itemCode: string
+  rating?: number
+  reviewCount?: number
 }
 
 export default function HomePage() {

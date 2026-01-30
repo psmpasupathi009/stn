@@ -119,7 +119,7 @@ export default function Header() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
                 {user?.role === 'admin' && (
-                  <Link href="/admin/dashboard" className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full"></Link>
+                  <Link href="/admin/dashboard" className="absolute -top-1 -right-1 w-3 h-3 bg-amber-900 rounded-full border-2 border-white"></Link>
                 )}
               </Link>
             ) : (
@@ -173,11 +173,11 @@ export default function Header() {
                   <Link href="/profile" className="text-gray-700 hover:text-gray-900 text-sm font-medium">
                     Profile
                   </Link>
-                  {user?.role === 'admin' && (
-                    <Link href="/admin/dashboard" className="text-gray-700 hover:text-gray-900 text-sm font-medium">
-                      Admin Dashboard
-                    </Link>
-                  )}
+                {user?.role === 'admin' && (
+                  <Link href="/admin/dashboard" className="text-amber-900 hover:text-amber-800 text-sm font-medium font-semibold">
+                    Admin Dashboard
+                  </Link>
+                )}
                   <button
                     onClick={logout}
                     className="text-left text-gray-700 hover:text-gray-900 text-sm font-medium"

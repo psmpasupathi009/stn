@@ -56,19 +56,10 @@ export default function ProfilePage() {
             <CardContent className="space-y-4">
               {user.role === 'admin' && (
                 <Button
-                  className="w-full"
-                  onClick={() => setShowAdminDashboard(!showAdminDashboard)}
-                >
-                  {showAdminDashboard ? 'Hide' : 'Show'} Admin Dashboard
-                </Button>
-              )}
-              {user.role === 'admin' && showAdminDashboard && (
-                <Button
-                  variant="outline"
-                  className="w-full"
+                  className="w-full bg-amber-900 text-white hover:bg-amber-800"
                   onClick={() => router.push('/admin/dashboard')}
                 >
-                  Go to Admin Dashboard
+                  Admin Dashboard
                 </Button>
               )}
               <Button variant="outline" className="w-full" onClick={() => router.push('/orders')}>

@@ -20,6 +20,8 @@ interface Product {
   images?: string[]
   description?: string
   inStock: boolean
+  rating?: number
+  reviewCount?: number
 }
 
 export default function ProductDetailPage() {
@@ -127,7 +129,21 @@ export default function ProductDetailPage() {
               <div className="w-20 h-20 rounded-full bg-amber-900 text-white flex items-center justify-center text-2xl font-bold mb-4">
                 A
               </div>
-              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">{product.name}</h1>
+              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">{product.name}</h1>
+              {product.rating && product.rating > 0 && (
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="flex items-center">
+                    {[...Array(5)].map((_, i) => (
+                      <span key={i} className={i < Math.round(product.rating!) ? 'text-yellow-400' : 'text-gray-300'}>
+                        ⭐
+                      </span>
+                    ))}
+                  </div>
+                  <span className="text-sm text-gray-600">
+                    {product.rating.toFixed(1)} ({product.reviewCount || 0} reviews)
+                  </span>
+                </div>
+              )}
             </div>
 
             <div className="mb-6">
