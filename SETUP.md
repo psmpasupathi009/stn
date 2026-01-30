@@ -45,12 +45,15 @@
 
 ## Admin Access
 
-1. Go to `/login`
-2. Enter the admin email you created
-3. You'll receive an OTP via email
-4. Verify the OTP
+1. Make sure `ADMIN_EMAIL=psmpasupathi009@gmail.com` is set in your `.env` file
+2. Go to `/login` or `/signup`
+3. Enter the admin email (must match `ADMIN_EMAIL` in `.env`)
+4. Complete the OTP verification
 5. Set your password
-6. You'll be redirected to the admin dashboard
+6. You'll be automatically redirected to the admin dashboard
+7. You can also access the admin dashboard from the profile page
+
+**Note:** Admin detection is based on the `ADMIN_EMAIL` environment variable. When a user signs up or logs in with an email matching `ADMIN_EMAIL`, they are automatically assigned the `admin` role.
 
 ## Features Overview
 

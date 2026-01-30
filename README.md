@@ -91,22 +91,23 @@ npm run db:push
 npm run db:seed
 ```
 
-### 4. Create Admin User
+### 4. Configure Admin Access
 
-To create an admin user, you need to:
+To enable admin access:
 
-1. Add an admin email to the `Admin` table in MongoDB
-2. Or use Prisma Studio to add an admin:
+1. **Set Admin Email in `.env`:**
+   ```env
+   ADMIN_EMAIL=psmpasupathi009@gmail.com
+   ```
 
-```bash
-npx prisma studio
-```
+2. **Optional - Create Admin User with Password:**
+   ```bash
+   npm run admin:create psmpasupathi009@gmail.com yourpassword123
+   ```
 
-Then add an admin record with:
-- `email`: Your admin email
-- `password`: Hashed password (use bcrypt to hash)
+   This creates a user with `role: 'admin'` in the User table.
 
-Alternatively, you can create an admin via the database directly or create a script.
+**Note:** Admin detection is automatic based on `ADMIN_EMAIL`. When someone signs up or logs in with an email matching `ADMIN_EMAIL`, they are assigned the `admin` role.
 
 ### 5. Run Development Server
 
@@ -147,9 +148,13 @@ Visit [http://localhost:3000](http://localhost:3000)
 
 ## Admin Access
 
-1. Register/login with an admin email (must be in the Admin table)
-2. After OTP verification, set your password
-3. Access the admin dashboard from the profile page or directly at `/admin/dashboard`
+1. Set `ADMIN_EMAIL=psmpasupathi009@gmail.com` in your `.env` file
+2. Register/login with the admin email (must match `ADMIN_EMAIL`)
+3. Complete OTP verification and set password
+4. You'll be automatically redirected to the admin dashboard
+5. Access the admin dashboard from the profile page or directly at `/admin/dashboard`
+
+**Authentication:** All users (including admins) are stored in the `User` table with a `role` field (`'user'` or `'admin'`). Admin role is automatically assigned when the email matches `ADMIN_EMAIL`.
 
 ## Payment Integration
 
