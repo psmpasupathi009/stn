@@ -42,13 +42,17 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // Send OTP via email (or log to console if SMTP not configured)
+    // Send OTP via email
     try {
       await sendOTP(email, otp)
+      console.log(`✅ OTP sent successfully to ${email}`)
     } catch (emailError: any) {
-      // If email fails, still return success since OTP is saved in database
-      // User can check console logs in development
-      console.error('Email send failed, but OTP saved:', emailError)
+      // Log the error but don't fail the request - OTP is saved in database
+      console.error('❌ Email send failed, but OTP saved in database:', emailError.message)
+      console.error('Full error:', emailError)
+      
+      // Still return success since OTP is saved - user can check console or email
+      // In production, you might want to return an error here
     }
 
     return NextResponse.json({ 
