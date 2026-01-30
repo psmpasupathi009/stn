@@ -75,9 +75,6 @@ export default function Header() {
                 </div>
               </div>
             </div>
-            <Link href="/combos" className="text-gray-700 hover:text-gray-900 text-sm font-medium">
-              Combos
-            </Link>
             <Link href="/our-story" className="text-gray-700 hover:text-gray-900 text-sm font-medium">
               Our Story
             </Link>
@@ -158,9 +155,6 @@ export default function Header() {
             <nav className="flex flex-col space-y-3">
               <Link href="/products" className="text-gray-700 hover:text-gray-900 text-sm font-medium">
                 Shop All
-              </Link>
-              <Link href="/combos" className="text-gray-700 hover:text-gray-900 text-sm font-medium">
-                Combos
               </Link>
               <Link href="/our-story" className="text-gray-700 hover:text-gray-900 text-sm font-medium">
                 Our Story

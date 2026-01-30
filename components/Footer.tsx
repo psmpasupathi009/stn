@@ -14,9 +14,6 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/combos" className="hover:text-white">
-                  Combos
-                </Link>
               </li>
               <li>
                 <Link href="/our-story" className="hover:text-white">
