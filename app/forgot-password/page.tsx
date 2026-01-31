@@ -175,8 +175,17 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-6 sm:py-8 md:py-12 px-3 sm:px-4 lg:px-8">
-      <Card className="w-full max-w-md shadow-lg mx-auto">
+    <div className="flex min-h-svh w-full min-w-0 flex-col items-center justify-center overflow-x-hidden bg-gray-50 px-4 py-6 sm:px-6 sm:py-8 md:px-8 md:py-10 lg:px-10 lg:py-12">
+      <div className="flex w-full min-w-0 max-w-full flex-col gap-4 sm:max-w-sm md:max-w-md sm:gap-5 md:gap-6">
+        <Link
+          href="/"
+          className="flex min-w-0 max-w-full items-center justify-center gap-2 self-center font-semibold text-gray-900 transition-colors hover:text-amber-800 text-sm sm:text-base md:text-lg"
+        >
+          <img src="/STN LOGO.png" alt="STN" className="h-7 w-7 shrink-0 rounded-md sm:h-8 sm:w-8 md:h-9 md:w-9" />
+          <span className="truncate">STN Golden Healthy Foods</span>
+        </Link>
+        <div className="w-full min-w-0">
+        <Card className="rounded-xl">
         <CardHeader className="space-y-1 p-4 sm:p-6">
           <CardTitle className="text-xl sm:text-2xl font-bold text-center">
             {step === 'email' && 'Reset Password'}
@@ -312,6 +321,8 @@ export default function ForgotPasswordPage() {
           )}
         </CardContent>
       </Card>
+        </div>
+      </div>
     </div>
   )
 }

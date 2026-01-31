@@ -24,6 +24,11 @@ export const metadata: Metadata = {
   description: "Authentic traditional oils, spices, and healthy products from STN Golden Healthy Foods",
 };
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -39,7 +44,7 @@ export default function RootLayout({
           <AnnouncementBar />
           <Header />
           <CategoryIcons />
-          <main className="min-h-screen">
+          <main className="min-h-screen min-w-0 overflow-x-hidden">
             {children}
           </main>
           <Footer />
