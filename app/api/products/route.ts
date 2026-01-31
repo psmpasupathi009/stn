@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { getSessionFromRequest } from '@/lib/session'
 
 export async function GET(request: NextRequest) {
   try {
@@ -13,26 +14,27 @@ export async function GET(request: NextRequest) {
     })
 
     // Filter by category (case-insensitive)
-    if (category) {
+    if (category?.trim()) {
       const categoryLower = category.toLowerCase()
       products = products.filter((p) =>
-        p.category.toLowerCase().includes(categoryLower)
+        p.category?.toLowerCase().includes(categoryLower)
       )
     }
 
     // Filter by search term (case-insensitive)
-    if (search) {
+    if (search?.trim()) {
       const searchLower = search.toLowerCase()
       products = products.filter(
         (p) =>
-          p.name.toLowerCase().includes(searchLower) ||
-          p.itemCode.toLowerCase().includes(searchLower)
+          p.name?.toLowerCase().includes(searchLower) ||
+          p.itemCode?.toLowerCase().includes(searchLower)
       )
     }
 
     // Apply limit
     if (limit) {
-      products = products.slice(0, parseInt(limit))
+      const n = parseInt(limit, 10)
+      if (!Number.isNaN(n) && n > 0) products = products.slice(0, n)
     }
 
     return NextResponse.json(products)
@@ -47,6 +49,10 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const session = await getSessionFromRequest(request)
+    if (!session || session.role?.toUpperCase() !== 'ADMIN') {
+      return NextResponse.json({ error: 'Admin only' }, { status: 403 })
+    }
     const body = await request.json()
     const {
       name,

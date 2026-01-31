@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { useAuth } from '@/lib/context'
+import { toast } from 'sonner'
 
 interface Product {
   id: string
@@ -60,33 +61,44 @@ export default function ProductDetailPage() {
     }
 
     try {
-      const token = localStorage.getItem('token')
       const res = await fetch('/api/cart', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ productId: product?.id, quantity }),
       })
 
       if (res.ok) {
-        alert('Product added to cart!')
+        window.dispatchEvent(new CustomEvent('cart-updated'))
+        toast.success('Added to cart!')
       } else {
-        alert('Failed to add to cart')
+        const data = await res.json().catch(() => ({}))
+        toast.error(data.error || 'Failed to add to cart')
       }
     } catch (error) {
       console.error('Error adding to cart:', error)
-      alert('Failed to add to cart')
+      toast.error('Failed to add to cart')
     }
   }
 
   if (loading) {
-    return <div className="container mx-auto px-4 py-12 text-center">Loading...</div>
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="animate-pulse flex flex-col items-center gap-4">
+          <div className="w-48 h-48 rounded-2xl bg-neutral-200" />
+          <p className="text-neutral-600">Loading product...</p>
+        </div>
+      </div>
+    )
   }
 
   if (!product) {
-    return <div className="container mx-auto px-4 py-12 text-center">Product not found</div>
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4">
+        <p className="text-neutral-600">Product not found</p>
+        <Button onClick={() => router.push('/products')} variant="outline">Browse products</Button>
+      </div>
+    )
   }
 
   const discount = product.mrp > product.salePrice
@@ -94,12 +106,12 @@ export default function ProductDetailPage() {
     : 0
 
   return (
-    <div className="bg-white min-h-screen">
-      <div className="container mx-auto px-4 py-12">
+    <div className="min-h-screen bg-neutral-50">
+      <div className="container mx-auto px-4 py-8 md:py-12">
         <div className="grid md:grid-cols-2 gap-12">
           {/* Product Images */}
           <div>
-            <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden mb-4">
+            <div className="aspect-square bg-white border border-neutral-200 rounded-2xl overflow-hidden mb-4 shadow-sm">
               {product.image ? (
                 <img
                   src={product.image}
@@ -126,10 +138,7 @@ export default function ProductDetailPage() {
           {/* Product Info */}
           <div>
             <div className="mb-6">
-              <div className="w-20 h-20 rounded-full bg-amber-900 text-white flex items-center justify-center text-2xl font-bold mb-4">
-                A
-              </div>
-              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">{product.name}</h1>
+              <h1 className="text-2xl md:text-3xl font-bold text-neutral-900 mb-2">{product.name}</h1>
               {product.rating && product.rating > 0 && (
                 <div className="flex items-center gap-2 mb-4">
                   <div className="flex items-center">
@@ -189,16 +198,8 @@ export default function ProductDetailPage() {
               </div>
             </div>
 
-            {product.salePrice < 299 && (
-              <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded">
-                <p className="text-sm text-gray-700">
-                  Cash on Delivery is available only for orders above ₹299. Please add more items to proceed.
-                </p>
-              </div>
-            )}
-
             {/* Value Propositions */}
-            <div className="grid grid-cols-5 gap-4 mb-6">
+            <div className="grid grid-cols-4 gap-4 mb-6">
               <div className="text-center">
                 <div className="text-2xl mb-2">💎</div>
                 <p className="text-xs text-gray-600">PREMIUM QUALITY</p>
@@ -206,10 +207,6 @@ export default function ProductDetailPage() {
               <div className="text-center">
                 <div className="text-2xl mb-2">✓</div>
                 <p className="text-xs text-gray-600">SATISFACTION GUARANTEED</p>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl mb-2">💰</div>
-                <p className="text-xs text-gray-600">CASH ON DELIVERY</p>
               </div>
               <div className="text-center">
                 <div className="text-2xl mb-2">🚚</div>
@@ -225,7 +222,7 @@ export default function ProductDetailPage() {
               <button
                 onClick={addToCart}
                 disabled={!product.inStock}
-                className="flex-1 border-2 border-black text-black py-3 px-6 rounded hover:bg-black hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 border-2 border-amber-600 text-amber-700 py-3 px-6 rounded-xl font-semibold hover:bg-amber-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Add to cart
               </button>
@@ -234,7 +231,8 @@ export default function ProductDetailPage() {
                   addToCart()
                   router.push('/cart')
                 }}
-                className="flex-1 bg-black text-white py-3 px-6 rounded hover:bg-gray-800 transition-colors"
+                disabled={!product.inStock}
+                className="flex-1 bg-amber-600 text-white py-3 px-6 rounded-xl font-semibold hover:bg-amber-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Buy it now
               </button>

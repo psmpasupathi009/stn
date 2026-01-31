@@ -5,50 +5,71 @@ import React, { createContext, useContext, useState, useEffect } from 'react'
 interface User {
   id: string
   email: string
-  name?: string
+  name?: string | null
+  phoneNumber?: string | null
   role: string
+  isEmailVerified?: boolean
 }
 
 interface AuthContextType {
   user: User | null
-  token: string | null
-  login: (user: User, token: string) => void
-  logout: () => void
+  isLoading: boolean
+  setUser: (user: User | null) => void
+  signOut: () => Promise<void>
+  logout: () => Promise<void>
   isAuthenticated: boolean
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
-  const [token, setToken] = useState<string | null>(null)
+  const [user, setUserState] = useState<User | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
+  // On mount, fetch current user from session cookie
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const storedToken = localStorage.getItem('token')
-      const storedUser = localStorage.getItem('user')
-      if (storedToken && storedUser) {
-        setToken(storedToken)
-        setUser(JSON.parse(storedUser))
+    const fetchUser = async () => {
+      try {
+        const res = await fetch('/api/auth/me', {
+          cache: 'no-store',
+          credentials: 'include',
+        })
+        const data = await res.json()
+        if (data.user) {
+          setUserState(data.user)
+        }
+      } catch (error) {
+        console.error('Failed to fetch user:', error)
+      } finally {
+        setIsLoading(false)
       }
     }
+
+    fetchUser()
   }, [])
 
-  const login = (userData: User, userToken: string) => {
-    setUser(userData)
-    setToken(userToken)
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('token', userToken)
-      localStorage.setItem('user', JSON.stringify(userData))
-    }
+  const setUser = (userData: User | null) => {
+    setUserState(userData)
   }
 
-  const logout = () => {
-    setUser(null)
-    setToken(null)
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('token')
-      localStorage.removeItem('user')
+  const signOut = async () => {
+    try {
+      // Call signout API to clear cookie
+      await fetch('/api/auth/signout', {
+        method: 'POST',
+        credentials: 'include',
+      })
+    } catch (error) {
+      console.error('Failed to sign out:', error)
+    } finally {
+      // Clear user state and any local storage
+      setUserState(null)
+      if (typeof window !== 'undefined') {
+        // Clear any remaining localStorage items
+        localStorage.removeItem('token')
+        localStorage.removeItem('user')
+        localStorage.removeItem('cart')
+      }
     }
   }
 
@@ -56,10 +77,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     <AuthContext.Provider
       value={{
         user,
-        token,
-        login,
-        logout,
-        isAuthenticated: !!user && !!token,
+        isLoading,
+        setUser,
+        signOut,
+        logout: signOut,
+        isAuthenticated: !!user,
       }}
     >
       {children}

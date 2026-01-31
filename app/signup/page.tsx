@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useEffect, Suspense } from 'react'
+import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -10,83 +10,43 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useAuth } from '@/lib/context'
 import Link from 'next/link'
 
-type Step = 'email' | 'otp' | 'password' | 'details'
+type Step = 'email' | 'otp' | 'password'
 
 interface FormData {
   email: string
   name: string
-  phone: string
+  phoneNumber: string
   password: string
   confirmPassword: string
-}
-
-interface ApiResponse {
-  success?: boolean
-  error?: string
-  isAdmin?: boolean
-  user?: {
-    id: string
-    email: string
-    name?: string
-    role: string
-  }
-  token?: string
 }
 
 function SignupForm() {
   const searchParams = useSearchParams()
   const [step, setStep] = useState<Step>('email')
   const [formData, setFormData] = useState<FormData>({
-    email: '',
+    email: searchParams.get('email') || '',
     name: '',
-    phone: '',
+    phoneNumber: '',
     password: '',
     confirmPassword: '',
   })
   const [otp, setOtp] = useState('')
-  const [isAdmin, setIsAdmin] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const router = useRouter()
-  const { login } = useAuth()
+  const { setUser } = useAuth()
 
-  // Pre-fill email from query params (if redirected from login)
-  useEffect(() => {
-    const emailParam = searchParams.get('email')
-    if (emailParam && step === 'email') {
-      setFormData(prev => ({ ...prev, email: emailParam }))
-    }
-  }, [searchParams, step])
-
-  // Email validation
   const isValidEmail = (email: string): boolean => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
   }
 
-  // Phone validation (optional, basic)
-  const isValidPhone = (phone: string): boolean => {
-    if (!phone) return true // Phone is optional
-    return /^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,9}$/.test(phone)
-  }
-
-  // Reset form state
-  const resetForm = useCallback(() => {
-    setError('')
-    setSuccess('')
-    setOtp('')
-  }, [])
-
-  // Update form field
-  const updateField = useCallback((field: keyof FormData, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
-  }, [])
-
-  // Handle OTP send
-  const handleSendOTP = async (e: React.FormEvent) => {
+  // Step 1: Send signup request (email + name)
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    resetForm()
+    setError('')
+    setSuccess('')
 
     if (!formData.email.trim()) {
       setError('Email is required')
@@ -100,17 +60,27 @@ function SignupForm() {
       return
     }
 
+    if (!formData.name || formData.name.trim().length < 2) {
+      setError('Name is required and must be at least 2 characters')
+      setLoading(false)
+      return
+    }
+
     try {
-      const res = await fetch('/api/auth/send-otp', {
+      const res = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: formData.email.trim().toLowerCase() }),
+        credentials: 'include',
+        body: JSON.stringify({
+          email: formData.email.trim().toLowerCase(),
+          name: formData.name.trim(),
+          phoneNumber: formData.phoneNumber.trim() || undefined,
+        }),
       })
 
-      const data: ApiResponse = await res.json()
+      const data = await res.json()
 
       if (res.ok && data.success) {
-        setIsAdmin(data.isAdmin || false)
         setSuccess('OTP sent to your email! Please check your inbox.')
         setStep('otp')
       } else {
@@ -123,7 +93,7 @@ function SignupForm() {
     }
   }
 
-  // Handle OTP verification
+  // Step 2: Verify OTP
   const handleVerifyOTP = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
@@ -140,21 +110,21 @@ function SignupForm() {
       const res = await fetch('/api/auth/verify-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          email: formData.email.trim().toLowerCase(), 
-          otp 
+        credentials: 'include',
+        body: JSON.stringify({
+          email: formData.email.trim().toLowerCase(),
+          code: otp,
+          type: 'SIGNUP',
         }),
       })
 
-      const data: ApiResponse = await res.json()
+      const data = await res.json()
 
-      if (res.ok && data.success) {
-        setSuccess('OTP verified successfully!')
-        // If admin, go directly to password step (skip name/phone)
-        // If user, go to details step (name, phone, password)
-        setStep(isAdmin ? 'password' : 'details')
+      if (res.ok && data.verified) {
+        setSuccess('OTP verified! Please create your password.')
+        setStep('password')
       } else {
-        setError(data.error || 'Invalid OTP. Please try again.')
+        setError(data.error || 'Invalid or expired OTP')
       }
     } catch (err) {
       setError('Network error. Please check your connection and try again.')
@@ -163,25 +133,12 @@ function SignupForm() {
     }
   }
 
-  // Handle signup
-  const handleSignup = async (e: React.FormEvent) => {
+  // Step 3: Create account with password
+  const handleCreateAccount = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError('')
     setSuccess('')
-
-    // Validation
-    if (!isAdmin && (!formData.name || formData.name.trim().length < 2)) {
-      setError('Name must be at least 2 characters')
-      setLoading(false)
-      return
-    }
-
-    if (formData.phone && !isValidPhone(formData.phone)) {
-      setError('Please enter a valid phone number')
-      setLoading(false)
-      return
-    }
 
     if (!formData.password || formData.password.length < 6) {
       setError('Password must be at least 6 characters')
@@ -196,24 +153,27 @@ function SignupForm() {
     }
 
     try {
-      const res = await fetch('/api/auth/set-password', {
+      const res = await fetch('/api/auth/create-account', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          email: formData.email.trim().toLowerCase(), 
+        credentials: 'include',
+        body: JSON.stringify({
+          email: formData.email.trim().toLowerCase(),
           password: formData.password,
-          name: isAdmin ? undefined : formData.name.trim(),
-          phone: isAdmin ? undefined : formData.phone.trim() || undefined,
+          name: formData.name.trim(),
+          phoneNumber: formData.phoneNumber.trim() || undefined,
         }),
       })
 
-      const data: ApiResponse = await res.json()
+      const data = await res.json()
 
-      if (res.ok && data.token && data.user) {
-        login(data.user, data.token)
+      if (res.ok && data.success && data.user) {
+        // Cookie is set by server, just update user state
+        setUser(data.user)
         setSuccess('Account created successfully! Redirecting...')
+        
         setTimeout(() => {
-          if (data.user?.role === 'admin') {
+          if (data.user.role === 'ADMIN') {
             router.push('/admin/dashboard')
           } else {
             router.push('/')
@@ -229,17 +189,18 @@ function SignupForm() {
     }
   }
 
-  // Handle back navigation
   const handleBack = () => {
-    resetForm()
+    setError('')
+    setSuccess('')
     if (step === 'otp') {
       setStep('email')
-    } else if (step === 'password' || step === 'details') {
+      setOtp('')
+    } else if (step === 'password') {
       setStep('otp')
+      setFormData(prev => ({ ...prev, password: '', confirmPassword: '' }))
     }
   }
 
-  // Password match validation
   const passwordsMatch = formData.password === formData.confirmPassword
   const isPasswordValid = formData.password.length >= 6
 
@@ -251,10 +212,9 @@ function SignupForm() {
             Create Account
           </CardTitle>
           <CardDescription className="text-center">
-            {step === 'email' && 'Enter your email to get started'}
+            {step === 'email' && 'Enter your details to get started'}
             {step === 'otp' && 'Verify your email with OTP'}
-            {step === 'password' && isAdmin && 'Create your admin password'}
-            {step === 'details' && !isAdmin && 'Complete your profile'}
+            {step === 'password' && 'Create your password'}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -270,14 +230,14 @@ function SignupForm() {
           )}
 
           {step === 'email' && (
-            <form onSubmit={handleSendOTP} className="space-y-4">
+            <form onSubmit={handleSignup} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
+                <Label htmlFor="email">Email Address *</Label>
                 <Input
                   id="email"
                   type="email"
                   value={formData.email}
-                  onChange={(e) => updateField('email', e.target.value)}
+                  onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                   required
                   placeholder="your.email@example.com"
                   className="mt-1"
@@ -285,10 +245,38 @@ function SignupForm() {
                   autoFocus
                 />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="name">Full Name *</Label>
+                <Input
+                  id="name"
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                  required
+                  placeholder="Enter your full name"
+                  className="mt-1"
+                  autoComplete="name"
+                />
+                {formData.name && formData.name.trim().length < 2 && (
+                  <p className="text-xs text-red-500">Name must be at least 2 characters</p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="phoneNumber">Phone Number</Label>
+                <Input
+                  id="phoneNumber"
+                  type="tel"
+                  value={formData.phoneNumber}
+                  onChange={(e) => setFormData(prev => ({ ...prev, phoneNumber: e.target.value }))}
+                  placeholder="Enter your phone number (optional)"
+                  className="mt-1"
+                  autoComplete="tel"
+                />
+              </div>
               <Button 
                 type="submit" 
                 className="w-full" 
-                disabled={loading || !formData.email.trim()}
+                disabled={loading || !formData.email.trim() || formData.name.trim().length < 2}
               >
                 {loading ? 'Sending OTP...' : 'Continue'}
               </Button>
@@ -339,20 +327,15 @@ function SignupForm() {
             </form>
           )}
 
-          {step === 'password' && isAdmin && (
-            <form onSubmit={handleSignup} className="space-y-4">
-              <Alert className="border-amber-200 bg-amber-50 text-amber-800">
-                <AlertDescription>
-                  <strong>Admin Account:</strong> You're signing up as an administrator.
-                </AlertDescription>
-              </Alert>
+          {step === 'password' && (
+            <form onSubmit={handleCreateAccount} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="password">Password *</Label>
                 <Input
                   id="password"
                   type="password"
                   value={formData.password}
-                  onChange={(e) => updateField('password', e.target.value)}
+                  onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
                   required
                   placeholder="Enter password (min 6 characters)"
                   className="mt-1"
@@ -368,7 +351,7 @@ function SignupForm() {
                   id="confirmPassword"
                   type="password"
                   value={formData.confirmPassword}
-                  onChange={(e) => updateField('confirmPassword', e.target.value)}
+                  onChange={(e) => setFormData(prev => ({ ...prev, confirmPassword: e.target.value }))}
                   required
                   placeholder="Confirm your password"
                   className="mt-1"
@@ -381,87 +364,6 @@ function SignupForm() {
                 type="submit" 
                 className="w-full" 
                 disabled={loading || !passwordsMatch || !isPasswordValid}
-              >
-                {loading ? 'Creating Account...' : 'Create Admin Account'}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full"
-                onClick={handleBack}
-                disabled={loading}
-              >
-                Back
-              </Button>
-            </form>
-          )}
-
-          {step === 'details' && !isAdmin && (
-            <form onSubmit={handleSignup} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Full Name *</Label>
-                <Input
-                  id="name"
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => updateField('name', e.target.value)}
-                  required
-                  placeholder="Enter your full name"
-                  className="mt-1"
-                  autoFocus
-                />
-                {formData.name && formData.name.trim().length < 2 && (
-                  <p className="text-xs text-red-500">Name must be at least 2 characters</p>
-                )}
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="phone">Phone Number</Label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  value={formData.phone}
-                  onChange={(e) => updateField('phone', e.target.value)}
-                  placeholder="Enter your phone number (optional)"
-                  className="mt-1"
-                />
-                {formData.phone && !isValidPhone(formData.phone) && (
-                  <p className="text-xs text-red-500">Please enter a valid phone number</p>
-                )}
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Password *</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={formData.password}
-                  onChange={(e) => updateField('password', e.target.value)}
-                  required
-                  placeholder="Enter password (min 6 characters)"
-                  className="mt-1"
-                />
-                {formData.password && !isPasswordValid && (
-                  <p className="text-xs text-red-500">Password must be at least 6 characters</p>
-                )}
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm Password *</Label>
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  value={formData.confirmPassword}
-                  onChange={(e) => updateField('confirmPassword', e.target.value)}
-                  required
-                  placeholder="Confirm your password"
-                  className="mt-1"
-                />
-                {formData.confirmPassword && !passwordsMatch && (
-                  <p className="text-xs text-red-500">Passwords do not match</p>
-                )}
-              </div>
-              <Button 
-                type="submit" 
-                className="w-full" 
-                disabled={loading || !passwordsMatch || !isPasswordValid || formData.name.trim().length < 2}
               >
                 {loading ? 'Creating Account...' : 'Create Account'}
               </Button>

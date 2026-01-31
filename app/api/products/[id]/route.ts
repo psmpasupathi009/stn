@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { getSessionFromRequest } from '@/lib/session'
 
 export async function GET(
   request: NextRequest,
@@ -30,6 +31,10 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await getSessionFromRequest(request)
+    if (!session || session.role?.toUpperCase() !== 'ADMIN') {
+      return NextResponse.json({ error: 'Admin only' }, { status: 403 })
+    }
     const { id } = await params
     const body = await request.json()
     const {
@@ -80,6 +85,10 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await getSessionFromRequest(request)
+    if (!session || session.role?.toUpperCase() !== 'ADMIN') {
+      return NextResponse.json({ error: 'Admin only' }, { status: 403 })
+    }
     const { id } = await params
     await prisma.product.delete({
       where: { id },

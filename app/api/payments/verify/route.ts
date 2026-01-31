@@ -1,19 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifyPayment } from '@/lib/razorpay'
-import { verifyToken } from '@/lib/auth'
+import { getSessionFromRequest } from '@/lib/session'
 
 export async function POST(request: NextRequest) {
   try {
-    const token = request.headers.get('authorization')?.replace('Bearer ', '')
-
-    if (!token) {
+    const session = await getSessionFromRequest(request)
+    if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const payload = verifyToken(token)
-    if (!payload) {
-      return NextResponse.json({ error: 'Invalid token' }, { status: 401 })
     }
 
     const {
@@ -36,7 +30,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Update order status
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+      select: { userId: true },
+    })
+    if (!order || order.userId !== session.userId) {
+      return NextResponse.json({ error: 'Order not found' }, { status: 404 })
+    }
+
     await prisma.order.update({
       where: { id: orderId },
       data: {
@@ -47,7 +48,7 @@ export async function POST(request: NextRequest) {
     })
 
     return NextResponse.json({ success: true, message: 'Payment verified' })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Verify payment error:', error)
     return NextResponse.json(
       { error: 'Failed to verify payment' },

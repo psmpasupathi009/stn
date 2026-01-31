@@ -1,187 +1,312 @@
 'use client'
 
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/context'
-import { useState, useEffect } from 'react'
-import { Button } from '@/components/ui/button'
+import { useState, useEffect, useRef, useCallback } from 'react'
+import {
+  Search,
+  User,
+  ShoppingCart,
+  Menu,
+  ChevronDown,
+  LogOut,
+  LayoutDashboard,
+} from 'lucide-react'
+
+const ICON_SIZE = 22
+const NAV_LINKS = [
+  { href: '/our-story', label: 'Our Story' },
+  { href: '/contact', label: 'Contact' },
+  { href: '/track-order', label: 'Track Order' },
+]
+
+const SHOP_LINKS = [
+  { href: '/collections/wood-pressed-oils', label: 'Wood Pressed Oils' },
+  { href: '/collections/healthy-mixes', label: 'Healthy Mixes' },
+  { href: '/collections/idly-podi', label: 'Idly Podi Varieties' },
+  { href: '/collections/home-made-masala', label: 'Home Made Masala' },
+  { href: '/collections/kovilpatti-special', label: 'Kovilpatti Special' },
+  { href: '/collections/flour-kali-mixes', label: 'Flour & Kali Mixes' },
+  { href: '/collections/natural-sweeteners', label: 'Natural Sweeteners' },
+  { href: '/collections/essential-millets', label: 'Essential Millets' },
+  { href: '/collections/explorer-pack', label: 'Explorer Pack' },
+]
 
 export default function Header() {
+  const router = useRouter()
   const { user, logout, isAuthenticated } = useAuth()
   const [cartCount, setCartCount] = useState(0)
   const [showMobileMenu, setShowMobileMenu] = useState(false)
+  const [showShopDropdown, setShowShopDropdown] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchOpen, setSearchOpen] = useState(false)
+  const searchInputRef = useRef<HTMLInputElement>(null)
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    const q = searchQuery.trim()
+    if (q) router.push(`/products?search=${encodeURIComponent(q)}`)
+    else router.push('/products')
+    setSearchOpen(false)
+    setSearchQuery('')
+  }
+
+  const openSearch = () => {
+    setSearchOpen(true)
+    setTimeout(() => searchInputRef.current?.focus(), 50)
+  }
+
+  const refreshCartCount = useCallback(() => {
+    if (!isAuthenticated) return
+    fetch('/api/cart', { credentials: 'include' })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.items) {
+          const total = data.items.reduce((s: number, i: { quantity?: number }) => s + (i.quantity || 1), 0)
+          setCartCount(total)
+        } else if (data?.error) setCartCount(0)
+      })
+      .catch(() => setCartCount(0))
+  }, [isAuthenticated])
 
   useEffect(() => {
     if (isAuthenticated) {
-      fetch('/api/cart', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
-      })
-        .then(res => res.json())
-        .then(data => {
-          if (data.items) {
-            setCartCount(data.items.length)
-          }
-        })
-        .catch(() => {})
+      refreshCartCount()
+    } else {
+      setCartCount(0)
     }
-  }, [isAuthenticated])
+  }, [isAuthenticated, refreshCartCount])
+
+  useEffect(() => {
+    const handler = () => refreshCartCount()
+    window.addEventListener('cart-updated', handler)
+    return () => window.removeEventListener('cart-updated', handler)
+  }, [refreshCartCount])
+
+  const iconButtonClass =
+    'p-2.5 rounded-full text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 transition-colors focus:outline-none focus:ring-2 focus:ring-neutral-300 focus:ring-offset-1'
 
   return (
-    <header className="bg-white border-b sticky top-0 z-50">
+    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-neutral-200">
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-20">
-          {/* Left Navigation */}
-          <nav className="hidden lg:flex items-center space-x-6">
-            <div className="relative group">
-              <Link href="/products" className="text-gray-700 hover:text-gray-900 text-sm font-medium flex items-center">
+        <div className="flex items-center justify-between h-16 md:h-17">
+          {/* Left: Desktop nav */}
+          <nav className="hidden lg:flex items-center gap-1">
+            <div
+              className="relative"
+              onMouseEnter={() => setShowShopDropdown(true)}
+              onMouseLeave={() => setShowShopDropdown(false)}
+            >
+              <button
+                type="button"
+                className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-neutral-700 hover:text-neutral-900 rounded-md hover:bg-neutral-50 transition-colors"
+              >
                 Shop All
-                <svg className="inline-block w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </Link>
-              <div className="absolute top-full left-0 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
-                <div className="py-2">
-                  <Link href="/collections/wood-pressed-oils" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                    Wood Pressed Oils
-                  </Link>
-                  <Link href="/collections/healthy-mixes" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                    Healthy Mixes
-                  </Link>
-                  <Link href="/collections/idly-podi" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                    Idly Podi Varieties
-                  </Link>
-                  <Link href="/collections/home-made-masala" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                    Home Made Masala
-                  </Link>
-                  <Link href="/collections/kovilpatti-special" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                    Kovilpatti Special
-                  </Link>
-                  <Link href="/collections/flour-kali-mixes" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                    Flour & Kali Mixes
-                  </Link>
-                  <Link href="/collections/natural-sweeteners" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                    Natural Sweeteners
-                  </Link>
-                  <Link href="/collections/essential-millets" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                    Essential Millets
-                  </Link>
-                  <Link href="/collections/explorer-pack" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                    Explorer Pack
-                  </Link>
-                  <Link href="/products" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 border-t border-gray-200 mt-2 pt-2">
+                <ChevronDown
+                  className={`w-4 h-4 transition-transform ${showShopDropdown ? 'rotate-180' : ''}`}
+                />
+              </button>
+              {showShopDropdown && (
+                <div className="absolute top-full left-0 mt-1 w-56 bg-white border border-neutral-200 rounded-xl shadow-lg py-2 z-50">
+                  {SHOP_LINKS.map((link) => (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      className="block px-4 py-2.5 text-sm text-neutral-700 hover:bg-neutral-50 hover:text-neutral-900"
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
+                  <Link
+                    href="/products"
+                    className="block px-4 py-2.5 text-sm font-medium text-neutral-900 border-t border-neutral-100 mt-1 pt-2"
+                  >
                     Shop All Products
                   </Link>
                 </div>
-              </div>
+              )}
             </div>
-            <Link href="/our-story" className="text-gray-700 hover:text-gray-900 text-sm font-medium">
-              Our Story
-            </Link>
-            <Link href="/contact" className="text-gray-700 hover:text-gray-900 text-sm font-medium">
-              Contact
-            </Link>
-            <Link href="/track-order" className="text-gray-700 hover:text-gray-900 text-sm font-medium">
-              Track Order
-            </Link>
+            {NAV_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="px-3 py-2 text-sm font-medium text-neutral-700 hover:text-neutral-900 rounded-md hover:bg-neutral-50 transition-colors"
+              >
+                {link.label}
+              </Link>
+            ))}
           </nav>
 
-          {/* Mobile Menu Button */}
+          {/* Mobile menu button */}
           <button
-            className="lg:hidden p-2"
+            type="button"
+            className="lg:hidden p-2.5 rounded-full text-neutral-600 hover:bg-neutral-100"
             onClick={() => setShowMobileMenu(!showMobileMenu)}
+            aria-label="Menu"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
+            <Menu size={24} strokeWidth={2} />
           </button>
 
           {/* Logo */}
-          <Link href="/" className="flex-1 flex items-center justify-center">
-            <img 
-              src="/STN LOGO.png" 
-              alt="STN Golden Healthy Foods" 
-              className="h-16 md:h-20 w-auto object-contain"
+          <Link
+            href="/"
+            className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center lg:relative lg:left-0 lg:translate-x-0"
+          >
+            <img
+              src="/STN LOGO.png"
+              alt="STN Golden Healthy Foods"
+              className="h-12 md:h-14 w-auto object-contain"
             />
           </Link>
 
-          {/* Right Icons */}
-          <div className="flex items-center space-x-4">
-            {/* Search */}
-            <Link href="/search" className="p-2 hover:bg-gray-100 rounded-full">
-              <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </Link>
-
-            {/* Account/Login */}
-            {isAuthenticated ? (
-              <Link href="/profile" className="p-2 hover:bg-gray-100 rounded-full relative">
-                <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-                {user?.role === 'admin' && (
-                  <Link href="/admin/dashboard" className="absolute -top-1 -right-1 w-3 h-3 bg-amber-900 rounded-full border-2 border-white"></Link>
-                )}
-              </Link>
+          {/* Right: Search (inline in navbar), Profile, Cart */}
+          <div className="flex items-center gap-0.5 flex-1 min-w-0 lg:flex-initial lg:min-w-0 justify-end lg:max-w-[320px]">
+            {/* Desktop: always-visible search input in navbar */}
+            <form
+              onSubmit={handleSearch}
+              className="hidden lg:flex flex-1 min-w-0 max-w-[200px] items-center gap-1.5 rounded-full bg-neutral-100 border border-transparent focus-within:bg-white focus-within:border-neutral-300 focus-within:ring-2 focus-within:ring-neutral-200 pl-3 pr-2 py-1.5 transition-all"
+            >
+              <Search size={18} className="text-neutral-400 shrink-0" strokeWidth={2} />
+              <input
+                type="search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search products..."
+                className="flex-1 min-w-0 bg-transparent text-sm text-neutral-800 placeholder:text-neutral-400 outline-none"
+                aria-label="Search products"
+              />
+            </form>
+            {/* Mobile: search icon opens inline search */}
+            {!searchOpen ? (
+              <button
+                type="button"
+                onClick={openSearch}
+                className={`lg:hidden ${iconButtonClass}`}
+                aria-label="Search"
+              >
+                <Search size={ICON_SIZE} strokeWidth={2} />
+              </button>
             ) : (
-              <div className="flex items-center gap-2">
-                <Link href="/login" className="text-sm text-gray-700 hover:text-gray-900 px-3 py-1">
-                  Log in
-                </Link>
-                <Link href="/signup">
-                  <Button size="sm" className="bg-black text-white hover:bg-gray-800">
-                    Sign up
-                  </Button>
-                </Link>
-              </div>
+              <form
+                onSubmit={handleSearch}
+                className="lg:hidden flex flex-1 min-w-0 items-center gap-1 rounded-full bg-neutral-100 border border-neutral-200 pl-3 pr-2 py-1.5"
+              >
+                <Search size={18} className="text-neutral-400 shrink-0" strokeWidth={2} />
+                <input
+                  ref={searchInputRef}
+                  type="search"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onBlur={() => setSearchOpen(false)}
+                  placeholder="Search..."
+                  className="flex-1 min-w-0 bg-transparent text-sm text-neutral-800 placeholder:text-neutral-400 outline-none"
+                  aria-label="Search products"
+                />
+                <button type="submit" className="p-1.5 rounded-full hover:bg-neutral-200 text-neutral-600" aria-label="Submit search">
+                  <Search size={18} strokeWidth={2} />
+                </button>
+              </form>
             )}
 
-            {/* Cart */}
-            <Link href="/cart" className="p-2 hover:bg-gray-100 rounded-full relative">
-              <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-              </svg>
+            {isAuthenticated ? (
+              <div className="relative flex items-center">
+                <Link
+                  href="/profile"
+                  className={iconButtonClass}
+                  aria-label="Profile"
+                >
+                  <User size={ICON_SIZE} strokeWidth={2} />
+                  {user?.role?.toUpperCase() === 'ADMIN' && (
+                    <span
+                      className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-amber-600 rounded-full border-2 border-white"
+                      title="Admin"
+                    />
+                  )}
+                </Link>
+                {user?.role?.toUpperCase() === 'ADMIN' && (
+                  <Link
+                    href="/admin/dashboard"
+                    className="hidden sm:flex ml-0.5 p-2 rounded-full text-amber-700 hover:bg-amber-50"
+                    aria-label="Admin dashboard"
+                  >
+                    <LayoutDashboard size={ICON_SIZE} strokeWidth={2} />
+                  </Link>
+                )}
+              </div>
+            ) : (
+              <Link
+                href="/login"
+                className={iconButtonClass}
+                aria-label="Log in"
+              >
+                <User size={ICON_SIZE} strokeWidth={2} />
+              </Link>
+            )}
+
+            <Link
+              href="/cart"
+              className={`${iconButtonClass} relative`}
+              aria-label={`Cart${cartCount > 0 ? `, ${cartCount} items` : ''}`}
+            >
+              <ShoppingCart size={ICON_SIZE} strokeWidth={2} />
               {cartCount > 0 && (
-                <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                  {cartCount}
+                <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center bg-red-500 text-white text-xs font-semibold rounded-full">
+                  {cartCount > 99 ? '99+' : cartCount}
                 </span>
               )}
             </Link>
           </div>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Mobile menu */}
         {showMobileMenu && (
-          <div className="lg:hidden border-t py-4">
-            <nav className="flex flex-col space-y-3">
-              <Link href="/products" className="text-gray-700 hover:text-gray-900 text-sm font-medium">
+          <div className="lg:hidden border-t border-neutral-200 py-4">
+            <nav className="flex flex-col gap-0.5">
+              <Link
+                href="/products"
+                className="px-3 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-50 rounded-lg"
+                onClick={() => setShowMobileMenu(false)}
+              >
                 Shop All
               </Link>
-              <Link href="/our-story" className="text-gray-700 hover:text-gray-900 text-sm font-medium">
-                Our Story
-              </Link>
-              <Link href="/contact" className="text-gray-700 hover:text-gray-900 text-sm font-medium">
-                Contact
-              </Link>
-              <Link href="/track-order" className="text-gray-700 hover:text-gray-900 text-sm font-medium">
-                Track Order
-              </Link>
+              {NAV_LINKS.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="px-3 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-50 rounded-lg"
+                  onClick={() => setShowMobileMenu(false)}
+                >
+                  {link.label}
+                </Link>
+              ))}
               {isAuthenticated && (
                 <>
-                  <Link href="/profile" className="text-gray-700 hover:text-gray-900 text-sm font-medium">
-                    Profile
-                  </Link>
-                {user?.role === 'admin' && (
-                  <Link href="/admin/dashboard" className="text-amber-900 hover:text-amber-800 text-sm font-semibold">
-                    Admin Dashboard
-                  </Link>
-                )}
-                  <button
-                    onClick={logout}
-                    className="text-left text-gray-700 hover:text-gray-900 text-sm font-medium"
+                  <Link
+                    href="/profile"
+                    className="px-3 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-50 rounded-lg flex items-center gap-2"
+                    onClick={() => setShowMobileMenu(false)}
                   >
-                    Logout
+                    <User size={18} /> Profile
+                  </Link>
+                  {user?.role?.toUpperCase() === 'ADMIN' && (
+                    <Link
+                      href="/admin/dashboard"
+                      className="px-3 py-2.5 text-sm font-medium text-amber-700 hover:bg-amber-50 rounded-lg flex items-center gap-2"
+                      onClick={() => setShowMobileMenu(false)}
+                    >
+                      <LayoutDashboard size={18} /> Admin Dashboard
+                    </Link>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      logout()
+                      setShowMobileMenu(false)
+                    }}
+                    className="px-3 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-50 rounded-lg flex items-center gap-2 text-left w-full"
+                  >
+                    <LogOut size={18} /> Logout
                   </button>
                 </>
               )}

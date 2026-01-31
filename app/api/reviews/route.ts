@@ -1,18 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { verifyToken } from '@/lib/auth'
+import { getSessionFromRequest } from '@/lib/session'
 
 export async function POST(request: NextRequest) {
   try {
-    const token = request.headers.get('authorization')?.replace('Bearer ', '')
-
-    if (!token) {
+    const session = await getSessionFromRequest(request)
+    if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const payload = verifyToken(token)
-    if (!payload) {
-      return NextResponse.json({ error: 'Invalid token' }, { status: 401 })
     }
 
     const { productId, rating, comment } = await request.json()
@@ -28,7 +22,7 @@ export async function POST(request: NextRequest) {
     const existingReview = await prisma.review.findFirst({
       where: {
         productId,
-        userId: payload.userId,
+        userId: session.userId,
       },
     })
 
@@ -46,7 +40,7 @@ export async function POST(request: NextRequest) {
       await prisma.review.create({
         data: {
           productId,
-          userId: payload.userId,
+          userId: session.userId,
           rating,
           comment: comment || null,
         },

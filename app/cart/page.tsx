@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/lib/context'
 import Script from 'next/script'
+import { toast } from 'sonner'
 
 interface CartItem {
   id: string
@@ -24,7 +25,7 @@ interface Cart {
 }
 
 export default function CartPage() {
-  const { isAuthenticated, token } = useAuth()
+  const { isAuthenticated } = useAuth()
   const router = useRouter()
   const [cart, setCart] = useState<Cart | null>(null)
   const [loading, setLoading] = useState(true)
@@ -40,12 +41,7 @@ export default function CartPage() {
 
   const fetchCart = async () => {
     try {
-      const token = localStorage.getItem('token')
-      const res = await fetch('/api/cart', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      })
+      const res = await fetch('/api/cart', { credentials: 'include' })
       if (res.ok) {
         const data = await res.json()
         setCart(data)
@@ -59,37 +55,35 @@ export default function CartPage() {
 
   const updateQuantity = async (itemId: string, newQuantity: number) => {
     try {
-      const token = localStorage.getItem('token')
       const res = await fetch(`/api/cart/${itemId}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ quantity: newQuantity }),
       })
       if (res.ok) {
+        window.dispatchEvent(new CustomEvent('cart-updated'))
         fetchCart()
       }
     } catch (error) {
       console.error('Error updating cart:', error)
+      toast.error('Failed to update cart')
     }
   }
 
   const removeItem = async (itemId: string) => {
     try {
-      const token = localStorage.getItem('token')
       const res = await fetch(`/api/cart/${itemId}`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+        credentials: 'include',
       })
       if (res.ok) {
+        window.dispatchEvent(new CustomEvent('cart-updated'))
         fetchCart()
       }
     } catch (error) {
       console.error('Error removing item:', error)
+      toast.error('Failed to remove item')
     }
   }
 
@@ -103,13 +97,10 @@ export default function CartPage() {
 
     setProcessing(true)
     try {
-      const token = localStorage.getItem('token')
       const res = await fetch('/api/orders', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           items: cart.items.map(item => ({
             productId: item.product.id,
@@ -135,10 +126,8 @@ export default function CartPage() {
             // Verify payment
             const verifyRes = await fetch('/api/payments/verify', {
               method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`,
-              },
+              credentials: 'include',
+              headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 razorpay_order_id: response.razorpay_order_id,
                 razorpay_payment_id: response.razorpay_payment_id,
@@ -148,10 +137,11 @@ export default function CartPage() {
             })
 
             if (verifyRes.ok) {
-              alert('Payment successful!')
+              window.dispatchEvent(new CustomEvent('cart-updated'))
+              toast.success('Payment successful!')
               router.push('/orders')
             } else {
-              alert('Payment verification failed')
+              toast.error('Payment verification failed')
             }
           },
           prefill: {
@@ -166,31 +156,40 @@ export default function CartPage() {
         const razorpay = new (window as any).Razorpay(options)
         razorpay.open()
       } else {
-        alert('Failed to create order')
+        toast.error(data?.error || 'Failed to create order')
       }
     } catch (error) {
       console.error('Error during checkout:', error)
-      alert('Failed to process checkout')
+      toast.error('Error processing checkout')
     } finally {
       setProcessing(false)
     }
   }
 
   if (loading) {
-    return <div className="container mx-auto px-4 py-12 text-center">Loading...</div>
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="animate-pulse flex flex-col items-center gap-4">
+          <div className="w-12 h-12 rounded-full bg-amber-200" />
+          <p className="text-neutral-600">Loading your cart...</p>
+        </div>
+      </div>
+    )
   }
 
   if (!cart || cart.items.length === 0) {
     return (
-      <div className="bg-white min-h-screen">
-        <div className="container mx-auto px-4 py-12">
-          <h1 className="text-3xl md:text-4xl font-bold mb-8 text-gray-900">Shopping Cart</h1>
-          <div className="text-center py-12">
-            <p className="text-gray-600 mb-4">Your cart is empty</p>
-            <Button onClick={() => router.push('/')} className="bg-black text-white hover:bg-gray-800">
-              Continue Shopping
-            </Button>
-          </div>
+      <div className="min-h-[60vh] flex items-center justify-center px-4">
+        <div className="text-center max-w-md">
+          <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-neutral-100 flex items-center justify-center text-4xl">🛒</div>
+          <h2 className="text-2xl font-bold text-neutral-900 mb-2">Your cart is empty</h2>
+          <p className="text-neutral-600 mb-6">Add some products to get started!</p>
+          <Button
+            onClick={() => router.push('/products')}
+            className="bg-amber-600 hover:bg-amber-700 text-white px-8 py-6 text-base rounded-xl"
+          >
+            Continue Shopping
+          </Button>
         </div>
       </div>
     )
@@ -199,93 +198,83 @@ export default function CartPage() {
   return (
     <>
       <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
-      <div className="bg-white min-h-screen">
-        <div className="container mx-auto px-4 py-12">
-          <h1 className="text-3xl md:text-4xl font-bold mb-8 text-gray-900">Shopping Cart</h1>
-        <div className="grid md:grid-cols-3 gap-8">
-          <div className="md:col-span-2 space-y-4">
-            {cart.items.map((item) => (
-              <div key={item.id} className="bg-white border border-gray-200 rounded-lg p-6">
-                  <div className="flex gap-4">
-                    <div className="w-24 h-24 bg-gray-200 rounded overflow-hidden flex-shrink-0">
+      <div className="min-h-screen bg-neutral-50">
+        <div className="container mx-auto px-4 py-8 md:py-12">
+          <h1 className="text-2xl md:text-3xl font-bold text-neutral-900 mb-8">Shopping Cart</h1>
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="md:col-span-2 space-y-4">
+              {cart.items.map((item) => (
+                <div key={item.id} className="bg-white border border-neutral-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow">
+                  <div className="flex gap-5">
+                    <div className="w-24 h-24 bg-neutral-100 rounded-lg overflow-hidden shrink-0">
                       {item.product.image ? (
-                        <img
-                          src={item.product.image}
-                          alt={item.product.name}
-                          className="w-full h-full object-cover"
-                        />
+                        <img src={item.product.image} alt={item.product.name} className="w-full h-full object-cover" />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
-                          No Image
-                        </div>
+                        <div className="w-full h-full flex items-center justify-center text-neutral-400 text-2xl">🛢️</div>
                       )}
                     </div>
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-lg mb-2">{item.product.name}</h3>
-                      <p className="text-green-600 font-semibold mb-4">
-                        ₹{item.product.salePrice} each
-                      </p>
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-neutral-900 mb-1 truncate">{item.product.name}</h3>
+                      <p className="text-amber-600 font-semibold mb-3">₹{item.product.salePrice} each</p>
+                      <div className="flex flex-wrap items-center gap-3">
+                        <div className="flex items-center border border-neutral-200 rounded-lg overflow-hidden">
+                          <button
+                            type="button"
                             onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                            className="px-3 py-1.5 hover:bg-neutral-100 text-neutral-600 font-medium"
                           >
-                            -
-                          </Button>
-                          <span className="w-8 text-center">{item.quantity}</span>
-                          <Button
-                            variant="outline"
-                            size="sm"
+                            −
+                          </button>
+                          <span className="w-10 text-center text-sm font-medium">{item.quantity}</span>
+                          <button
+                            type="button"
                             onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                            className="px-3 py-1.5 hover:bg-neutral-100 text-neutral-600 font-medium"
                           >
                             +
-                          </Button>
+                          </button>
                         </div>
-                        <Button
-                          variant="destructive"
-                          size="sm"
+                        <button
+                          type="button"
                           onClick={() => removeItem(item.id)}
+                          className="text-sm text-red-600 hover:text-red-700 hover:underline"
                         >
                           Remove
-                        </Button>
+                        </button>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className="font-semibold text-lg">
-                        ₹{(item.product.salePrice * item.quantity).toFixed(2)}
-                      </p>
+                    <div className="text-right shrink-0">
+                      <p className="font-bold text-neutral-900 text-lg">₹{(item.product.salePrice * item.quantity).toFixed(2)}</p>
                     </div>
                   </div>
                 </div>
-            ))}
-          </div>
-          <div>
-            <div className="bg-white border border-gray-200 rounded-lg p-6 sticky top-24">
-              <h2 className="text-xl font-bold mb-4">Order Summary</h2>
-              <div className="space-y-2 mb-4">
-                <div className="flex justify-between">
-                  <span>Subtotal</span>
-                  <span>₹{calculateTotal().toFixed(2)}</span>
+              ))}
+            </div>
+            <div>
+              <div className="bg-white border border-neutral-200 rounded-xl p-6 sticky top-24 shadow-sm">
+                <h2 className="text-lg font-bold text-neutral-900 mb-4">Order Summary</h2>
+                <div className="space-y-3 mb-4">
+                  <div className="flex justify-between text-neutral-600">
+                    <span>Subtotal</span>
+                    <span>₹{calculateTotal().toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between font-bold text-lg pt-4 border-t border-neutral-200">
+                    <span>Total</span>
+                    <span className="text-amber-600">₹{calculateTotal().toFixed(2)}</span>
+                  </div>
                 </div>
-                <div className="flex justify-between font-bold text-lg pt-4 border-t">
-                  <span>Total</span>
-                  <span>₹{calculateTotal().toFixed(2)}</span>
-                </div>
+                <Button
+                  className="w-full bg-amber-600 hover:bg-amber-700 text-white py-6 rounded-xl font-semibold"
+                  onClick={handleCheckout}
+                  disabled={processing}
+                >
+                  {processing ? 'Processing...' : 'Proceed to Checkout'}
+                </Button>
               </div>
-              <Button
-                className="w-full"
-                onClick={handleCheckout}
-                disabled={processing}
-              >
-                {processing ? 'Processing...' : 'Proceed to Checkout'}
-              </Button>
             </div>
           </div>
         </div>
       </div>
-    </div>
     </>
   )
 }

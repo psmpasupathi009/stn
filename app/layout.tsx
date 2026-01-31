@@ -7,6 +7,7 @@ import Footer from "@/components/Footer";
 import AnnouncementBar from "@/components/AnnouncementBar";
 import CategoryIcons from "@/components/CategoryIcons";
 import WhatsAppButton from "@/components/WhatsAppButton";
+import { Toaster } from "sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,11 +35,12 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AuthProvider>
+          <Toaster position="top-center" richColors closeButton />
           <AnnouncementBar />
           <Header />
           <CategoryIcons />
           <main className="min-h-screen">
-        {children}
+            {children}
           </main>
           <Footer />
           <WhatsAppButton />

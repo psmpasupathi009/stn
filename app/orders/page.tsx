@@ -41,11 +41,8 @@ export default function OrdersPage() {
 
   const fetchOrders = async () => {
     try {
-      const token = localStorage.getItem('token')
       const res = await fetch('/api/orders', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+        credentials: 'include',
       })
       if (res.ok) {
         const data = await res.json()
@@ -102,7 +99,7 @@ export default function OrdersPage() {
                 <div className="space-y-4">
                   {order.items.map((item) => (
                     <div key={item.id} className="flex gap-4">
-                      <div className="w-16 h-16 bg-gray-200 rounded overflow-hidden flex-shrink-0">
+                      <div className="w-16 h-16 bg-gray-200 rounded overflow-hidden shrink-0">
                         {item.product.image ? (
                           <img
                             src={item.product.image}

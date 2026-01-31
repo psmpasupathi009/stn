@@ -11,26 +11,36 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(auto()) @map("_id") @db.ObjectId
-  email         String    @unique
-  name          String?
-  password      String?
-  role          String    @default("user") // "user" or "admin"
-  phone         String?
-  address       String?
-  city          String?
-  state         String?
-  pincode       String?
-  isVerified    Boolean   @default(false)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  otp           String?
-  otpExpires    DateTime?
-  resetToken    String?
-  resetExpires  DateTime?
-  cart          Cart?
-  orders        Order[]
-  reviews       Review[]
+  id              String    @id @default(auto()) @map("_id") @db.ObjectId
+  email           String    @unique
+  name            String?
+  password        String?   // Hashed password
+  phoneNumber     String?
+  role            String    @default("USER") // "USER" or "ADMIN"
+  isEmailVerified Boolean   @default(false)
+  address         String?
+  city            String?
+  state           String?
+  pincode         String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  otps            Otp[]
+  cart            Cart?
+  orders          Order[]
+  reviews         Review[]
+}
+
+model Otp {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  email     String
+  code      String   // 6-digit code
+  type      String   // "SIGNUP" or "FORGOT_PASSWORD"
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
+  user      User?     @relation(fields: [email], references: [email], onDelete: Cascade)
+
+  @@index([email, type])
+  @@map("otps")
 }
 
 model Product {

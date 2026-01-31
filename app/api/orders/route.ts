@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { verifyToken } from '@/lib/auth'
+import { getSessionFromRequest } from '@/lib/session'
 import { createRazorpayOrder } from '@/lib/razorpay'
 
 export async function GET(request: NextRequest) {
@@ -40,20 +40,14 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(order)
     }
 
-    // Otherwise, return user's orders (requires auth)
-    const token = request.headers.get('authorization')?.replace('Bearer ', '')
-
-    if (!token) {
+    // Otherwise, return user's orders (requires auth via session cookie)
+    const session = await getSessionFromRequest(request)
+    if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const payload = verifyToken(token)
-    if (!payload) {
-      return NextResponse.json({ error: 'Invalid token' }, { status: 401 })
-    }
-
     const orders = await prisma.order.findMany({
-      where: { userId: payload.userId },
+      where: { userId: session.userId },
       include: {
         items: {
           include: {
@@ -76,15 +70,9 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const token = request.headers.get('authorization')?.replace('Bearer ', '')
-
-    if (!token) {
+    const session = await getSessionFromRequest(request)
+    if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const payload = verifyToken(token)
-    if (!payload) {
-      return NextResponse.json({ error: 'Invalid token' }, { status: 401 })
     }
 
     const { items, shippingAddress } = await request.json()
@@ -117,7 +105,7 @@ export async function POST(request: NextRequest) {
     // Create order in database
     const order = await prisma.order.create({
       data: {
-        userId: payload.userId,
+        userId: session.userId,
         totalAmount,
         shippingAddress: shippingAddress || '',
         razorpayOrderId: razorpayOrder.id,
@@ -140,7 +128,7 @@ export async function POST(request: NextRequest) {
 
     // Clear cart
     const cart = await prisma.cart.findUnique({
-      where: { userId: payload.userId },
+      where: { userId: session.userId },
     })
 
     if (cart) {

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createOTP } from '@/lib/otp'
+import { sendOTP, normalizeEmail, isValidEmail, wasEmailSent } from '@/lib/email'
 import { prisma } from '@/lib/prisma'
-import { generateResetToken } from '@/lib/auth'
-import { sendPasswordReset } from '@/lib/email'
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,40 +11,33 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Email is required' }, { status: 400 })
     }
 
+    // Normalize and validate email
+    const normalizedEmail = normalizeEmail(email)
+    if (!isValidEmail(normalizedEmail)) {
+      return NextResponse.json({ error: 'Invalid email format' }, { status: 400 })
+    }
+
+    // Check if user exists (admin or regular user)
     const user = await prisma.user.findUnique({
-      where: { email },
+      where: { email: normalizedEmail },
     })
 
-    if (!user) {
-      // Don't reveal if user exists
-      return NextResponse.json({
-        success: true,
-        message: 'If the email exists, a password reset link has been sent',
-      })
+    // Don't reveal if user exists (security best practice)
+    // But only send OTP if user actually exists
+    if (user) {
+      // Create OTP for password reset
+      const otpRecord = await createOTP(normalizedEmail, 'FORGOT_PASSWORD', 10)
+
+      const emailResult = await sendOTP(normalizedEmail, otpRecord.code)
+      if (!wasEmailSent(emailResult)) {
+        console.warn(`Password reset OTP (email not sent) - use OTP: ${otpRecord.code}`)
+      }
     }
 
-    const resetToken = generateResetToken()
-    const resetExpires = new Date(Date.now() + 60 * 60 * 1000) // 1 hour
-
-    await prisma.user.update({
-      where: { email },
-      data: {
-        resetToken,
-        resetExpires,
-      },
-    })
-
-    try {
-      await sendPasswordReset(email, resetToken)
-    } catch (emailError: any) {
-      // If email fails, still return success since reset token is saved
-      // User can check console logs in development
-      console.error('Email send failed, but reset token saved:', emailError)
-    }
-
+    // Always return success (don't reveal if email exists)
     return NextResponse.json({
       success: true,
-      message: 'If the email exists, a password reset link has been sent',
+      message: 'If the email exists, an OTP has been sent to your email',
     })
   } catch (error: any) {
     console.error('Forgot password error:', error)

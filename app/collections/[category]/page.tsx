@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/lib/context'
 import { categoryMapping } from '@/components/CategoryIcons'
+import { toast } from 'sonner'
 
 interface Product {
   id: string
@@ -94,24 +95,23 @@ export default function CategoryPage() {
     }
 
     try {
-      const token = localStorage.getItem('token')
       const res = await fetch('/api/cart', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ productId, quantity: 1 }),
       })
 
       if (res.ok) {
-        alert('Product added to cart!')
+        window.dispatchEvent(new CustomEvent('cart-updated'))
+        toast.success('Added to cart!')
       } else {
-        alert('Failed to add product to cart')
+        const data = await res.json().catch(() => ({}))
+        toast.error(data.error || 'Failed to add to cart')
       }
     } catch (error) {
       console.error('Error adding to cart:', error)
-      alert('Failed to add product to cart')
+      toast.error('Failed to add to cart')
     }
   }
 

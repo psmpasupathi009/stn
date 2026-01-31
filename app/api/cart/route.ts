@@ -1,22 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { verifyToken } from '@/lib/auth'
+import { getSessionFromRequest } from '@/lib/session'
 
 export async function GET(request: NextRequest) {
   try {
-    const token = request.headers.get('authorization')?.replace('Bearer ', '')
+    const session = await getSessionFromRequest(request)
 
-    if (!token) {
+    if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const payload = verifyToken(token)
-    if (!payload) {
-      return NextResponse.json({ error: 'Invalid token' }, { status: 401 })
-    }
-
     let cart = await prisma.cart.findUnique({
-      where: { userId: payload.userId },
+      where: { userId: session.userId },
       include: {
         items: {
           include: {
@@ -29,7 +24,7 @@ export async function GET(request: NextRequest) {
     if (!cart) {
       cart = await prisma.cart.create({
         data: {
-          userId: payload.userId,
+          userId: session.userId,
         },
         include: {
           items: {
@@ -53,15 +48,10 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const token = request.headers.get('authorization')?.replace('Bearer ', '')
+    const session = await getSessionFromRequest(request)
 
-    if (!token) {
+    if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const payload = verifyToken(token)
-    if (!payload) {
-      return NextResponse.json({ error: 'Invalid token' }, { status: 401 })
     }
 
     const { productId, quantity } = await request.json()
@@ -74,13 +64,13 @@ export async function POST(request: NextRequest) {
     }
 
     let cart = await prisma.cart.findUnique({
-      where: { userId: payload.userId },
+      where: { userId: session.userId },
     })
 
     if (!cart) {
       cart = await prisma.cart.create({
         data: {
-          userId: payload.userId,
+          userId: session.userId,
         },
       })
     }

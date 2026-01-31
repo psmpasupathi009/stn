@@ -1,229 +1,156 @@
 import nodemailer from 'nodemailer'
+import type { Transporter } from 'nodemailer'
 
-// Get transporter with proper fallback to SMTP_* variables
-const getTransporter = () => {
-  // Priority: EMAIL_* first, then SMTP_* as fallback
-  const emailUser = process.env.EMAIL_USER || process.env.SMTP_USER
-  let emailPass = process.env.EMAIL_PASS || process.env.SMTP_PASS
-  const emailHost = process.env.EMAIL_HOST || process.env.SMTP_HOST || 'smtp.gmail.com'
-  const emailPort = process.env.EMAIL_PORT || process.env.SMTP_PORT || '587'
-  const emailSecure = process.env.EMAIL_SECURE || process.env.SMTP_SECURE || 'false'
-  
-  if (!emailUser || !emailPass) {
-    console.log('⚠️  Email credentials not found. Using EMAIL_USER/EMAIL_PASS or SMTP_USER/SMTP_PASS')
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+export function isValidEmail(email: string): boolean {
+  return emailRegex.test(email)
+}
+
+export function normalizeEmail(email: string): string {
+  return email.trim().toLowerCase()
+}
+
+let cachedTransporter: Transporter | null = null
+let gmailHintLogged = false
+
+function getTransporter(): Transporter | null {
+  if (cachedTransporter) return cachedTransporter
+
+  const user = process.env.EMAIL_USER || process.env.SMTP_USER
+  let pass = process.env.EMAIL_PASS || process.env.SMTP_PASS
+  const host = process.env.EMAIL_HOST || process.env.SMTP_HOST || 'smtp.gmail.com'
+  const port = process.env.EMAIL_PORT || process.env.SMTP_PORT || '587'
+  const secure = process.env.EMAIL_SECURE || process.env.SMTP_SECURE || 'false'
+
+  if (!user || !pass) {
+    if (!gmailHintLogged) {
+      console.warn('⚠️ Email not configured: set EMAIL_USER and EMAIL_PASS (or SMTP_*) in .env. OTP will log to console.')
+      gmailHintLogged = true
+    }
     return null
   }
 
-  // Remove spaces from App Password if present (Gmail App Passwords sometimes have spaces)
-  if (emailPass) {
-    emailPass = emailPass.replace(/\s+/g, '')
-  }
+  pass = pass.replace(/\s+/g, '')
 
-  console.log(`📧 Configuring email transporter: ${emailUser} @ ${emailHost}:${emailPort}`)
-
-  return nodemailer.createTransport({
-    host: emailHost,
-    port: parseInt(emailPort),
-    secure: emailSecure === 'true',
-    auth: {
-      user: emailUser,
-      pass: emailPass,
-    },
-    // Add connection timeout and better error handling
+  cachedTransporter = nodemailer.createTransport({
+    host,
+    port: parseInt(port, 10),
+    secure: secure === 'true',
+    auth: { user, pass },
     connectionTimeout: 10000,
     greetingTimeout: 10000,
     socketTimeout: 10000,
   })
+
+  return cachedTransporter
 }
 
-export async function sendOTP(email: string, otp: string) {
+function logAuthHint(): void {
+  if (gmailHintLogged) return
+  gmailHintLogged = true
+  console.warn('⚠️ Gmail: use an App Password (not account password). See https://support.google.com/mail/answer/185833 → set EMAIL_PASS in .env')
+}
+
+function logFallbackOTP(to: string, otp: string, label: string): void {
+  console.warn(`📧 ${label} | To: ${to} | OTP: ${otp}`)
+}
+
+export interface SendResult {
+  messageId: string
+  accepted?: string[]
+}
+
+const FALLBACK_IDS = ['console', 'console-fallback'] as const
+export function wasEmailSent(result: SendResult): boolean {
+  return Boolean(result.messageId && !FALLBACK_IDS.includes(result.messageId as (typeof FALLBACK_IDS)[number]))
+}
+
+const FROM = () =>
+  process.env.EMAIL_FROM || process.env.EMAIL_USER || process.env.SMTP_USER || 'noreply@stn.com'
+
+export async function sendOTP(email: string, otp: string): Promise<SendResult> {
+  const to = normalizeEmail(email)
+  if (!isValidEmail(to)) throw new Error('Invalid email format')
+
   const transporter = getTransporter()
-  
-  // If no email credentials, log OTP to console (development mode)
   if (!transporter) {
-    console.log('='.repeat(50))
-    console.log('📧 OTP EMAIL (Email not configured)')
-    console.log('='.repeat(50))
-    console.log(`To: ${email}`)
-    console.log(`Subject: OTP for Login Verification`)
-    console.log(`OTP: ${otp}`)
-    console.log('='.repeat(50))
-    console.log('⚠️  Configure EMAIL_USER and EMAIL_PASS (or SMTP_USER and SMTP_PASS) in .env')
-    console.log('='.repeat(50))
-    return Promise.resolve({ messageId: 'console-log' })
+    logFallbackOTP(to, otp, 'OTP (email not configured)')
+    return { messageId: 'console' }
   }
 
-  const fromEmail = process.env.EMAIL_FROM || process.env.EMAIL_USER || process.env.SMTP_USER || 'noreply@stn.com'
-
   const mailOptions = {
-    from: `"STN Golden Healthy Foods" <${fromEmail}>`,
-    to: email,
+    from: `"STN Golden Healthy Foods" <${FROM()}>`,
+    to,
     subject: 'OTP for Login Verification - STN Golden Healthy Foods',
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
         <div style="background-color: #f9fafb; border-radius: 8px; padding: 30px; text-align: center;">
           <h2 style="color: #1f2937; margin-bottom: 20px;">OTP Verification</h2>
-          <p style="color: #4b5563; font-size: 16px; margin-bottom: 20px;">
-            Your OTP for login to STN Golden Healthy Foods is:
-          </p>
+          <p style="color: #4b5563; font-size: 16px; margin-bottom: 20px;">Your OTP for login to STN Golden Healthy Foods is:</p>
           <div style="background-color: #ffffff; border: 2px solid #10b981; border-radius: 8px; padding: 20px; margin: 20px 0;">
             <strong style="font-size: 32px; color: #10b981; letter-spacing: 4px;">${otp}</strong>
           </div>
-          <p style="color: #6b7280; font-size: 14px; margin-top: 20px;">
-            This OTP will expire in 10 minutes.
-          </p>
-          <p style="color: #9ca3af; font-size: 12px; margin-top: 30px;">
-            If you didn't request this OTP, please ignore this email.
-          </p>
+          <p style="color: #6b7280; font-size: 14px; margin-top: 20px;">This OTP will expire in 10 minutes.</p>
+          <p style="color: #9ca3af; font-size: 12px; margin-top: 30px;">If you didn't request this, please ignore this email.</p>
         </div>
       </div>
     `,
-    // Plain text version as fallback
     text: `Your OTP for login to STN Golden Healthy Foods is: ${otp}. This OTP will expire in 10 minutes.`,
   }
 
   try {
-    console.log(`📧 Sending OTP email to: ${email}`)
     const result = await transporter.sendMail(mailOptions)
-    console.log(`✅ OTP email sent successfully to: ${email}`, result.messageId)
-    return result
-  } catch (error: any) {
-    console.error('❌ Email send error:', error)
-    console.error('Error details:', {
-      code: error.code,
-      command: error.command,
-      response: error.response,
-      responseCode: error.responseCode,
-    })
-    
-    // Check if it's an authentication error
-    if (error.code === 'EAUTH' || error.responseCode === 535) {
-      console.error('')
-      console.error('⚠️  GMAIL AUTHENTICATION ERROR')
-      console.error('='.repeat(50))
-      console.error('Gmail requires an App Password, not your regular password.')
-      console.error('')
-      console.error('To fix this:')
-      console.error('1. Go to: https://myaccount.google.com/security')
-      console.error('2. Enable 2-Step Verification (if not already enabled)')
-      console.error('3. Go to: https://myaccount.google.com/apppasswords')
-      console.error('4. Generate an App Password for "Mail"')
-      console.error('5. Use that App Password in your .env file as EMAIL_PASS or SMTP_PASS')
-      console.error('')
-      console.error('Example .env:')
-      console.error('EMAIL_USER=your-email@gmail.com')
-      console.error('EMAIL_PASS=xxxx xxxx xxxx xxxx  (16-character App Password)')
-      console.error('='.repeat(50))
-      console.error('')
-    }
-    
-    // Log OTP to console as fallback
-    console.log('='.repeat(50))
-    console.log('📧 OTP FALLBACK (Email failed - check console above)')
-    console.log(`To: ${email}`)
-    console.log(`OTP: ${otp}`)
-    console.log('='.repeat(50))
-    
-    // Return a resolved promise instead of throwing - OTP is saved in DB
-    // This allows the API to return success even if email fails
-    return Promise.resolve({ messageId: 'console-log-fallback', accepted: [email] })
+    return { messageId: result.messageId ?? 'sent', accepted: result.accepted }
+  } catch (err) {
+    const error = err as { code?: string; responseCode?: number; message?: string }
+    const isAuth = error.code === 'EAUTH' || error.responseCode === 535
+    if (isAuth) logAuthHint()
+    logFallbackOTP(to, otp, 'OTP (send failed)')
+    return { messageId: 'console-fallback', accepted: [to] }
   }
 }
 
-export async function sendPasswordReset(email: string, resetToken: string) {
+export async function sendPasswordReset(email: string, resetToken: string): Promise<SendResult> {
+  const to = normalizeEmail(email)
+  if (!isValidEmail(to)) throw new Error('Invalid email format')
+
   const transporter = getTransporter()
-  const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`
-  
-  // If no email credentials, log reset link to console (development mode)
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+  const resetUrl = `${baseUrl}/reset-password?token=${resetToken}`
+
   if (!transporter) {
-    console.log('='.repeat(50))
-    console.log('📧 PASSWORD RESET EMAIL (Email not configured)')
-    console.log('='.repeat(50))
-    console.log(`To: ${email}`)
-    console.log(`Subject: Password Reset Request`)
-    console.log(`Reset URL: ${resetUrl}`)
-    console.log('='.repeat(50))
-    console.log('⚠️  Configure EMAIL_USER and EMAIL_PASS (or SMTP_USER and SMTP_PASS) in .env')
-    console.log('='.repeat(50))
-    return Promise.resolve({ messageId: 'console-log' })
+    console.warn(`📧 Password reset (email not configured) | To: ${to} | URL: ${resetUrl}`)
+    return { messageId: 'console' }
   }
 
-  const fromEmail = process.env.EMAIL_FROM || process.env.EMAIL_USER || process.env.SMTP_USER || 'noreply@stn.com'
-
   const mailOptions = {
-    from: `"STN Golden Healthy Foods" <${fromEmail}>`,
-    to: email,
+    from: `"STN Golden Healthy Foods" <${FROM()}>`,
+    to,
     subject: 'Password Reset Request - STN Golden Healthy Foods',
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
         <div style="background-color: #f9fafb; border-radius: 8px; padding: 30px;">
           <h2 style="color: #1f2937; margin-bottom: 20px;">Password Reset Request</h2>
-          <p style="color: #4b5563; font-size: 16px; margin-bottom: 20px;">
-            Click the button below to reset your password for STN Golden Healthy Foods:
-          </p>
+          <p style="color: #4b5563; font-size: 16px; margin-bottom: 20px;">Click the button below to reset your password:</p>
           <div style="text-align: center; margin: 30px 0;">
-            <a href="${resetUrl}" style="display: inline-block; padding: 14px 28px; background-color: #10b981; color: white; text-decoration: none; border-radius: 6px; font-weight: 600;">
-              Reset Password
-            </a>
+            <a href="${resetUrl}" style="display: inline-block; padding: 14px 28px; background-color: #10b981; color: white; text-decoration: none; border-radius: 6px; font-weight: 600;">Reset Password</a>
           </div>
-          <p style="color: #6b7280; font-size: 14px; margin-top: 20px;">
-            Or copy and paste this URL in your browser:
-          </p>
-          <p style="color: #9ca3af; font-size: 12px; word-break: break-all; background-color: #ffffff; padding: 10px; border-radius: 4px; margin: 10px 0;">
-            ${resetUrl}
-          </p>
-          <p style="color: #9ca3af; font-size: 12px; margin-top: 30px;">
-            This link will expire in 1 hour. If you didn't request this, please ignore this email.
-          </p>
+          <p style="color: #6b7280; font-size: 14px;">Or copy: ${resetUrl}</p>
+          <p style="color: #9ca3af; font-size: 12px; margin-top: 30px;">Link expires in 1 hour. If you didn't request this, ignore this email.</p>
         </div>
       </div>
     `,
-    text: `Click this link to reset your password: ${resetUrl}. This link will expire in 1 hour.`,
+    text: `Reset your password: ${resetUrl}. Link expires in 1 hour.`,
   }
 
   try {
-    console.log(`📧 Sending password reset email to: ${email}`)
     const result = await transporter.sendMail(mailOptions)
-    console.log(`✅ Password reset email sent successfully to: ${email}`, result.messageId)
-    return result
-  } catch (error: any) {
-    console.error('❌ Email send error:', error)
-    console.error('Error details:', {
-      code: error.code,
-      command: error.command,
-      response: error.response,
-      responseCode: error.responseCode,
-    })
-    
-    // Check if it's an authentication error
-    if (error.code === 'EAUTH' || error.responseCode === 535) {
-      console.error('')
-      console.error('⚠️  GMAIL AUTHENTICATION ERROR')
-      console.error('='.repeat(50))
-      console.error('Gmail requires an App Password, not your regular password.')
-      console.error('')
-      console.error('To fix this:')
-      console.error('1. Go to: https://myaccount.google.com/security')
-      console.error('2. Enable 2-Step Verification (if not already enabled)')
-      console.error('3. Go to: https://myaccount.google.com/apppasswords')
-      console.error('4. Generate an App Password for "Mail"')
-      console.error('5. Use that App Password in your .env file as EMAIL_PASS or SMTP_PASS')
-      console.error('')
-      console.error('Example .env:')
-      console.error('EMAIL_USER=your-email@gmail.com')
-      console.error('EMAIL_PASS=xxxx xxxx xxxx xxxx  (16-character App Password)')
-      console.error('='.repeat(50))
-      console.error('')
-    }
-    
-    // Log reset link to console as fallback
-    console.log('='.repeat(50))
-    console.log('📧 PASSWORD RESET FALLBACK (Email failed - check console above)')
-    console.log(`To: ${email}`)
-    console.log(`Reset URL: ${resetUrl}`)
-    console.log('='.repeat(50))
-    
-    // Return a resolved promise instead of throwing - allows graceful handling
-    return Promise.resolve({ messageId: 'console-log-fallback', accepted: [email] })
+    return { messageId: result.messageId ?? 'sent', accepted: result.accepted }
+  } catch (err) {
+    const error = err as { code?: string; responseCode?: number }
+    if (error.code === 'EAUTH' || error.responseCode === 535) logAuthHint()
+    console.warn(`📧 Password reset (send failed) | To: ${to} | URL: ${resetUrl}`)
+    return { messageId: 'console-fallback', accepted: [to] }
   }
 }

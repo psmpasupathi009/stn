@@ -63,6 +63,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('')
+  const [newCategoryName, setNewCategoryName] = useState('')
 
   useEffect(() => {
     // Strict admin check - redirect if not admin
@@ -70,7 +71,7 @@ export default function AdminDashboard() {
       router.push('/login')
       return
     }
-    if (user?.role !== 'admin') {
+    if (user?.role?.toUpperCase() !== 'ADMIN') {
       router.push('/')
       return
     }
@@ -84,7 +85,7 @@ export default function AdminDashboard() {
       const url = selectedCategory
         ? `/api/products?category=${encodeURIComponent(selectedCategory)}`
         : '/api/products'
-      const res = await fetch(url)
+      const res = await fetch(url, { credentials: 'include' })
       if (res.ok) {
         const data = await res.json()
         let filtered = data
@@ -105,10 +106,10 @@ export default function AdminDashboard() {
 
   const fetchCategories = async () => {
     try {
-      const res = await fetch('/api/categories')
+      const res = await fetch('/api/categories', { credentials: 'include' })
       if (res.ok) {
         const data = await res.json()
-        setCategories(data.map((c: any) => c.category))
+        setCategories(data.map((c: { category: string }) => c.category))
       }
     } catch (error) {
       console.error('Error fetching categories:', error)
@@ -116,7 +117,7 @@ export default function AdminDashboard() {
   }
 
   useEffect(() => {
-    if (isAuthenticated && user?.role === 'admin') {
+    if (isAuthenticated && user?.role?.toUpperCase() === 'ADMIN') {
       fetchProducts()
     }
   }, [selectedCategory, searchQuery])
@@ -144,6 +145,7 @@ export default function AdminDashboard() {
       const res = await fetch('/api/upload', {
         method: 'POST',
         body: formData,
+        credentials: 'include',
       })
 
       if (res.ok) {
@@ -161,12 +163,16 @@ export default function AdminDashboard() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    const categoryValue = formData.category === '__other__' ? newCategoryName.trim() : formData.category
+    if (!categoryValue) {
+      alert('Please select or enter a category.')
+      return
+    }
     setUploading(true)
 
     try {
       const imageUrl = await handleImageUpload()
 
-      const token = localStorage.getItem('token')
       const url = editingProduct
         ? `/api/products/${editingProduct.id}`
         : '/api/products'
@@ -174,12 +180,11 @@ export default function AdminDashboard() {
 
       const res = await fetch(url, {
         method,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
+          category: categoryValue,
           image: imageUrl || editingProduct?.image || null,
           mrp: parseFloat(formData.mrp),
           salePrice: parseFloat(formData.salePrice),
@@ -190,6 +195,7 @@ export default function AdminDashboard() {
       if (res.ok) {
         setShowForm(false)
         setEditingProduct(null)
+        setNewCategoryName('')
         setFormData({
           name: '',
           category: '',
@@ -205,6 +211,7 @@ export default function AdminDashboard() {
         setImageFile(null)
         setImagePreview(null)
         fetchProducts()
+        fetchCategories()
         alert(editingProduct ? 'Product updated successfully!' : 'Product created successfully!')
       } else {
         const errorData = await res.json()
@@ -241,12 +248,9 @@ export default function AdminDashboard() {
     if (!confirm('Are you sure you want to delete this product? This action cannot be undone.')) return
 
     try {
-      const token = localStorage.getItem('token')
       const res = await fetch(`/api/products/${id}`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+        credentials: 'include',
       })
 
       if (res.ok) {
@@ -264,6 +268,7 @@ export default function AdminDashboard() {
   const resetForm = () => {
     setShowForm(false)
     setEditingProduct(null)
+    setNewCategoryName('')
     setFormData({
       name: '',
       category: '',
@@ -281,7 +286,7 @@ export default function AdminDashboard() {
   }
 
   // Show loading or redirect if not admin
-  if (!isAuthenticated || user?.role !== 'admin') {
+  if (!isAuthenticated || user?.role?.toUpperCase() !== 'ADMIN') {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -360,15 +365,25 @@ export default function AdminDashboard() {
                       className="w-full rounded-md border border-gray-300 px-3 py-2"
                       value={formData.category}
                       onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                      required
+                      required={formData.category !== '__other__' || !newCategoryName.trim()}
                     >
                       <option value="">Select Category</option>
-                      {CATEGORIES.map((cat) => (
+                      {[...new Set([...CATEGORIES, ...categories])].filter(Boolean).sort().map((cat) => (
                         <option key={cat} value={cat}>
                           {cat}
                         </option>
                       ))}
+                      <option value="__other__">+ Add new category</option>
                     </select>
+                    {formData.category === '__other__' && (
+                      <Input
+                        className="mt-2"
+                        placeholder="Type new category name"
+                        value={newCategoryName}
+                        onChange={(e) => setNewCategoryName(e.target.value)}
+                        required
+                      />
+                    )}
                   </div>
                   <div>
                     <Label>Item Code *</Label>

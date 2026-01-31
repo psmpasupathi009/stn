@@ -1,70 +1,48 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import { generateOTP, isAdminEmail } from '@/lib/auth'
-import { sendOTP } from '@/lib/email'
+import { createOTP } from '@/lib/otp'
+import { sendOTP, normalizeEmail, isValidEmail, wasEmailSent } from '@/lib/email'
 
 export async function POST(request: NextRequest) {
   try {
-    const { email } = await request.json()
+    const { email, type } = await request.json()
 
-    if (!email) {
-      return NextResponse.json({ error: 'Email is required' }, { status: 400 })
+    if (!email || !type) {
+      return NextResponse.json(
+        { error: 'Email and type are required' },
+        { status: 400 }
+      )
     }
 
-    const otp = generateOTP()
-    const otpExpires = new Date(Date.now() + 10 * 60 * 1000) // 10 minutes
-
-    // Check if user exists
-    let user = await prisma.user.findUnique({
-      where: { email },
-    })
-
-    const isAdmin = await isAdminEmail(email)
-
-    if (!user) {
-      // Create new user
-      user = await prisma.user.create({
-        data: {
-          email,
-          role: isAdmin ? 'admin' : 'user',
-          otp,
-          otpExpires,
-        },
-      })
-    } else {
-      // Update existing user's OTP
-      await prisma.user.update({
-        where: { email },
-        data: {
-          otp,
-          otpExpires,
-        },
-      })
+    if (type !== 'SIGNUP' && type !== 'FORGOT_PASSWORD') {
+      return NextResponse.json(
+        { error: 'Type must be SIGNUP or FORGOT_PASSWORD' },
+        { status: 400 }
+      )
     }
 
-    // Send OTP via email
-    try {
-      const emailResult = await sendOTP(email, otp)
-      if (emailResult.messageId && emailResult.messageId !== 'console-log-fallback') {
-        console.log(`✅ OTP sent successfully to ${email}`)
-      } else {
-        console.log(`⚠️  OTP saved in database but email failed - check console for OTP`)
-      }
-    } catch (emailError: any) {
-      // This should rarely happen now since we return resolved promise
-      console.error('❌ Email send failed, but OTP saved in database:', emailError.message)
-      console.error('Full error:', emailError)
+    // Normalize and validate email
+    const normalizedEmail = normalizeEmail(email)
+    if (!isValidEmail(normalizedEmail)) {
+      return NextResponse.json({ error: 'Invalid email format' }, { status: 400 })
     }
 
-    return NextResponse.json({ 
-      success: true, 
+    // Create OTP
+    const otpRecord = await createOTP(normalizedEmail, type, 10)
+
+    const emailResult = await sendOTP(normalizedEmail, otpRecord.code)
+    if (!wasEmailSent(emailResult)) {
+      console.warn(`OTP (email not sent) - use OTP: ${otpRecord.code}`)
+    }
+
+    return NextResponse.json({
+      success: true,
       message: 'OTP sent to your email',
-      isAdmin 
+      expiresIn: 10, // minutes
     })
   } catch (error: any) {
     console.error('Send OTP error:', error)
     return NextResponse.json(
-      { error: 'Failed to send OTP. Please try again.' },
+      { error: 'Failed to send OTP' },
       { status: 500 }
     )
   }

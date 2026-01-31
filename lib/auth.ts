@@ -1,47 +1,31 @@
 import { prisma } from './prisma'
 import bcrypt from 'bcryptjs'
-import jwt from 'jsonwebtoken'
-import crypto from 'crypto'
 
-// Support both JWT_SECRET and AUTH_SECRET for flexibility
-const JWT_SECRET = process.env.JWT_SECRET || process.env.AUTH_SECRET || 'your-secret-key-change-in-production'
-
-export interface TokenPayload {
-  userId: string
-  email: string
-  role: string
-}
-
-export function generateToken(payload: TokenPayload): string {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: '7d' })
-}
-
-export function verifyToken(token: string): TokenPayload | null {
-  try {
-    return jwt.verify(token, JWT_SECRET) as TokenPayload
-  } catch {
-    return null
-  }
-}
-
+/**
+ * Hash a password using bcrypt
+ */
 export async function hashPassword(password: string): Promise<string> {
   return bcrypt.hash(password, 10)
 }
 
+/**
+ * Compare a password with a hash
+ */
 export async function comparePassword(password: string, hash: string): Promise<boolean> {
   return bcrypt.compare(password, hash)
 }
 
+/**
+ * Generate a 6-digit OTP
+ */
 export function generateOTP(): string {
   return Math.floor(100000 + Math.random() * 900000).toString()
 }
 
-export function generateResetToken(): string {
-  return crypto.randomBytes(32).toString('hex')
-}
-
+/**
+ * Check if email matches ADMIN_EMAIL from .env
+ */
 export async function isAdminEmail(email: string): Promise<boolean> {
-  // Check if email matches ADMIN_EMAIL from .env
   const adminEmail = process.env.ADMIN_EMAIL
   if (adminEmail && email.toLowerCase() === adminEmail.toLowerCase()) {
     return true
@@ -49,9 +33,76 @@ export async function isAdminEmail(email: string): Promise<boolean> {
   
   // Also check if user exists with admin role
   const user = await prisma.user.findUnique({
-    where: { email },
+    where: { email: email.toLowerCase() },
     select: { role: true },
   })
   
-  return user?.role === 'admin'
+  return user?.role === 'ADMIN'
+}
+
+/**
+ * Get user by email
+ */
+export async function getUserByEmail(email: string) {
+  return prisma.user.findUnique({
+    where: { email: email.toLowerCase() },
+  })
+}
+
+/**
+ * Create a new user, or complete signup if user exists without password
+ */
+export async function createUser(data: {
+  email: string
+  password: string
+  name?: string
+  phoneNumber?: string
+  role?: string
+}) {
+  const email = data.email.toLowerCase()
+  const hashedPassword = await hashPassword(data.password)
+  const isAdmin = await isAdminEmail(data.email)
+  const role = isAdmin ? 'ADMIN' : (data.role || 'USER')
+
+  const existing = await prisma.user.findUnique({
+    where: { email },
+  })
+
+  if (existing) {
+    if (existing.password) {
+      throw new Error('Account already exists')
+    }
+    return prisma.user.update({
+      where: { email },
+      data: {
+        password: hashedPassword,
+        name: data.name ?? existing.name,
+        phoneNumber: data.phoneNumber ?? existing.phoneNumber,
+        isEmailVerified: true,
+      },
+    })
+  }
+
+  return prisma.user.create({
+    data: {
+      email,
+      password: hashedPassword,
+      name: data.name,
+      phoneNumber: data.phoneNumber,
+      role,
+      isEmailVerified: true,
+    },
+  })
+}
+
+/**
+ * Update user password
+ */
+export async function updateUserPassword(email: string, newPassword: string) {
+  const hashedPassword = await hashPassword(newPassword)
+  
+  return prisma.user.update({
+    where: { email: email.toLowerCase() },
+    data: { password: hashedPassword },
+  })
 }

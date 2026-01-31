@@ -11,7 +11,6 @@ import { useAuth } from '@/lib/context'
 export default function ProfilePage() {
   const { user, isAuthenticated, logout } = useAuth()
   const router = useRouter()
-  const [showAdminDashboard, setShowAdminDashboard] = useState(false)
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -54,7 +53,7 @@ export default function ProfilePage() {
               <CardTitle>Actions</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {user.role === 'admin' && (
+              {(user.role?.toUpperCase() === 'ADMIN') && (
                 <Button
                   className="w-full bg-amber-900 text-white hover:bg-amber-800"
                   onClick={() => router.push('/admin/dashboard')}

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/lib/context'
+import { toast } from 'sonner'
 
 interface Product {
   id: string
@@ -113,21 +114,23 @@ export default function HomePage() {
     }
 
     try {
-      const token = localStorage.getItem('token')
       const res = await fetch('/api/cart', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ productId, quantity: 1 }),
       })
 
       if (res.ok) {
-        alert('Product added to cart!')
+        window.dispatchEvent(new CustomEvent('cart-updated'))
+        toast.success('Added to cart!')
+      } else {
+        const data = await res.json().catch(() => ({}))
+        toast.error(data.error || 'Failed to add to cart')
       }
     } catch (error) {
       console.error('Error adding to cart:', error)
+      toast.error('Failed to add to cart')
     }
   }
 
@@ -146,7 +149,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Carousel Section */}
-      <section className="relative bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100 py-20 md:py-32 overflow-hidden">
+      <section className="relative bg-linear-to-br from-amber-50 via-orange-50 to-amber-100 py-20 md:py-32 overflow-hidden">
         <div className="container mx-auto px-4">
           <div className="relative">
             {/* Slides */}
