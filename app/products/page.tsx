@@ -102,7 +102,7 @@ export default function ProductsPage() {
               onClick={() => setSelectedCategory('')}
               className={`px-4 py-2 rounded-full ${
                 selectedCategory === ''
-                  ? 'bg-amber-600 text-white'
+                  ? 'bg-green-600 text-white'
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
               }`}
             >
@@ -114,7 +114,7 @@ export default function ProductsPage() {
                 onClick={() => setSelectedCategory(category)}
                 className={`px-4 py-2 rounded-full ${
                   selectedCategory === category
-                    ? 'bg-amber-600 text-white'
+                    ? 'bg-green-600 text-white'
                     : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                 }`}
               >
@@ -152,7 +152,7 @@ export default function ProductsPage() {
                 </Link>
                 <div className="text-center">
                   <Link href={`/products/${product.id}`}>
-                    <h3 className="font-semibold text-lg mb-2 hover:text-amber-900">
+                    <h3 className="font-semibold text-lg mb-2 hover:text-green-900">
                       {product.name}
                     </h3>
                   </Link>

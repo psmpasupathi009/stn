@@ -94,7 +94,7 @@ export default function CategoryIcons() {
                   className={`w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center text-2xl md:text-3xl transition-transform group-hover:scale-110 ${
                     category.dashed
                       ? 'border-2 border-dashed border-gray-300 bg-gray-50'
-                      : 'bg-amber-900 text-white'
+                      : 'bg-green-700 text-white'
                   }`}
                 >
                   {category.icon}

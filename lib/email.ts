@@ -88,8 +88,8 @@ export async function sendOTP(email: string, otp: string): Promise<SendResult> {
         <div style="background-color: #f9fafb; border-radius: 8px; padding: 30px; text-align: center;">
           <h2 style="color: #1f2937; margin-bottom: 20px;">OTP Verification</h2>
           <p style="color: #4b5563; font-size: 16px; margin-bottom: 20px;">Your OTP for login to STN Golden Healthy Foods is:</p>
-          <div style="background-color: #ffffff; border: 2px solid #d97706; border-radius: 8px; padding: 20px; margin: 20px 0;">
-            <strong style="font-size: 32px; color: #d97706; letter-spacing: 4px;">${otp}</strong>
+          <div style="background-color: #ffffff; border: 2px solid #3CB31A; border-radius: 8px; padding: 20px; margin: 20px 0;">
+            <strong style="font-size: 32px; color: #3CB31A; letter-spacing: 4px;">${otp}</strong>
           </div>
           <p style="color: #6b7280; font-size: 14px; margin-top: 20px;">This OTP will expire in 10 minutes.</p>
           <p style="color: #9ca3af; font-size: 12px; margin-top: 30px;">If you didn't request this, please ignore this email.</p>
@@ -134,7 +134,7 @@ export async function sendPasswordReset(email: string, resetToken: string): Prom
           <h2 style="color: #1f2937; margin-bottom: 20px;">Password Reset Request</h2>
           <p style="color: #4b5563; font-size: 16px; margin-bottom: 20px;">Click the button below to reset your password:</p>
           <div style="text-align: center; margin: 30px 0;">
-            <a href="${resetUrl}" style="display: inline-block; padding: 14px 28px; background-color: #d97706; color: white; text-decoration: none; border-radius: 6px; font-weight: 600;">Reset Password</a>
+            <a href="${resetUrl}" style="display: inline-block; padding: 14px 28px; background-color: #3CB31A; color: white; text-decoration: none; border-radius: 6px; font-weight: 600;">Reset Password</a>
           </div>
           <p style="color: #6b7280; font-size: 14px;">Or copy: ${resetUrl}</p>
           <p style="color: #9ca3af; font-size: 12px; margin-top: 30px;">Link expires in 1 hour. If you didn't request this, ignore this email.</p>

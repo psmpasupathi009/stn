@@ -526,7 +526,7 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="bg-gradient-to-br from-gray-50 to-amber-50 min-h-screen">
+    <div className="bg-gradient-to-br from-gray-50 to-green-50 min-h-screen">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -540,7 +540,7 @@ export default function AdminDashboard() {
             onClick={() => setActiveTab('products')}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-md font-medium transition-all ${
               activeTab === 'products'
-                ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-md'
+                ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-md'
                 : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
@@ -551,7 +551,7 @@ export default function AdminDashboard() {
             onClick={() => setActiveTab('hero')}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-md font-medium transition-all ${
               activeTab === 'hero'
-                ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-md'
+                ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-md'
                 : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
@@ -601,7 +601,7 @@ export default function AdminDashboard() {
             {/* Product Form */}
             {showForm && (
               <Card className="mb-8 shadow-lg">
-                <CardHeader className="bg-gradient-to-r from-amber-50 to-orange-50">
+                <CardHeader className="bg-gradient-to-r from-green-50 to-green-100">
                   <CardTitle className="flex items-center gap-2">
                     {editingProduct ? <Pencil className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
                     {editingProduct ? 'Edit Product' : 'Create New Product'}
@@ -770,12 +770,12 @@ export default function AdminDashboard() {
                   <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {products.map((product) => (
                       <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow bg-white">
-                        <div className="aspect-square bg-gradient-to-br from-amber-50 to-orange-50 relative">
+                        <div className="aspect-square bg-gradient-to-br from-green-50 to-green-100 relative">
                           {product.image ? (
                             <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center">
-                              <ImageIcon className="w-12 h-12 text-amber-200" />
+                              <ImageIcon className="w-12 h-12 text-green-200" />
                             </div>
                           )}
                           {!product.inStock && (
@@ -790,7 +790,7 @@ export default function AdminDashboard() {
                           <p className="text-sm text-gray-600 mb-2 line-clamp-1">{product.category}</p>
                           <div className="flex items-center justify-between mb-3">
                             <div>
-                              <p className="text-lg font-bold text-amber-600">₹{product.salePrice}</p>
+                              <p className="text-lg font-bold text-green-600">₹{product.salePrice}</p>
                               {product.mrp > product.salePrice && (
                                 <p className="text-xs text-gray-500 line-through">₹{product.mrp}</p>
                               )}
@@ -836,7 +836,7 @@ export default function AdminDashboard() {
             {/* Hero Form - Simplified */}
             {showHeroForm && (
               <Card className="mb-8 shadow-lg">
-                <CardHeader className="bg-gradient-to-r from-amber-50 to-orange-50">
+                <CardHeader className="bg-gradient-to-r from-green-50 to-green-100">
                   <CardTitle className="flex items-center gap-2">
                     {editingHero ? <Pencil className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
                     {editingHero ? 'Edit Hero Slide' : 'Create Hero Slide'}
@@ -941,14 +941,14 @@ export default function AdminDashboard() {
             ) : (
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {heroSections.map((hero) => (
-                  <Card key={hero.id} className={`overflow-hidden transition-all hover:shadow-lg ${hero.isActive ? 'ring-2 ring-amber-400' : ''}`}>
+                  <Card key={hero.id} className={`overflow-hidden transition-all hover:shadow-lg ${hero.isActive ? 'ring-2 ring-green-400' : ''}`}>
                     {/* Image Preview */}
                     <div className="relative w-full h-40 bg-gradient-to-br from-amber-100 to-orange-100">
                       {hero.image ? (
                         <img src={hero.image} alt="Hero slide" className="w-full h-full object-cover" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
-                          <ImageIcon className="w-12 h-12 text-amber-300" />
+                          <ImageIcon className="w-12 h-12 text-green-300" />
                         </div>
                       )}
                       {/* Status Badge */}
@@ -969,7 +969,7 @@ export default function AdminDashboard() {
                     <CardContent className="p-4">
                       <div className="mb-3">
                         <p className="text-sm text-gray-600 mb-1">Button Link:</p>
-                        <p className="text-sm font-medium text-amber-700 truncate">{hero.buttonLink}</p>
+                        <p className="text-sm font-medium text-green-700 truncate">{hero.buttonLink}</p>
                       </div>
                       <div className="mb-3">
                         <p className="text-sm text-gray-600 mb-1">Button Text:</p>
@@ -982,7 +982,7 @@ export default function AdminDashboard() {
                           variant="outline"
                           size="sm"
                           onClick={() => toggleHeroActive(hero)}
-                          className={`flex-1 ${hero.isActive ? 'text-orange-600 border-orange-200 hover:bg-orange-50' : 'text-amber-600 border-amber-200 hover:bg-amber-50'}`}
+                          className={`flex-1 ${hero.isActive ? 'text-orange-600 border-orange-200 hover:bg-orange-50' : 'text-green-600 border-green-200 hover:bg-green-50'}`}
                         >
                           {hero.isActive ? <><EyeOff className="w-4 h-4 mr-1" /> Hide</> : <><Eye className="w-4 h-4 mr-1" /> Show</>}
                         </Button>

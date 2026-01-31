@@ -7,7 +7,7 @@ export default function LoginPage() {
       <div className="flex w-full min-w-0 max-w-full flex-col gap-4 sm:max-w-sm md:max-w-md sm:gap-5 md:gap-6">
         <Link
           href="/"
-          className="flex min-w-0 max-w-full items-center justify-center gap-2 self-center font-semibold text-gray-900 transition-colors hover:text-amber-800 text-sm sm:text-base md:text-lg"
+          className="flex min-w-0 max-w-full items-center justify-center gap-2 self-center font-semibold text-gray-900 transition-colors hover:text-green-800 text-sm sm:text-base md:text-lg"
         >
           <img
             src="/STN LOGO.png"

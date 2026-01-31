@@ -149,7 +149,7 @@ export default function CartPage() {
             contact: '',
           },
           theme: {
-            color: '#d97706',
+            color: '#3CB31A',
           },
         }
 
@@ -170,7 +170,7 @@ export default function CartPage() {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <div className="animate-pulse flex flex-col items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-amber-200" />
+          <div className="w-12 h-12 rounded-full bg-green-200" />
           <p className="text-neutral-600">Loading your cart...</p>
         </div>
       </div>
@@ -186,7 +186,7 @@ export default function CartPage() {
           <p className="text-neutral-600 mb-6">Add some products to get started!</p>
           <Button
             onClick={() => router.push('/products')}
-            className="bg-amber-600 hover:bg-amber-700 text-white px-8 py-6 text-base rounded-xl"
+            className="bg-green-600 hover:bg-green-700 text-white px-8 py-6 text-base rounded-xl"
           >
             Continue Shopping
           </Button>
@@ -264,7 +264,7 @@ export default function CartPage() {
                   </div>
                 </div>
                 <Button
-                  className="w-full bg-amber-600 hover:bg-amber-700 text-white py-6 rounded-xl font-semibold"
+                  className="w-full bg-green-600 hover:bg-green-700 text-white py-6 rounded-xl font-semibold"
                   onClick={handleCheckout}
                   disabled={processing}
                 >

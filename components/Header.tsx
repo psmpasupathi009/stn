@@ -1,11 +1,9 @@
 'use client'
 
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/context'
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import {
-  Search,
   User,
   ShoppingCart,
   Menu,
@@ -22,41 +20,11 @@ const NAV_LINKS = [
   { href: '/track-order', label: 'Track Order' },
 ]
 
-const SHOP_LINKS = [
-  { href: '/collections/wood-pressed-oils', label: 'Wood Pressed Oils' },
-  { href: '/collections/healthy-mixes', label: 'Healthy Mixes' },
-  { href: '/collections/idly-podi', label: 'Idly Podi Varieties' },
-  { href: '/collections/home-made-masala', label: 'Home Made Masala' },
-  { href: '/collections/kovilpatti-special', label: 'Kovilpatti Special' },
-  { href: '/collections/flour-kali-mixes', label: 'Flour & Kali Mixes' },
-  { href: '/collections/natural-sweeteners', label: 'Natural Sweeteners' },
-  { href: '/collections/essential-millets', label: 'Essential Millets' },
-  { href: '/collections/explorer-pack', label: 'Explorer Pack' },
-]
-
 export default function Header() {
-  const router = useRouter()
   const { user, logout, isAuthenticated } = useAuth()
   const [cartCount, setCartCount] = useState(0)
   const [showMobileMenu, setShowMobileMenu] = useState(false)
   const [showShopDropdown, setShowShopDropdown] = useState(false)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [searchOpen, setSearchOpen] = useState(false)
-  const searchInputRef = useRef<HTMLInputElement>(null)
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
-    const q = searchQuery.trim()
-    if (q) router.push(`/products?search=${encodeURIComponent(q)}`)
-    else router.push('/products')
-    setSearchOpen(false)
-    setSearchQuery('')
-  }
-
-  const openSearch = () => {
-    setSearchOpen(true)
-    setTimeout(() => searchInputRef.current?.focus(), 50)
-  }
 
   const refreshCartCount = useCallback(() => {
     if (!isAuthenticated) return
@@ -131,60 +99,13 @@ export default function Header() {
             href="/"
             className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center"
           >
-            <h1 className="text-lg sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+            <h1 className="text-lg sm:text-xl md:text-2xl font-bold" style={{ color: '#3CB31A' }}>
               STN Golden Healthy Foods
             </h1>
           </Link>
 
-          {/* Right: Search (inline in navbar), Profile, Cart */}
-          <div className="flex items-center gap-0.5 flex-1 min-w-0 lg:flex-initial lg:min-w-0 justify-end lg:max-w-[320px]">
-            {/* Desktop: always-visible search input in navbar */}
-            <form
-              onSubmit={handleSearch}
-              className="hidden lg:flex flex-1 min-w-0 max-w-[200px] items-center gap-1.5 rounded-full bg-neutral-100 border border-transparent focus-within:bg-white focus-within:border-neutral-300 focus-within:ring-2 focus-within:ring-neutral-200 pl-3 pr-2 py-1.5 transition-all"
-            >
-              <Search size={18} className="text-neutral-400 shrink-0" strokeWidth={2} />
-              <input
-                type="search"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search products..."
-                className="flex-1 min-w-0 bg-transparent text-sm text-neutral-800 placeholder:text-neutral-400 outline-none"
-                aria-label="Search products"
-              />
-            </form>
-            {/* Mobile: search icon opens inline search */}
-            {!searchOpen ? (
-              <button
-                type="button"
-                onClick={openSearch}
-                className={`lg:hidden ${iconButtonClass}`}
-                aria-label="Search"
-              >
-                <Search size={ICON_SIZE} strokeWidth={2} />
-              </button>
-            ) : (
-              <form
-                onSubmit={handleSearch}
-                className="lg:hidden flex flex-1 min-w-0 items-center gap-1 rounded-full bg-neutral-100 border border-neutral-200 pl-3 pr-2 py-1.5"
-              >
-                <Search size={18} className="text-neutral-400 shrink-0" strokeWidth={2} />
-                <input
-                  ref={searchInputRef}
-                  type="search"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onBlur={() => setSearchOpen(false)}
-                  placeholder="Search..."
-                  className="flex-1 min-w-0 bg-transparent text-sm text-neutral-800 placeholder:text-neutral-400 outline-none"
-                  aria-label="Search products"
-                />
-                <button type="submit" className="p-1.5 rounded-full hover:bg-neutral-200 text-neutral-600" aria-label="Submit search">
-                  <Search size={18} strokeWidth={2} />
-                </button>
-              </form>
-            )}
-
+          {/* Right: Profile, Cart */}
+          <div className="flex items-center gap-1">
             {isAuthenticated ? (
               <div className="relative flex items-center">
                 <Link
@@ -195,7 +116,8 @@ export default function Header() {
                   <User size={ICON_SIZE} strokeWidth={2} />
                   {user?.role?.toUpperCase() === 'ADMIN' && (
                     <span
-                      className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-amber-600 rounded-full border-2 border-white"
+                      className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white"
+                      style={{ backgroundColor: '#3CB31A' }}
                       title="Admin"
                     />
                   )}
@@ -203,7 +125,8 @@ export default function Header() {
                 {user?.role?.toUpperCase() === 'ADMIN' && (
                   <Link
                     href="/admin/dashboard"
-                    className="hidden sm:flex ml-0.5 p-2 rounded-full text-amber-700 hover:bg-amber-50"
+                    className="hidden sm:flex ml-0.5 p-2 rounded-full hover:bg-green-50"
+                    style={{ color: '#3CB31A' }}
                     aria-label="Admin dashboard"
                   >
                     <LayoutDashboard size={ICON_SIZE} strokeWidth={2} />
@@ -268,7 +191,8 @@ export default function Header() {
                   {user?.role?.toUpperCase() === 'ADMIN' && (
                     <Link
                       href="/admin/dashboard"
-                      className="px-3 py-2.5 text-sm font-medium text-amber-700 hover:bg-amber-50 rounded-lg flex items-center gap-2"
+                      className="px-3 py-2.5 text-sm font-medium hover:bg-green-50 rounded-lg flex items-center gap-2"
+                      style={{ color: '#3CB31A' }}
                       onClick={() => setShowMobileMenu(false)}
                     >
                       <LayoutDashboard size={18} /> Admin Dashboard

@@ -26,7 +26,7 @@ export default function OurStoryPage() {
               </p>
             </div>
 
-            <div className="bg-amber-50 border-l-4 border-amber-900 p-6 mb-12">
+            <div className="bg-green-50 border-l-4 border-green-700 p-6 mb-12">
               <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">
                 Our Vision and Mission
               </h2>
@@ -73,7 +73,7 @@ export default function OurStoryPage() {
             </div>
 
             <div className="text-center">
-              <p className="text-2xl md:text-3xl font-bold text-amber-900 mb-8">
+              <p className="text-2xl md:text-3xl font-bold text-green-700 mb-8">
                 Pure. Honest. Naturally Cold-Pressed.
               </p>
               <Link href="/products">

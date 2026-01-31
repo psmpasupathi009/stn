@@ -39,13 +39,13 @@ export default function ContactPage() {
               <div className="space-y-6">
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-2">Email</h3>
-                  <a href="mailto:info@stngoldenhealthyfoods.com" className="text-amber-900 hover:underline">
+                  <a href="mailto:info@stngoldenhealthyfoods.com" className="text-green-700 hover:underline">
                     info@stngoldenhealthyfoods.com
                   </a>
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-2">Phone</h3>
-                  <a href="tel:+919942590202" className="text-amber-900 hover:underline">
+                  <a href="tel:+919942590202" className="text-green-700 hover:underline">
                     +919942590202
                   </a>
                 </div>
@@ -60,13 +60,13 @@ export default function ContactPage() {
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-4">Follow Us</h3>
                   <div className="flex gap-4">
-                    <a href="#" className="text-gray-600 hover:text-amber-900">
+                    <a href="#" className="text-gray-600 hover:text-green-700">
                       Facebook
                     </a>
-                    <a href="#" className="text-gray-600 hover:text-amber-900">
+                    <a href="#" className="text-gray-600 hover:text-green-700">
                       Instagram
                     </a>
-                    <a href="#" className="text-gray-600 hover:text-amber-900">
+                    <a href="#" className="text-gray-600 hover:text-green-700">
                       YouTube
                     </a>
                   </div>

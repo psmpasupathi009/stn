@@ -193,13 +193,13 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Hero Carousel Section - Full height, no rounded corners */}
-      <section className="w-full bg-white py-2 sm:py-3 md:py-4">
-        <div className="container mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
-          {/* Hero Image Container - no rounded corners, fills viewport */}
+      {/* Hero Carousel Section */}
+      <section className="w-full bg-white py-4 sm:py-5 md:py-6">
+        <div className="container mx-auto px-4">
+          {/* Hero Image Container */}
           <div 
-            className="relative w-full overflow-hidden shadow-sm"
-            style={{ height: 'calc(100vh - 200px)', minHeight: '400px', maxHeight: '700px' }}
+            className="relative w-full overflow-hidden"
+            style={{ height: 'calc(100vh - 220px)', minHeight: '400px', maxHeight: '650px' }}
           >
             {heroSlides.map((slide, index) => (
               <div
@@ -219,11 +219,11 @@ export default function HomePage() {
                     <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent pointer-events-none" />
                   </>
                 ) : (
-                  <div className="absolute inset-0 bg-gradient-to-br from-amber-100 via-orange-50 to-amber-200 flex items-center justify-center">
+                  <div className="absolute inset-0 bg-gradient-to-br from-green-100 via-green-50 to-green-200 flex items-center justify-center">
                     <div className="text-center px-4">
                       <HeroIcon
                         iconName={slide.icon}
-                        className="w-16 h-16 sm:w-20 sm:h-20 md:w-28 md:h-28 lg:w-36 lg:h-36 text-amber-600 mx-auto mb-3 sm:mb-4"
+                        className="w-16 h-16 sm:w-20 sm:h-20 md:w-28 md:h-28 lg:w-36 lg:h-36 text-green-600 mx-auto mb-3 sm:mb-4"
                       />
                       <h2 className="text-lg sm:text-xl md:text-3xl lg:text-4xl font-bold text-gray-800 max-w-sm sm:max-w-md md:max-w-lg mx-auto leading-tight">
                         {slide.title}
@@ -296,14 +296,14 @@ export default function HomePage() {
           </div>
           {loading ? (
             <div className="text-center py-12">
-              <div className="inline-block w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full animate-spin" />
+              <div className="inline-block w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full animate-spin" />
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
               {featuredProducts.slice(0, 4).map((product) => (
                 <div key={product.id} className="group bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden border border-gray-100">
                   <Link href={`/products/${product.id}`}>
-                    <div className="aspect-square bg-gradient-to-br from-amber-50 to-orange-50 overflow-hidden">
+                    <div className="aspect-square bg-gradient-to-br from-green-50 to-green-100 overflow-hidden">
                       {product.image ? (
                         <img
                           src={product.image}
@@ -312,14 +312,14 @@ export default function HomePage() {
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
-                          <Droplets className="w-16 h-16 text-amber-300" />
+                          <Droplets className="w-16 h-16 text-green-300" />
                         </div>
                       )}
                     </div>
                   </Link>
                   <div className="p-4 text-center">
                     <Link href={`/products/${product.id}`}>
-                      <h3 className="font-semibold text-base sm:text-lg mb-2 text-gray-800 hover:text-amber-700 transition-colors line-clamp-2">
+                      <h3 className="font-semibold text-base sm:text-lg mb-2 text-gray-800 hover:text-green-700 transition-colors line-clamp-2">
                         {product.name}
                       </h3>
                     </Link>
@@ -332,7 +332,7 @@ export default function HomePage() {
                           <span className="text-sm text-gray-400 line-through">
                             ₹{product.mrp}
                           </span>
-                          <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs px-2 py-0.5 rounded-full">
+                          <span className="bg-gradient-to-r from-green-500 to-green-600 text-white text-xs px-2 py-0.5 rounded-full">
                             Sale
                           </span>
                         </>
@@ -350,7 +350,7 @@ export default function HomePage() {
             </div>
           )}
           <div className="text-center mt-8">
-            <Link href="/products" className="inline-flex items-center gap-2 text-amber-700 font-semibold hover:text-amber-800 transition-colors">
+            <Link href="/products" className="inline-flex items-center gap-2 text-green-700 font-semibold hover:text-green-800 transition-colors">
               View all products
               <ChevronRight className="w-4 h-4" />
             </Link>
@@ -359,7 +359,7 @@ export default function HomePage() {
       </section>
 
       {/* Healthy Mixes Section */}
-      <section className="py-12 sm:py-16 bg-gradient-to-br from-amber-50 to-orange-50">
+      <section className="py-12 sm:py-16 bg-gradient-to-br from-green-50 to-green-100">
         <div className="container mx-auto px-4">
           <div className="text-center mb-8 sm:mb-12">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
@@ -371,14 +371,14 @@ export default function HomePage() {
           </div>
           {loading ? (
             <div className="text-center py-12">
-              <div className="inline-block w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full animate-spin" />
+              <div className="inline-block w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full animate-spin" />
             </div>
           ) : healthyMixes.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
               {healthyMixes.map((product) => (
-                <div key={product.id} className="group bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden border border-amber-100">
+                <div key={product.id} className="group bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden border border-green-100">
                   <Link href={`/products/${product.id}`}>
-                    <div className="aspect-square bg-gradient-to-br from-amber-50 to-yellow-50 overflow-hidden">
+                    <div className="aspect-square bg-gradient-to-br from-green-50 to-yellow-50 overflow-hidden">
                       {product.image ? (
                         <img
                           src={product.image}
@@ -387,14 +387,14 @@ export default function HomePage() {
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
-                          <Wheat className="w-16 h-16 text-amber-300" />
+                          <Wheat className="w-16 h-16 text-green-300" />
                         </div>
                       )}
                     </div>
                   </Link>
                   <div className="p-4 text-center">
                     <Link href={`/products/${product.id}`}>
-                      <h3 className="font-semibold text-base sm:text-lg mb-2 text-gray-800 hover:text-amber-700 transition-colors line-clamp-2">
+                      <h3 className="font-semibold text-base sm:text-lg mb-2 text-gray-800 hover:text-green-700 transition-colors line-clamp-2">
                         {product.name}
                       </h3>
                     </Link>
@@ -407,7 +407,7 @@ export default function HomePage() {
                           <span className="text-sm text-gray-400 line-through">
                             ₹{product.mrp}
                           </span>
-                          <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs px-2 py-0.5 rounded-full">
+                          <span className="bg-gradient-to-r from-green-500 to-green-600 text-white text-xs px-2 py-0.5 rounded-full">
                             Sale
                           </span>
                         </>
@@ -432,7 +432,7 @@ export default function HomePage() {
             </div>
           ) : null}
           <div className="text-center mt-8">
-            <Link href="/collections/healthy-mixes" className="inline-flex items-center gap-2 text-amber-700 font-semibold hover:text-amber-800 transition-colors">
+            <Link href="/collections/healthy-mixes" className="inline-flex items-center gap-2 text-green-700 font-semibold hover:text-green-800 transition-colors">
               View all Healthy Mixes
               <ChevronRight className="w-4 h-4" />
             </Link>
@@ -453,14 +453,14 @@ export default function HomePage() {
           </div>
           {loading ? (
             <div className="text-center py-12">
-              <div className="inline-block w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full animate-spin" />
+              <div className="inline-block w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full animate-spin" />
             </div>
           ) : kovilpattiSpecial.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
               {kovilpattiSpecial.map((product) => (
                 <div key={product.id} className="group bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden border border-gray-100">
                   <Link href={`/products/${product.id}`}>
-                    <div className="aspect-square bg-gradient-to-br from-orange-50 to-amber-50 overflow-hidden">
+                    <div className="aspect-square bg-gradient-to-br from-green-50 to-green-100 overflow-hidden">
                       {product.image ? (
                         <img
                           src={product.image}
@@ -469,14 +469,14 @@ export default function HomePage() {
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
-                          <Cookie className="w-16 h-16 text-amber-300" />
+                          <Cookie className="w-16 h-16 text-green-300" />
                         </div>
                       )}
                     </div>
                   </Link>
                   <div className="p-4 text-center">
                     <Link href={`/products/${product.id}`}>
-                      <h3 className="font-semibold text-base sm:text-lg mb-2 text-gray-800 hover:text-amber-700 transition-colors line-clamp-2">
+                      <h3 className="font-semibold text-base sm:text-lg mb-2 text-gray-800 hover:text-green-700 transition-colors line-clamp-2">
                         {product.name}
                       </h3>
                     </Link>
@@ -489,7 +489,7 @@ export default function HomePage() {
                           <span className="text-sm text-gray-400 line-through">
                             ₹{product.mrp}
                           </span>
-                          <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs px-2 py-0.5 rounded-full">
+                          <span className="bg-gradient-to-r from-green-500 to-green-600 text-white text-xs px-2 py-0.5 rounded-full">
                             Sale
                           </span>
                         </>
@@ -514,7 +514,7 @@ export default function HomePage() {
             </div>
           ) : null}
           <div className="text-center mt-8">
-            <Link href="/collections/kovilpatti-special" className="inline-flex items-center gap-2 text-amber-700 font-semibold hover:text-amber-800 transition-colors">
+            <Link href="/collections/kovilpatti-special" className="inline-flex items-center gap-2 text-green-700 font-semibold hover:text-green-800 transition-colors">
               View all Kovilpatti Special
               <ChevronRight className="w-4 h-4" />
             </Link>
@@ -523,20 +523,20 @@ export default function HomePage() {
       </section>
 
       {/* Trust Section - Modern Design */}
-      <section className="py-12 sm:py-16 bg-gradient-to-br from-gray-50 to-amber-50">
+      <section className="py-12 sm:py-16 bg-gradient-to-br from-gray-50 to-green-50">
         <div className="container mx-auto px-4">
           <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-12 text-gray-900">Why Customers Trust Us</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6 text-center">
             <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm hover:shadow-md transition-shadow">
-              <div className="w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-3 sm:mb-4 bg-gradient-to-br from-amber-100 to-orange-100 rounded-full flex items-center justify-center">
-                <Gem className="w-6 h-6 sm:w-7 sm:h-7 text-amber-600" />
+              <div className="w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-3 sm:mb-4 bg-gradient-to-br from-green-100 to-green-200 rounded-full flex items-center justify-center">
+                <Gem className="w-6 h-6 sm:w-7 sm:h-7 text-green-600" />
               </div>
               <h3 className="font-semibold text-sm sm:text-base mb-1 sm:mb-2 text-gray-800">Premium Quality</h3>
               <p className="text-xs sm:text-sm text-gray-600">Carefully selected ingredients.</p>
             </div>
             <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm hover:shadow-md transition-shadow">
               <div className="w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-3 sm:mb-4 bg-gradient-to-br from-amber-100 to-orange-100 rounded-full flex items-center justify-center">
-                <Truck className="w-6 h-6 sm:w-7 sm:h-7 text-amber-600" />
+                <Truck className="w-6 h-6 sm:w-7 sm:h-7 text-green-600" />
               </div>
               <h3 className="font-semibold text-sm sm:text-base mb-1 sm:mb-2 text-gray-800">Free Delivery</h3>
               <p className="text-xs sm:text-sm text-gray-600">Zero delivery charges on all orders</p>
@@ -556,8 +556,8 @@ export default function HomePage() {
               <p className="text-xs sm:text-sm text-gray-600">Your questions answered with care</p>
             </div>
             <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm hover:shadow-md transition-shadow col-span-2 md:col-span-1">
-              <div className="w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-3 sm:mb-4 bg-gradient-to-br from-orange-100 to-red-100 rounded-full flex items-center justify-center">
-                <Globe className="w-6 h-6 sm:w-7 sm:h-7 text-orange-600" />
+              <div className="w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-3 sm:mb-4 bg-gradient-to-br from-green-100 to-green-200 rounded-full flex items-center justify-center">
+                <Globe className="w-6 h-6 sm:w-7 sm:h-7 text-green-600" />
               </div>
               <h3 className="font-semibold text-sm sm:text-base mb-1 sm:mb-2 text-gray-800">Pan-India Shipping</h3>
               <p className="text-xs sm:text-sm text-gray-600">Reachable. Reliable. Nationwide.</p>

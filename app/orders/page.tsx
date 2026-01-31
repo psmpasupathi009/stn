@@ -87,7 +87,7 @@ export default function OrdersPage() {
                   <div className="text-right">
                     <p className="font-semibold">₹{order.totalAmount.toFixed(2)}</p>
                     <p className={`text-sm ${
-                      order.paymentStatus === 'paid' ? 'text-amber-600' : 'text-red-600'
+                      order.paymentStatus === 'paid' ? 'text-green-600' : 'text-red-600'
                     }`}>
                       {order.paymentStatus}
                     </p>

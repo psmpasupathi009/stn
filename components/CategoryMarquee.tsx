@@ -34,7 +34,7 @@ const categories = [
     name: 'Healthy Mixes',
     icon: Wheat,
     slug: 'healthy-mixes',
-    color: 'from-amber-500 to-amber-600',
+    color: 'from-green-500 to-green-600',
   },
   {
     name: 'Wood Pressed Oils',
@@ -58,13 +58,13 @@ const categories = [
     name: 'Kovilpatti Special',
     icon: Cookie,
     slug: 'kovilpatti-special',
-    color: 'from-amber-600 to-yellow-600',
+    color: 'from-green-600 to-yellow-600',
   },
   {
     name: 'Flour & Kali Mixes',
     icon: FlaskConical,
     slug: 'flour-kali-mixes',
-    color: 'from-stone-500 to-amber-600',
+    color: 'from-stone-500 to-green-600',
   },
   {
     name: 'Natural Sweeteners',
@@ -76,7 +76,7 @@ const categories = [
     name: 'Essential Millets',
     icon: Leaf,
     slug: 'essential-millets',
-    color: 'from-amber-500 to-orange-500',
+    color: 'from-green-500 to-green-600',
   },
   {
     name: 'Shop All',
@@ -90,7 +90,7 @@ const categories = [
 
 export default function CategoryMarquee() {
   return (
-    <div className="bg-gradient-to-r from-amber-50 via-white to-amber-50 border-b border-amber-100 py-2.5 sm:py-3 overflow-hidden">
+    <div className="bg-gradient-to-r from-green-50 via-white to-green-50 border-b border-green-100 py-2.5 sm:py-3 overflow-hidden">
       <Marquee
         gradient={true}
         gradientColor="#fffbeb"
@@ -111,7 +111,7 @@ export default function CategoryMarquee() {
               <div
                 className={`w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12 rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg ${
                   category.dashed
-                    ? 'border-2 border-dashed border-amber-400 bg-amber-50'
+                    ? 'border-2 border-dashed border-green-400 bg-green-50'
                     : `bg-gradient-to-br ${category.color} shadow-md`
                 }`}
               >
@@ -125,8 +125,8 @@ export default function CategoryMarquee() {
               <span
                 className={`text-[10px] sm:text-xs font-medium text-center mt-1.5 max-w-[60px] sm:max-w-[65px] leading-tight transition-colors ${
                   category.dashed
-                    ? 'text-amber-600 group-hover:text-amber-700'
-                    : 'text-gray-700 group-hover:text-amber-800'
+                    ? 'text-green-600 group-hover:text-green-700'
+                    : 'text-gray-700 group-hover:text-green-800'
                 }`}
               >
                 {category.name}

@@ -92,7 +92,7 @@ function ResetPasswordForm() {
         <CardContent>
           {success ? (
             <div className="text-center space-y-4">
-              <div className="p-4 bg-amber-50 border border-amber-200 text-amber-700 rounded-md">
+              <div className="p-4 bg-green-50 border border-green-200 text-green-700 rounded-md">
                 Password reset successfully! Redirecting to login...
               </div>
             </div>
