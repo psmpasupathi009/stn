@@ -8,6 +8,9 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useAuth } from '@/lib/context'
+import { PasswordInput } from '@/components/ui/password-input'
+import { ResendOTP } from '@/components/ui/resend-otp'
+import { InputOTP } from '@/components/ui/input-otp'
 import Link from 'next/link'
 
 type Step = 'email' | 'otp' | 'password'
@@ -90,6 +93,33 @@ function SignupForm() {
       setError('Network error. Please check your connection and try again.')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleResendOTP = async (): Promise<boolean> => {
+    try {
+      const res = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          email: formData.email.trim().toLowerCase(),
+          name: formData.name.trim(),
+          phoneNumber: formData.phoneNumber.trim() || undefined,
+        }),
+      })
+      const data = await res.json()
+      if (res.ok && data.success) {
+        setOtp('') // Clear old OTP - new code was sent
+        setSuccess('New OTP sent to your email! Please enter the new code.')
+        setError('')
+        return true
+      }
+      setError(data.error || 'Failed to resend OTP')
+      return false
+    } catch {
+      setError('Network error. Please try again.')
+      return false
     }
   }
 
@@ -205,10 +235,10 @@ function SignupForm() {
   const isPasswordValid = formData.password.length >= 6
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <Card className="w-full max-w-md shadow-lg">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-6 sm:py-8 md:py-12 px-3 sm:px-4 lg:px-8">
+      <Card className="w-full max-w-md shadow-lg mx-auto">
+        <CardHeader className="space-y-1 p-4 sm:p-6">
+          <CardTitle className="text-xl sm:text-2xl font-bold text-center">
             Create Account
           </CardTitle>
           <CardDescription className="text-center">
@@ -217,7 +247,7 @@ function SignupForm() {
             {step === 'password' && 'Create your password'}
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 p-4 sm:p-6 pt-0">
           {error && (
             <Alert variant="destructive">
               <AlertDescription>{error}</AlertDescription>
@@ -292,21 +322,17 @@ function SignupForm() {
           {step === 'otp' && (
             <form onSubmit={handleVerifyOTP} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="otp">Enter 6-Digit OTP</Label>
-                <Input
-                  id="otp"
-                  type="text"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                  required
-                  placeholder="000000"
+                <Label>Enter 6-Digit OTP</Label>
+                <InputOTP
                   maxLength={6}
-                  className="mt-1 text-center text-2xl tracking-widest font-mono"
-                  autoFocus
+                  value={otp}
+                  onChange={setOtp}
+                  className="mt-1 justify-center"
                 />
-                <p className="text-xs text-gray-500 text-center">
+                <p className="text-xs text-gray-500 text-center break-all">
                   OTP sent to {formData.email}
                 </p>
+                <ResendOTP onResend={handleResendOTP} className="mt-1" />
               </div>
               <Button 
                 type="submit" 
@@ -331,9 +357,8 @@ function SignupForm() {
             <form onSubmit={handleCreateAccount} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="password">Password *</Label>
-                <Input
+                <PasswordInput
                   id="password"
-                  type="password"
                   value={formData.password}
                   onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
                   required
@@ -347,9 +372,8 @@ function SignupForm() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="confirmPassword">Confirm Password *</Label>
-                <Input
+                <PasswordInput
                   id="confirmPassword"
-                  type="password"
                   value={formData.confirmPassword}
                   onChange={(e) => setFormData(prev => ({ ...prev, confirmPassword: e.target.value }))}
                   required

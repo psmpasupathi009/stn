@@ -8,6 +8,9 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useAuth } from '@/lib/context'
+import { PasswordInput } from '@/components/ui/password-input'
+import { ResendOTP } from '@/components/ui/resend-otp'
+import { InputOTP } from '@/components/ui/input-otp'
 import Link from 'next/link'
 
 type Step = 'email' | 'otp' | 'password'
@@ -69,43 +72,40 @@ export default function ForgotPasswordPage() {
     }
   }
 
-  const handleVerifyOTP = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setError('')
-    setSuccess('')
-
-    if (!otp || otp.length !== 6) {
-      setError('Please enter a valid 6-digit OTP')
-      setLoading(false)
-      return
-    }
-
+  const handleResendOTP = async (): Promise<boolean> => {
     try {
-      const res = await fetch('/api/auth/verify-otp', {
+      const res = await fetch('/api/auth/forgot-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ 
-          email: email.trim().toLowerCase(), 
-          code: otp,
-          type: 'FORGOT_PASSWORD',
-        }),
+        body: JSON.stringify({ email: email.trim().toLowerCase() }),
       })
-
       const data = await res.json()
-
-      if (res.ok && data.verified) {
-        setSuccess('OTP verified! Please enter your new password.')
-        setStep('password')
-      } else {
-        setError(data.error || 'Invalid or expired OTP')
+      if (res.ok && data.success) {
+        setOtp('') // Clear old OTP - new code was sent
+        setSuccess('New OTP sent to your email! Please enter the new code.')
+        setError('')
+        return true
       }
-    } catch (err) {
-      setError('Network error. Please check your connection and try again.')
-    } finally {
-      setLoading(false)
+      setError(data.error || 'Failed to resend OTP')
+      return false
+    } catch {
+      setError('Network error. Please try again.')
+      return false
     }
+  }
+
+  // Proceed to password step without consuming OTP - verification happens on reset submit
+  const handleContinueToPassword = (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
+    setSuccess('')
+    if (!otp || otp.length !== 6) {
+      setError('Please enter a valid 6-digit OTP')
+      return
+    }
+    setSuccess('Enter your new password below.')
+    setStep('password')
   }
 
   const handleResetPassword = async (e: React.FormEvent) => {
@@ -175,21 +175,25 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <Card className="w-full max-w-md shadow-lg">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-6 sm:py-8 md:py-12 px-3 sm:px-4 lg:px-8">
+      <Card className="w-full max-w-md shadow-lg mx-auto">
+        <CardHeader className="space-y-1 p-4 sm:p-6">
+          <CardTitle className="text-xl sm:text-2xl font-bold text-center">
             {step === 'email' && 'Reset Password'}
             {step === 'otp' && 'Verify OTP'}
             {step === 'password' && 'Set New Password'}
           </CardTitle>
           <CardDescription className="text-center">
             {step === 'email' && 'Enter your email to receive an OTP'}
-            {step === 'otp' && `We sent a 6-digit code to ${email}`}
+            {step === 'otp' && (
+              <>
+                We sent a 6-digit code to <span className="break-all font-medium">{email}</span>
+              </>
+            )}
             {step === 'password' && 'Enter your new password'}
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 p-4 sm:p-6 pt-0">
           {error && (
             <Alert variant="destructive">
               <AlertDescription>{error}</AlertDescription>
@@ -230,37 +234,32 @@ export default function ForgotPasswordPage() {
           )}
 
           {step === 'otp' && (
-            <form onSubmit={handleVerifyOTP} className="space-y-4">
+            <form onSubmit={handleContinueToPassword} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="otp">Enter 6-Digit OTP</Label>
-                <Input
-                  id="otp"
-                  type="text"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                  required
-                  placeholder="000000"
+                <Label>Enter 6-Digit OTP</Label>
+                <InputOTP
                   maxLength={6}
-                  className="mt-1 text-center text-2xl tracking-widest font-mono"
-                  autoFocus
+                  value={otp}
+                  onChange={setOtp}
+                  className="mt-1 justify-center"
                 />
                 <p className="text-xs text-gray-500 text-center">
                   Check your email for the verification code
                 </p>
+                <ResendOTP onResend={handleResendOTP} className="mt-1" />
               </div>
               <Button 
                 type="submit" 
                 className="w-full" 
-                disabled={loading || otp.length !== 6}
+                disabled={otp.length !== 6}
               >
-                {loading ? 'Verifying...' : 'Verify OTP'}
+                Continue
               </Button>
               <Button
                 type="button"
                 variant="outline"
                 className="w-full"
                 onClick={handleBack}
-                disabled={loading}
               >
                 Back
               </Button>
@@ -271,9 +270,8 @@ export default function ForgotPasswordPage() {
             <form onSubmit={handleResetPassword} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="password">New Password</Label>
-                <Input
+                <PasswordInput
                   id="password"
-                  type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -285,9 +283,8 @@ export default function ForgotPasswordPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="confirmPassword">Confirm Password</Label>
-                <Input
+                <PasswordInput
                   id="confirmPassword"
-                  type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
