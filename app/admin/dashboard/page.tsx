@@ -7,6 +7,19 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useAuth } from '@/lib/context'
+import {
+  Package,
+  Image as ImageIcon,
+  Layers,
+  Plus,
+  Pencil,
+  Trash2,
+  Eye,
+  EyeOff,
+  GripVertical,
+  ChevronDown,
+  ChevronUp,
+} from 'lucide-react'
 
 interface Product {
   id: string
@@ -26,6 +39,18 @@ interface Product {
   reviewCount?: number
 }
 
+interface HeroSection {
+  id: string
+  title: string
+  description: string
+  buttonText: string
+  buttonLink: string
+  image?: string
+  icon?: string
+  order: number
+  isActive: boolean
+}
+
 const CATEGORIES = [
   'HEALTHY  MIXES',
   'IDLY PODI VARIETIES',
@@ -38,9 +63,25 @@ const CATEGORIES = [
   'Essential Millets',
 ]
 
+const ICON_OPTIONS = [
+  { value: 'Droplets', label: 'Droplets (Oils)' },
+  { value: 'Wheat', label: 'Wheat (Mixes)' },
+  { value: 'Cookie', label: 'Cookie (Snacks)' },
+  { value: 'Flame', label: 'Flame (Spices)' },
+  { value: 'ChefHat', label: 'Chef Hat (Masala)' },
+  { value: 'Leaf', label: 'Leaf (Millets)' },
+]
+
+type TabType = 'products' | 'hero'
+
 export default function AdminDashboard() {
   const { user, isAuthenticated } = useAuth()
   const router = useRouter()
+  
+  // Tab state
+  const [activeTab, setActiveTab] = useState<TabType>('products')
+  
+  // Products state
   const [products, setProducts] = useState<Product[]>([])
   const [categories, setCategories] = useState<string[]>([])
   const [showForm, setShowForm] = useState(false)
@@ -65,8 +106,24 @@ export default function AdminDashboard() {
   const [selectedCategory, setSelectedCategory] = useState('')
   const [newCategoryName, setNewCategoryName] = useState('')
 
+  // Hero sections state
+  const [heroSections, setHeroSections] = useState<HeroSection[]>([])
+  const [showHeroForm, setShowHeroForm] = useState(false)
+  const [editingHero, setEditingHero] = useState<HeroSection | null>(null)
+  const [heroFormData, setHeroFormData] = useState({
+    title: '',
+    description: '',
+    buttonText: 'Shop Now',
+    buttonLink: '/products',
+    icon: '',
+    order: 0,
+    isActive: true,
+  })
+  const [heroImageFile, setHeroImageFile] = useState<File | null>(null)
+  const [heroImagePreview, setHeroImagePreview] = useState<string | null>(null)
+  const [heroLoading, setHeroLoading] = useState(false)
+
   useEffect(() => {
-    // Strict admin check - redirect if not admin
     if (!isAuthenticated) {
       router.push('/login')
       return
@@ -77,8 +134,10 @@ export default function AdminDashboard() {
     }
     fetchProducts()
     fetchCategories()
+    fetchHeroSections()
   }, [isAuthenticated, user])
 
+  // Products functions
   const fetchProducts = async () => {
     try {
       setLoading(true)
@@ -113,6 +172,19 @@ export default function AdminDashboard() {
       }
     } catch (error) {
       console.error('Error fetching categories:', error)
+    }
+  }
+
+  // Hero sections functions
+  const fetchHeroSections = async () => {
+    try {
+      const res = await fetch('/api/hero-sections?active=false', { credentials: 'include' })
+      if (res.ok) {
+        const data = await res.json()
+        setHeroSections(data)
+      }
+    } catch (error) {
+      console.error('Error fetching hero sections:', error)
     }
   }
 
@@ -285,7 +357,164 @@ export default function AdminDashboard() {
     setImagePreview(null)
   }
 
-  // Show loading or redirect if not admin
+  // Hero section handlers
+  const handleHeroImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setHeroImageFile(file)
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setHeroImagePreview(reader.result as string)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const handleHeroImageUpload = async (): Promise<string | null> => {
+    if (!heroImageFile) return editingHero?.image || null
+
+    try {
+      const formData = new FormData()
+      formData.append('file', heroImageFile)
+
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+        credentials: 'include',
+      })
+
+      if (res.ok) {
+        const data = await res.json()
+        return data.url
+      }
+      return null
+    } catch (error) {
+      console.error('Error uploading hero image:', error)
+      return null
+    }
+  }
+
+  const handleHeroSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    // Validate image for new slides
+    if (!editingHero && !heroImageFile && !heroImagePreview) {
+      alert('Please upload a banner image')
+      return
+    }
+    
+    setHeroLoading(true)
+
+    try {
+      const imageUrl = await handleHeroImageUpload()
+
+      const url = editingHero
+        ? `/api/hero-sections/${editingHero.id}`
+        : '/api/hero-sections'
+      const method = editingHero ? 'PUT' : 'POST'
+
+      const res = await fetch(url, {
+        method,
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: heroFormData.title || 'Hero Slide',
+          description: heroFormData.description || '',
+          buttonText: heroFormData.buttonText || 'Shop Now',
+          buttonLink: heroFormData.buttonLink || '/products',
+          icon: heroFormData.icon || '',
+          order: heroFormData.order,
+          isActive: heroFormData.isActive,
+          image: imageUrl || editingHero?.image || null,
+        }),
+      })
+
+      if (res.ok) {
+        resetHeroForm()
+        fetchHeroSections()
+        alert(editingHero ? 'Hero slide updated!' : 'Hero slide created!')
+      } else {
+        const errorData = await res.json()
+        alert(errorData.error || 'Failed to save hero slide')
+      }
+    } catch (error) {
+      console.error('Error saving hero slide:', error)
+      alert('Failed to save hero slide')
+    } finally {
+      setHeroLoading(false)
+    }
+  }
+
+  const handleEditHero = (hero: HeroSection) => {
+    setEditingHero(hero)
+    setHeroFormData({
+      title: hero.title || '',
+      description: hero.description || '',
+      buttonText: hero.buttonText || 'Shop Now',
+      buttonLink: hero.buttonLink || '/products',
+      icon: hero.icon || '',
+      order: hero.order,
+      isActive: hero.isActive,
+    })
+    setHeroImagePreview(hero.image || null)
+    setHeroImageFile(null)
+    setShowHeroForm(true)
+  }
+
+  const handleDeleteHero = async (id: string) => {
+    if (!confirm('Delete this hero section?')) return
+
+    try {
+      const res = await fetch(`/api/hero-sections/${id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      })
+
+      if (res.ok) {
+        fetchHeroSections()
+        alert('Hero section deleted!')
+      } else {
+        alert('Failed to delete hero section')
+      }
+    } catch (error) {
+      console.error('Error deleting hero section:', error)
+      alert('Failed to delete hero section')
+    }
+  }
+
+  const toggleHeroActive = async (hero: HeroSection) => {
+    try {
+      const res = await fetch(`/api/hero-sections/${hero.id}`, {
+        method: 'PUT',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...hero, isActive: !hero.isActive }),
+      })
+
+      if (res.ok) {
+        fetchHeroSections()
+      }
+    } catch (error) {
+      console.error('Error toggling hero section:', error)
+    }
+  }
+
+  const resetHeroForm = () => {
+    setShowHeroForm(false)
+    setEditingHero(null)
+    setHeroFormData({
+      title: '',
+      description: '',
+      buttonText: 'Shop Now',
+      buttonLink: '/products',
+      icon: '',
+      order: 0,
+      isActive: true,
+    })
+    setHeroImageFile(null)
+    setHeroImagePreview(null)
+  }
+
   if (!isAuthenticated || user?.role?.toUpperCase() !== 'ADMIN') {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -297,292 +526,471 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="bg-white min-h-screen">
-      <div className="container mx-auto px-4 py-12">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900">Admin Dashboard</h1>
-            <p className="text-gray-600 mt-2">Manage products, categories, and inventory</p>
-          </div>
-          <Button onClick={() => {
-            if (showForm) {
-              resetForm()
-            } else {
-              setShowForm(true)
-            }
-          }} className="bg-black text-white hover:bg-gray-800">
-            {showForm ? 'Cancel' : '+ Add New Product'}
-          </Button>
+    <div className="bg-gradient-to-br from-gray-50 to-amber-50 min-h-screen">
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900">Admin Dashboard</h1>
+          <p className="text-gray-600 mt-2">Manage products, hero sections, and site content</p>
         </div>
 
-        {/* Search and Filter */}
-        <div className="mb-8 grid md:grid-cols-2 gap-4">
-          <div>
-            <Input
-              type="text"
-              placeholder="Search products by name or item code..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-          <div>
-            <select
-              className="w-full rounded-md border border-gray-300 px-3 py-2"
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-            >
-              <option value="">All Categories</option>
-              {categories.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
-                </option>
-              ))}
-            </select>
-          </div>
+        {/* Tabs */}
+        <div className="flex gap-2 mb-6 bg-white rounded-lg p-1 shadow-sm w-fit">
+          <button
+            onClick={() => setActiveTab('products')}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-md font-medium transition-all ${
+              activeTab === 'products'
+                ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-md'
+                : 'text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            <Package className="w-4 h-4" />
+            Products
+          </button>
+          <button
+            onClick={() => setActiveTab('hero')}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-md font-medium transition-all ${
+              activeTab === 'hero'
+                ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-md'
+                : 'text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            <Layers className="w-4 h-4" />
+            Hero Sections
+          </button>
         </div>
 
-        {/* Product Form */}
-        {showForm && (
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle>{editingProduct ? 'Edit Product' : 'Create New Product'}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <Label>Product Name *</Label>
-                    <Input
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      required
-                      placeholder="Enter product name"
-                    />
-                  </div>
-                  <div>
-                    <Label>Category *</Label>
-                    <select
-                      className="w-full rounded-md border border-gray-300 px-3 py-2"
-                      value={formData.category}
-                      onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                      required={formData.category !== '__other__' || !newCategoryName.trim()}
-                    >
-                      <option value="">Select Category</option>
-                      {[...new Set([...CATEGORIES, ...categories])].filter(Boolean).sort().map((cat) => (
-                        <option key={cat} value={cat}>
-                          {cat}
-                        </option>
-                      ))}
-                      <option value="__other__">+ Add new category</option>
-                    </select>
-                    {formData.category === '__other__' && (
-                      <Input
-                        className="mt-2"
-                        placeholder="Type new category name"
-                        value={newCategoryName}
-                        onChange={(e) => setNewCategoryName(e.target.value)}
-                        required
-                      />
-                    )}
-                  </div>
-                  <div>
-                    <Label>Item Code *</Label>
-                    <Input
-                      value={formData.itemCode}
-                      onChange={(e) => setFormData({ ...formData, itemCode: e.target.value })}
-                      required
-                      placeholder="e.g., STNHM001"
-                      disabled={!!editingProduct}
-                    />
-                  </div>
-                  <div>
-                    <Label>Weight</Label>
-                    <Input
-                      value={formData.weight}
-                      onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
-                      placeholder="e.g., 250 gms"
-                    />
-                  </div>
-                  <div>
-                    <Label>MRP (₹) *</Label>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={formData.mrp}
-                      onChange={(e) => setFormData({ ...formData, mrp: e.target.value })}
-                      required
-                      placeholder="0.00"
-                    />
-                  </div>
-                  <div>
-                    <Label>Sale Price (₹) *</Label>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={formData.salePrice}
-                      onChange={(e) => setFormData({ ...formData, salePrice: e.target.value })}
-                      required
-                      placeholder="0.00"
-                    />
-                  </div>
-                  <div>
-                    <Label>GST</Label>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      max="1"
-                      value={formData.gst}
-                      onChange={(e) => setFormData({ ...formData, gst: e.target.value })}
-                      placeholder="0.05"
-                    />
-                  </div>
-                  <div>
-                    <Label>HSN Code</Label>
-                    <Input
-                      value={formData.hsnCode}
-                      onChange={(e) => setFormData({ ...formData, hsnCode: e.target.value })}
-                      placeholder="e.g., 1107"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <Label>Description</Label>
-                  <textarea
-                    className="w-full rounded-md border border-gray-300 px-3 py-2"
-                    rows={4}
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    placeholder="Product description..."
-                  />
-                </div>
-                <div>
-                  <Label>Product Image</Label>
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageChange}
-                  />
-                  {imagePreview && (
-                    <div className="mt-4">
-                      <img
-                        src={imagePreview}
-                        alt="Preview"
-                        className="w-32 h-32 object-cover rounded border"
+        {/* Products Tab */}
+        {activeTab === 'products' && (
+          <>
+            <div className="flex justify-between items-center mb-6">
+              <div></div>
+              <Button
+                onClick={() => {
+                  if (showForm) resetForm()
+                  else setShowForm(true)
+                }}
+                className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                {showForm ? 'Cancel' : 'Add New Product'}
+              </Button>
+            </div>
+
+            {/* Search and Filter */}
+            <div className="mb-6 grid md:grid-cols-2 gap-4">
+              <Input
+                type="text"
+                placeholder="Search products by name or item code..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="bg-white"
+              />
+              <select
+                className="w-full rounded-md border border-gray-300 px-3 py-2 bg-white"
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+              >
+                <option value="">All Categories</option>
+                {categories.map((cat) => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Product Form */}
+            {showForm && (
+              <Card className="mb-8 shadow-lg">
+                <CardHeader className="bg-gradient-to-r from-amber-50 to-orange-50">
+                  <CardTitle className="flex items-center gap-2">
+                    {editingProduct ? <Pencil className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
+                    {editingProduct ? 'Edit Product' : 'Create New Product'}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-6">
+                  <form onSubmit={handleSubmit} className="space-y-6">
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <Label>Product Name *</Label>
+                        <Input
+                          value={formData.name}
+                          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                          required
+                          placeholder="Enter product name"
+                        />
+                      </div>
+                      <div>
+                        <Label>Category *</Label>
+                        <select
+                          className="w-full rounded-md border border-gray-300 px-3 py-2"
+                          value={formData.category}
+                          onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                          required={formData.category !== '__other__' || !newCategoryName.trim()}
+                        >
+                          <option value="">Select Category</option>
+                          {[...new Set([...CATEGORIES, ...categories])].filter(Boolean).sort().map((cat) => (
+                            <option key={cat} value={cat}>{cat}</option>
+                          ))}
+                          <option value="__other__">+ Add new category</option>
+                        </select>
+                        {formData.category === '__other__' && (
+                          <Input
+                            className="mt-2"
+                            placeholder="Type new category name"
+                            value={newCategoryName}
+                            onChange={(e) => setNewCategoryName(e.target.value)}
+                            required
+                          />
+                        )}
+                      </div>
+                      <div>
+                        <Label>Item Code *</Label>
+                        <Input
+                          value={formData.itemCode}
+                          onChange={(e) => setFormData({ ...formData, itemCode: e.target.value })}
+                          required
+                          placeholder="e.g., STNHM001"
+                          disabled={!!editingProduct}
+                        />
+                      </div>
+                      <div>
+                        <Label>Weight</Label>
+                        <Input
+                          value={formData.weight}
+                          onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
+                          placeholder="e.g., 250 gms"
+                        />
+                      </div>
+                      <div>
+                        <Label>MRP (₹) *</Label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={formData.mrp}
+                          onChange={(e) => setFormData({ ...formData, mrp: e.target.value })}
+                          required
+                          placeholder="0.00"
+                        />
+                      </div>
+                      <div>
+                        <Label>Sale Price (₹) *</Label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={formData.salePrice}
+                          onChange={(e) => setFormData({ ...formData, salePrice: e.target.value })}
+                          required
+                          placeholder="0.00"
+                        />
+                      </div>
+                      <div>
+                        <Label>GST</Label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          max="1"
+                          value={formData.gst}
+                          onChange={(e) => setFormData({ ...formData, gst: e.target.value })}
+                          placeholder="0.05"
+                        />
+                      </div>
+                      <div>
+                        <Label>HSN Code</Label>
+                        <Input
+                          value={formData.hsnCode}
+                          onChange={(e) => setFormData({ ...formData, hsnCode: e.target.value })}
+                          placeholder="e.g., 1107"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <Label>Description</Label>
+                      <textarea
+                        className="w-full rounded-md border border-gray-300 px-3 py-2"
+                        rows={4}
+                        value={formData.description}
+                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                        placeholder="Product description..."
                       />
                     </div>
-                  )}
-                  {editingProduct?.image && !imagePreview && (
-                    <div className="mt-4">
-                      <p className="text-sm text-gray-600 mb-2">Current Image:</p>
-                      <img
-                        src={editingProduct.image}
-                        alt="Current"
-                        className="w-32 h-32 object-cover rounded border"
-                      />
+                    <div>
+                      <Label>Product Image</Label>
+                      <Input type="file" accept="image/*" onChange={handleImageChange} />
+                      {(imagePreview || editingProduct?.image) && (
+                        <div className="mt-4">
+                          <img
+                            src={imagePreview || editingProduct?.image}
+                            alt="Preview"
+                            className="w-32 h-32 object-cover rounded-lg border shadow-sm"
+                          />
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    id="inStock"
-                    checked={formData.inStock}
-                    onChange={(e) => setFormData({ ...formData, inStock: e.target.checked })}
-                    className="h-4 w-4"
-                  />
-                  <Label htmlFor="inStock" className="cursor-pointer">
-                    In Stock
-                  </Label>
-                </div>
-                <div className="flex gap-4">
-                  <Button type="submit" disabled={uploading} className="bg-black text-white hover:bg-gray-800">
-                    {uploading ? 'Saving...' : editingProduct ? 'Update Product' : 'Create Product'}
-                  </Button>
-                  <Button type="button" variant="outline" onClick={resetForm}>
-                    Cancel
-                  </Button>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        id="inStock"
+                        checked={formData.inStock}
+                        onChange={(e) => setFormData({ ...formData, inStock: e.target.checked })}
+                        className="h-4 w-4"
+                      />
+                      <Label htmlFor="inStock" className="cursor-pointer">In Stock</Label>
+                    </div>
+                    <div className="flex gap-4">
+                      <Button type="submit" disabled={uploading} className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600">
+                        {uploading ? 'Saving...' : editingProduct ? 'Update Product' : 'Create Product'}
+                      </Button>
+                      <Button type="button" variant="outline" onClick={resetForm}>Cancel</Button>
+                    </div>
+                  </form>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Products List */}
+            {loading ? (
+              <div className="text-center py-12">
+                <div className="inline-block w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full animate-spin" />
+              </div>
+            ) : (
+              <>
+                <p className="text-gray-600 mb-4">Showing {products.length} product{products.length !== 1 ? 's' : ''}</p>
+                {products.length === 0 ? (
+                  <div className="text-center py-12 bg-white rounded-lg shadow-sm">
+                    <Package className="w-12 h-12 mx-auto text-gray-300 mb-4" />
+                    <p className="text-gray-600 mb-4">No products found</p>
+                    <Button onClick={() => setShowForm(true)} className="bg-gradient-to-r from-amber-500 to-orange-500">
+                      Add Your First Product
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {products.map((product) => (
+                      <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow bg-white">
+                        <div className="aspect-square bg-gradient-to-br from-amber-50 to-orange-50 relative">
+                          {product.image ? (
+                            <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <ImageIcon className="w-12 h-12 text-amber-200" />
+                            </div>
+                          )}
+                          {!product.inStock && (
+                            <div className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
+                              Out of Stock
+                            </div>
+                          )}
+                        </div>
+                        <CardContent className="p-4">
+                          <h3 className="font-semibold text-lg mb-1 line-clamp-2">{product.name}</h3>
+                          <p className="text-xs text-gray-500 mb-2">{product.itemCode}</p>
+                          <p className="text-sm text-gray-600 mb-2 line-clamp-1">{product.category}</p>
+                          <div className="flex items-center justify-between mb-3">
+                            <div>
+                              <p className="text-lg font-bold text-amber-600">₹{product.salePrice}</p>
+                              {product.mrp > product.salePrice && (
+                                <p className="text-xs text-gray-500 line-through">₹{product.mrp}</p>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button variant="outline" size="sm" className="flex-1" onClick={() => handleEdit(product)}>
+                              <Pencil className="w-3 h-3 mr-1" /> Edit
+                            </Button>
+                            <Button variant="destructive" size="sm" className="flex-1" onClick={() => handleDelete(product.id)}>
+                              <Trash2 className="w-3 h-3 mr-1" /> Delete
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+          </>
         )}
 
-        {/* Products List */}
-        {loading ? (
-          <div className="text-center py-12">Loading products...</div>
-        ) : (
+        {/* Hero Sections Tab */}
+        {activeTab === 'hero' && (
           <>
-            <div className="mb-4 flex justify-between items-center">
+            <div className="flex justify-between items-center mb-6">
               <p className="text-gray-600">
-                Showing {products.length} product{products.length !== 1 ? 's' : ''}
+                Manage hero carousel slides. Active slides will be shown on the homepage.
               </p>
+              <Button
+                onClick={() => {
+                  if (showHeroForm) resetHeroForm()
+                  else setShowHeroForm(true)
+                }}
+                className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                {showHeroForm ? 'Cancel' : 'Add Hero Slide'}
+              </Button>
             </div>
-            {products.length === 0 ? (
-              <div className="text-center py-12 bg-gray-50 rounded-lg">
-                <p className="text-gray-600 mb-4">No products found</p>
-                <Button onClick={() => setShowForm(true)} className="bg-black text-white hover:bg-gray-800">
-                  Add Your First Product
+
+            {/* Hero Form - Simplified */}
+            {showHeroForm && (
+              <Card className="mb-8 shadow-lg">
+                <CardHeader className="bg-gradient-to-r from-amber-50 to-orange-50">
+                  <CardTitle className="flex items-center gap-2">
+                    {editingHero ? <Pencil className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
+                    {editingHero ? 'Edit Hero Slide' : 'Create Hero Slide'}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-6">
+                  <form onSubmit={handleHeroSubmit} className="space-y-6">
+                    {/* Background Image - Required */}
+                    <div>
+                      <Label className="text-base font-semibold">Banner Image *</Label>
+                      <p className="text-sm text-gray-500 mb-2">Upload a high-quality banner image (recommended: 1920x600px or 16:5 ratio)</p>
+                      <Input type="file" accept="image/*" onChange={handleHeroImageChange} />
+                      {(heroImagePreview || editingHero?.image) && (
+                        <div className="mt-4">
+                          <img
+                            src={heroImagePreview || editingHero?.image}
+                            alt="Preview"
+                            className="w-full max-w-2xl h-48 object-cover rounded-lg border shadow-sm"
+                          />
+                        </div>
+                      )}
+                      {!heroImagePreview && !editingHero?.image && (
+                        <div className="mt-4 w-full max-w-2xl h-48 bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
+                          <div className="text-center text-gray-400">
+                            <ImageIcon className="w-12 h-12 mx-auto mb-2" />
+                            <p>No image selected</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Button Settings */}
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <Label>Button Text</Label>
+                        <Input
+                          value={heroFormData.buttonText}
+                          onChange={(e) => setHeroFormData({ ...heroFormData, buttonText: e.target.value })}
+                          placeholder="Shop Now"
+                        />
+                      </div>
+                      <div>
+                        <Label>Button Link *</Label>
+                        <Input
+                          value={heroFormData.buttonLink}
+                          onChange={(e) => setHeroFormData({ ...heroFormData, buttonLink: e.target.value })}
+                          required
+                          placeholder="/products or /collections/wood-pressed-oils"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">Where should the button go when clicked?</p>
+                      </div>
+                    </div>
+
+                    {/* Display Order */}
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <Label>Display Order</Label>
+                        <Input
+                          type="number"
+                          min="0"
+                          value={heroFormData.order}
+                          onChange={(e) => setHeroFormData({ ...heroFormData, order: parseInt(e.target.value) || 0 })}
+                          placeholder="0"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">Lower numbers appear first</p>
+                      </div>
+                      <div className="flex items-end pb-2">
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            id="heroActive"
+                            checked={heroFormData.isActive}
+                            onChange={(e) => setHeroFormData({ ...heroFormData, isActive: e.target.checked })}
+                            className="h-4 w-4"
+                          />
+                          <Label htmlFor="heroActive" className="cursor-pointer">Active (visible on homepage)</Label>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-4 pt-4 border-t">
+                      <Button type="submit" disabled={heroLoading} className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600">
+                        {heroLoading ? 'Saving...' : editingHero ? 'Update Slide' : 'Create Slide'}
+                      </Button>
+                      <Button type="button" variant="outline" onClick={resetHeroForm}>Cancel</Button>
+                    </div>
+                  </form>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Hero Sections List */}
+            {heroSections.length === 0 ? (
+              <div className="text-center py-12 bg-white rounded-lg shadow-sm">
+                <Layers className="w-12 h-12 mx-auto text-gray-300 mb-4" />
+                <p className="text-gray-600 mb-2">No hero slides yet</p>
+                <p className="text-sm text-gray-500 mb-4">Default slides will be shown until you create custom ones.</p>
+                <Button onClick={() => setShowHeroForm(true)} className="bg-gradient-to-r from-amber-500 to-orange-500">
+                  Create Your First Slide
                 </Button>
               </div>
             ) : (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {products.map((product) => (
-                  <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                    <div className="aspect-square bg-gray-100 relative">
-                      {product.image ? (
-                        <img
-                          src={product.image}
-                          alt={product.name}
-                          className="w-full h-full object-cover"
-                        />
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {heroSections.map((hero) => (
+                  <Card key={hero.id} className={`overflow-hidden transition-all hover:shadow-lg ${hero.isActive ? 'ring-2 ring-amber-400' : ''}`}>
+                    {/* Image Preview */}
+                    <div className="relative w-full h-40 bg-gradient-to-br from-amber-100 to-orange-100">
+                      {hero.image ? (
+                        <img src={hero.image} alt="Hero slide" className="w-full h-full object-cover" />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-gray-400 text-4xl">
-                          🛢️
+                        <div className="w-full h-full flex items-center justify-center">
+                          <ImageIcon className="w-12 h-12 text-amber-300" />
                         </div>
                       )}
-                      {!product.inStock && (
-                        <div className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
-                          Out of Stock
-                        </div>
-                      )}
-                    </div>
-                    <CardContent className="p-4">
-                      <h3 className="font-semibold text-lg mb-1 line-clamp-2">{product.name}</h3>
-                      <p className="text-xs text-gray-500 mb-2">{product.itemCode}</p>
-                      <p className="text-sm text-gray-600 mb-2">Category: {product.category}</p>
-                      <div className="flex items-center justify-between mb-3">
-                        <div>
-                          <p className="text-lg font-bold text-green-600">₹{product.salePrice}</p>
-                          {product.mrp > product.salePrice && (
-                            <p className="text-xs text-gray-500 line-through">₹{product.mrp}</p>
-                          )}
-                        </div>
-                        {product.rating && product.rating > 0 && (
-                          <div className="text-right">
-                            <p className="text-sm font-semibold">⭐ {product.rating.toFixed(1)}</p>
-                            <p className="text-xs text-gray-500">({product.reviewCount || 0} reviews)</p>
-                          </div>
-                        )}
+                      {/* Status Badge */}
+                      <div className="absolute top-2 left-2">
+                        <span className={`text-xs px-2 py-1 rounded-full font-medium ${hero.isActive ? 'bg-amber-500 text-white' : 'bg-gray-500 text-white'}`}>
+                          {hero.isActive ? 'Active' : 'Inactive'}
+                        </span>
                       </div>
-                      <div className="flex gap-2">
+                      {/* Order Badge */}
+                      <div className="absolute top-2 right-2">
+                        <span className="text-xs px-2 py-1 rounded-full bg-black/60 text-white font-medium">
+                          #{hero.order + 1}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    {/* Content */}
+                    <CardContent className="p-4">
+                      <div className="mb-3">
+                        <p className="text-sm text-gray-600 mb-1">Button Link:</p>
+                        <p className="text-sm font-medium text-amber-700 truncate">{hero.buttonLink}</p>
+                      </div>
+                      <div className="mb-3">
+                        <p className="text-sm text-gray-600 mb-1">Button Text:</p>
+                        <p className="text-sm font-medium text-gray-800">{hero.buttonText || 'Shop Now'}</p>
+                      </div>
+                      
+                      {/* Actions */}
+                      <div className="flex gap-2 pt-3 border-t">
                         <Button
                           variant="outline"
                           size="sm"
-                          className="flex-1"
-                          onClick={() => handleEdit(product)}
+                          onClick={() => toggleHeroActive(hero)}
+                          className={`flex-1 ${hero.isActive ? 'text-orange-600 border-orange-200 hover:bg-orange-50' : 'text-amber-600 border-amber-200 hover:bg-amber-50'}`}
                         >
-                          Edit
+                          {hero.isActive ? <><EyeOff className="w-4 h-4 mr-1" /> Hide</> : <><Eye className="w-4 h-4 mr-1" /> Show</>}
                         </Button>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          className="flex-1"
-                          onClick={() => handleDelete(product.id)}
-                        >
-                          Delete
+                        <Button variant="outline" size="sm" onClick={() => handleEditHero(hero)} className="flex-1">
+                          <Pencil className="w-4 h-4 mr-1" /> Edit
+                        </Button>
+                        <Button variant="destructive" size="sm" onClick={() => handleDeleteHero(hero.id)}>
+                          <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
                     </CardContent>

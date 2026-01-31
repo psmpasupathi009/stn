@@ -123,3 +123,25 @@ model OrderItem {
   price     Float
   createdAt DateTime @default(now())
 }
+
+model HeroSection {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  description String
+  buttonText  String
+  buttonLink  String
+  image       String?  // Optional image URL
+  icon        String?  // Icon name for fallback
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model SiteSettings {
+  id                    String   @id @default(auto()) @map("_id") @db.ObjectId
+  key                   String   @unique
+  value                 String   // JSON string for complex values
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}

@@ -149,7 +149,7 @@ export default function CartPage() {
             contact: '',
           },
           theme: {
-            color: '#10b981',
+            color: '#d97706',
           },
         }
 

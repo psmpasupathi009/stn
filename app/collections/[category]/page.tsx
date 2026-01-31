@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/lib/context'
-import { categoryMapping } from '@/components/CategoryIcons'
+import { categoryMapping } from '@/components/CategoryMarquee'
 import { toast } from 'sonner'
 
 interface Product {

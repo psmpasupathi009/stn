@@ -209,7 +209,7 @@ export default function ForgotPasswordPage() {
             </Alert>
           )}
           {success && (
-            <Alert className="border-green-200 bg-green-50 text-green-800">
+            <Alert className="border-amber-200 bg-amber-50 text-amber-800">
               <AlertDescription>{success}</AlertDescription>
             </Alert>
           )}

@@ -102,7 +102,7 @@ export default function ProductsPage() {
               onClick={() => setSelectedCategory('')}
               className={`px-4 py-2 rounded-full ${
                 selectedCategory === ''
-                  ? 'bg-green-600 text-white'
+                  ? 'bg-amber-600 text-white'
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
               }`}
             >
@@ -114,7 +114,7 @@ export default function ProductsPage() {
                 onClick={() => setSelectedCategory(category)}
                 className={`px-4 py-2 rounded-full ${
                   selectedCategory === category
-                    ? 'bg-green-600 text-white'
+                    ? 'bg-amber-600 text-white'
                     : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                 }`}
               >
