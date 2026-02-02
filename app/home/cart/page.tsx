@@ -127,7 +127,7 @@ export default function CartPage() {
 
   return (
     <div className="min-h-screen bg-neutral-50 w-full min-w-0 overflow-x-hidden">
-        <div className="container mx-auto w-full max-w-full min-w-0 px-3 sm:px-4 md:px-6 py-6 sm:py-8 md:py-12">
+        <div className="container mx-auto w-full min-w-0 px-3 sm:px-4 md:px-6 py-6 sm:py-8 md:py-12 max-w-6xl">
           <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-neutral-900 mb-6 sm:mb-8">Shopping Cart</h1>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
             <div className="md:col-span-2 space-y-4 min-w-0">

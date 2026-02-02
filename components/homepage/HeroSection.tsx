@@ -78,9 +78,19 @@ export default function HeroSection() {
 
   if (heroCount === 0) return null
 
+  // Ensure hero button links always point to valid app routes (avoid 404)
+  const getHeroButtonHref = (link: string | undefined): string => {
+    const raw = (link || '').trim()
+    if (!raw || raw === '/' || raw === '/products') return '/home/products'
+    if (raw.startsWith('/home')) return raw
+    // Paths like /home/collections/oils are valid; others without /home may 404
+    if (raw.startsWith('/')) return `/home${raw}` // e.g. /products -> /home/products
+    return '/home/products'
+  }
+
   return (
     <section className="w-full bg-white py-4 sm:py-5 md:py-6">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-4 w-full min-w-0 max-w-7xl">
         <div
           className="relative w-full overflow-hidden"
           style={{ height: 'calc(100vh - 220px)', minHeight: '400px', maxHeight: '650px' }}
@@ -125,9 +135,9 @@ export default function HeroSection() {
                     </div>
                   </div>
                 )}
-                <div className="absolute bottom-6 sm:bottom-8 md:bottom-10 lg:bottom-12 left-0 right-0 flex justify-center z-20">
-                  <Link href={slide.buttonLink || '/home/products'}>
-                    <button className="bg-black hover:bg-gray-800 text-white px-6 sm:px-8 md:px-10 py-2.5 sm:py-3 md:py-3.5 text-sm sm:text-base font-medium shadow-lg hover:shadow-xl transition-all duration-200">
+                <div className="absolute bottom-6 sm:bottom-8 md:bottom-10 lg:bottom-12 left-0 right-0 flex justify-center z-20 px-2">
+                  <Link href={getHeroButtonHref(slide.buttonLink)} className="touch-manipulation">
+                    <button type="button" className="bg-[var(--primary-green)] hover:opacity-90 text-white px-5 sm:px-6 md:px-8 py-2.5 sm:py-3 md:py-3.5 text-sm sm:text-base font-medium shadow-lg hover:shadow-xl transition-all duration-200 rounded-md min-h-[44px]">
                       {slide.buttonText || 'Shop Now'}
                     </button>
                   </Link>

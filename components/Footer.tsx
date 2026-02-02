@@ -3,7 +3,7 @@ import Link from 'next/link'
 export default function Footer() {
   return (
     <footer className="bg-gray-900 text-white py-8 sm:py-10 md:py-12 mt-12 sm:mt-16 md:mt-20">
-      <div className="container mx-auto w-full max-w-full min-w-0 px-3 sm:px-4 md:px-6">
+      <div className="container mx-auto w-full min-w-0 px-3 sm:px-4 md:px-6 max-w-7xl">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 mb-6 sm:mb-8">
           <div>
             <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">Shop</h3>
@@ -73,10 +73,10 @@ export default function Footer() {
               © 2026, STN Golden Healthy Foods
             </p>
             <div className="flex flex-wrap justify-center gap-3 sm:gap-6 text-xs sm:text-sm text-gray-400 order-1 md:order-2">
-              <Link href="/privacy-policy" className="hover:text-white">Privacy policy</Link>
-              <Link href="/refund-policy" className="hover:text-white">Refund policy</Link>
-              <Link href="/terms-of-service" className="hover:text-white">Terms of service</Link>
-              <Link href="/shipping-policy" className="hover:text-white">Shipping policy</Link>
+              <Link href="/home/contact" className="hover:text-white">Privacy policy</Link>
+              <Link href="/home/contact" className="hover:text-white">Refund policy</Link>
+              <Link href="/home/contact" className="hover:text-white">Terms of service</Link>
+              <Link href="/home/contact" className="hover:text-white">Shipping policy</Link>
               <Link href="/home/contact" className="hover:text-white">Contact information</Link>
             </div>
           </div>

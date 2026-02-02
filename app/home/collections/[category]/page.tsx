@@ -124,7 +124,7 @@ export default function CategoryPage() {
 
   return (
     <div className="bg-white min-h-screen">
-      <div className="container mx-auto w-full max-w-full min-w-0 px-3 sm:px-4 md:px-6 py-8 sm:py-12">
+      <div className="container mx-auto w-full min-w-0 px-3 sm:px-4 md:px-6 py-8 sm:py-12 max-w-6xl">
         <div className="text-center mb-12">
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
             {categoryInfo.title}

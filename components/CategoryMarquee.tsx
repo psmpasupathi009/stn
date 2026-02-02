@@ -91,7 +91,7 @@ const categories = [
 export default function CategoryMarquee() {
   return (
     <div
-      className="category-marquee w-full max-w-full min-w-0 overflow-hidden bg-linear-to-r from-green-50 via-white to-green-50 border-b border-green-100 py-2.5 sm:py-3"
+      className="category-marquee w-full min-w-0 overflow-hidden bg-linear-to-r from-green-50 via-white to-green-50 border-b border-green-100 py-2.5 sm:py-3 max-w-7xl mx-auto"
       style={{ contain: 'layout' }}
     >
       <Marquee

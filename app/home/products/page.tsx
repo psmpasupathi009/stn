@@ -146,8 +146,8 @@ function ProductsPageContent() {
 
   return (
     <div className="flex flex-col w-full min-w-0 overflow-x-hidden">
-      <div className="container mx-auto w-full max-w-screen-2xl px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8">
-        <div className="flex gap-6 lg:gap-8">
+      <div className="container mx-auto w-full min-w-0 px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8 max-w-6xl">
+        <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-8">
           {/* Sidebar: category filter (selected view) */}
           <aside className="hidden lg:flex lg:flex-col lg:w-56 lg:shrink-0 border-r border-gray-200 pr-6">
             <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
@@ -188,49 +188,51 @@ function ProductsPageContent() {
 
           {/* Main: search + product grid */}
           <div className="flex-1 min-w-0">
-            <div className="flex flex-col gap-4 mb-6 md:mb-8 min-w-0">
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">
+            <div className="flex flex-col gap-3 sm:gap-4 mb-4 sm:mb-6 md:mb-8 min-w-0">
+              <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900">
                 Products
                 {categoryFromUrl && (
-                  <span className="text-gray-500 font-normal ml-2">
+                  <span className="text-gray-500 font-normal ml-1 sm:ml-2 truncate">
                     · {categoryFromUrl}
                   </span>
                 )}
               </h1>
-              {/* Mobile category filter (sidebar hidden on small screens) */}
-              <div className="flex flex-wrap gap-2 lg:hidden">
-                <Link
-                  href="/home/products"
-                  className={cn(
-                    'px-3 py-1.5 rounded-full text-sm font-medium transition-colors border',
-                    !categoryFromUrl
-                      ? 'bg-gray-900 text-white border-gray-900'
-                      : 'bg-white text-gray-700 border-gray-200 hover:border-gray-300'
-                  )}
-                >
-                  All
-                </Link>
-                {categories.map((cat) => {
-                  const isActive =
-                    categoryFromUrl &&
-                    (cat?.trim() || '').toLowerCase() === categoryFromUrl.toLowerCase()
-                  return (
-                    <Link
-                      key={cat}
-                      href={`/home/products?category=${encodeURIComponent(cat?.trim() || '')}`}
-                      className={cn(
-                        'px-3 py-1.5 rounded-full text-sm font-medium transition-colors border',
-                        isActive
-                          ? 'bg-gray-900 text-white border-gray-900'
-                          : 'bg-white text-gray-700 border-gray-200 hover:border-gray-300'
-                      )}
-                    >
-                      {cat}
-                    </Link>
-                  )
-                })}
+              {/* Mobile/tablet category filter: horizontal scroll on small screens */}
+              <div className="flex overflow-x-auto gap-2 lg:hidden pb-1 -mx-1 px-1 scrollbar-thin touch-pan-x">
+                <div className="flex gap-2 shrink-0">
+                  <Link
+                    href="/home/products"
+                    className={cn(
+                      'px-3 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-colors border shrink-0 whitespace-nowrap',
+                      !categoryFromUrl
+                        ? 'bg-gray-900 text-white border-gray-900'
+                        : 'bg-white text-gray-700 border-gray-200 hover:border-gray-300'
+                    )}
+                  >
+                    All
+                  </Link>
+                  {categories.map((cat) => {
+                    const isActive =
+                      categoryFromUrl &&
+                      (cat?.trim() || '').toLowerCase() === categoryFromUrl.toLowerCase()
+                    return (
+                      <Link
+                        key={cat}
+                        href={`/home/products?category=${encodeURIComponent(cat?.trim() || '')}`}
+                        className={cn(
+                          'px-3 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-colors border shrink-0 whitespace-nowrap',
+                          isActive
+                            ? 'bg-gray-900 text-white border-gray-900'
+                            : 'bg-white text-gray-700 border-gray-200 hover:border-gray-300'
+                        )}
+                      >
+                        {cat}
+                      </Link>
+                    )
+                  })}
+                </div>
               </div>
-              <div className="relative max-w-md">
+              <div className="relative w-full max-w-md min-w-0">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                 <Input
                   type="text"
@@ -243,12 +245,12 @@ function ProductsPageContent() {
             </div>
 
             {displayedProducts.length === 0 ? (
-              <div className="rounded-xl border border-gray-200 bg-white p-8 md:p-12 text-center">
+              <div className="rounded-xl border border-gray-200 bg-white p-6 sm:p-8 md:p-12 text-center min-w-0">
                 <Package className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                <p className="text-gray-600 font-medium">No products found</p>
+                <p className="text-gray-600 font-medium text-sm sm:text-base">No products found</p>
               </div>
             ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-5 min-w-0">
                 {displayedProducts.map((product) => (
                   <ProductCard
                     key={product.id}

@@ -104,7 +104,7 @@ export default function ProductDetailPage() {
 
   return (
     <div className="min-h-screen bg-neutral-50 w-full min-w-0 overflow-x-hidden">
-      <div className="container mx-auto w-full max-w-full min-w-0 px-3 sm:px-4 md:px-6 py-6 sm:py-8 md:py-12">
+      <div className="container mx-auto w-full min-w-0 px-3 sm:px-4 md:px-6 py-6 sm:py-8 md:py-12 max-w-6xl">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 md:gap-12">
           {/* Product Images */}
           <div className="min-w-0">

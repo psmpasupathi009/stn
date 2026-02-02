@@ -5,6 +5,7 @@ import { AuthProvider } from "@/lib/context";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
+import ScrollToTop from "@/components/ScrollToTop";
 import { Toaster } from "sonner";
 
 const geistSans = Geist({
@@ -44,6 +45,7 @@ export default function RootLayout({
             {children}
           </main>
           <Footer />
+          <ScrollToTop />
           <WhatsAppButton />
         </AuthProvider>
       </body>
