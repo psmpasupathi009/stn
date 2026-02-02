@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { jsPDF } from 'jspdf'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
@@ -8,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useAuth } from '@/lib/context'
+import { toast } from 'sonner'
 import {
   Package,
   Image as ImageIcon,
@@ -17,6 +19,15 @@ import {
   Trash2,
   Eye,
   EyeOff,
+  ShoppingBag,
+  Truck,
+  Download,
+  CheckSquare,
+  Square,
+  Search,
+  Filter,
+  RefreshCw,
+  X,
 } from 'lucide-react'
 
 interface Product {
@@ -49,6 +60,54 @@ interface HeroSection {
   isActive: boolean
 }
 
+interface OrderItem {
+  id: string
+  quantity: number
+  price: number
+  product: {
+    id: string
+    name: string
+    image?: string
+    itemCode: string
+    weight: string
+  }
+}
+
+interface Order {
+  id: string
+  totalAmount: number
+  subtotal?: number
+  gstAmount?: number
+  status: string
+  paymentStatus: string
+  shippingAddress: string
+  trackingNumber?: string
+  courierName?: string
+  shippedAt?: string
+  expectedDelivery?: string
+  deliveredAt?: string
+  adminNotes?: string
+  createdAt: string
+  updatedAt: string
+  user: {
+    id: string
+    name?: string
+    email: string
+    phoneNumber?: string
+  }
+  items: OrderItem[]
+}
+
+const ORDER_STATUSES = [
+  { value: 'pending', label: 'Pending', color: 'bg-yellow-100 text-yellow-800' },
+  { value: 'confirmed', label: 'Confirmed', color: 'bg-blue-100 text-blue-800' },
+  { value: 'processing', label: 'Processing', color: 'bg-purple-100 text-purple-800' },
+  { value: 'shipped', label: 'Shipped', color: 'bg-indigo-100 text-indigo-800' },
+  { value: 'out_for_delivery', label: 'Out for Delivery', color: 'bg-cyan-100 text-cyan-800' },
+  { value: 'delivered', label: 'Delivered', color: 'bg-green-100 text-green-800' },
+  { value: 'cancelled', label: 'Cancelled', color: 'bg-red-100 text-red-800' },
+]
+
 const CATEGORIES = [
   'HEALTHY  MIXES',
   'IDLY PODI VARIETIES',
@@ -61,7 +120,7 @@ const CATEGORIES = [
   'Essential Millets',
 ]
 
-type TabType = 'products' | 'hero'
+type TabType = 'products' | 'hero' | 'orders'
 
 export default function AdminDashboard() {
   const { user, isAuthenticated } = useAuth()
@@ -103,7 +162,7 @@ export default function AdminDashboard() {
     title: '',
     description: '',
     buttonText: 'Shop Now',
-    buttonLink: '/products',
+    buttonLink: '/home/products',
     icon: '',
     order: 0,
     isActive: true,
@@ -112,9 +171,29 @@ export default function AdminDashboard() {
   const [heroImagePreview, setHeroImagePreview] = useState<string | null>(null)
   const [heroLoading, setHeroLoading] = useState(false)
 
+  // Orders state
+  const [orders, setOrders] = useState<Order[]>([])
+  const [ordersLoading, setOrdersLoading] = useState(false)
+  const [selectedOrders, setSelectedOrders] = useState<Set<string>>(new Set())
+  const [orderStatusFilter, setOrderStatusFilter] = useState('all')
+  const [orderPaymentFilter, setOrderPaymentFilter] = useState('all')
+  const [orderDateFrom, setOrderDateFrom] = useState('')
+  const [orderDateTo, setOrderDateTo] = useState('')
+  const [orderSearch, setOrderSearch] = useState('')
+  const [editingOrder, setEditingOrder] = useState<Order | null>(null)
+  const [bulkStatus, setBulkStatus] = useState('')
+  const [showBulkStatusModal, setShowBulkStatusModal] = useState(false)
+  const [shippingFormData, setShippingFormData] = useState({
+    status: '',
+    trackingNumber: '',
+    courierName: '',
+    expectedDelivery: '',
+    adminNotes: '',
+  })
+
   useEffect(() => {
     if (!isAuthenticated) {
-      router.push('/login')
+      router.push('/home/login')
       return
     }
     if (user?.role?.toUpperCase() !== 'ADMIN') {
@@ -124,6 +203,7 @@ export default function AdminDashboard() {
     fetchProducts()
     fetchCategories()
     fetchHeroSections()
+    fetchOrders()
     // eslint-disable-next-line react-hooks/exhaustive-deps -- run once when auth is ready; fetch fns are stable in intent
   }, [isAuthenticated, user, router])
 
@@ -228,7 +308,7 @@ export default function AdminDashboard() {
     e.preventDefault()
     const categoryValue = formData.category === '__other__' ? newCategoryName.trim() : formData.category
     if (!categoryValue) {
-      alert('Please select or enter a category.')
+      toast.error('Please select or enter a category.')
       return
     }
     setUploading(true)
@@ -275,14 +355,14 @@ export default function AdminDashboard() {
         setImagePreview(null)
         fetchProducts()
         fetchCategories()
-        alert(editingProduct ? 'Product updated successfully!' : 'Product created successfully!')
+        toast.success(editingProduct ? 'Product updated successfully!' : 'Product created successfully!')
       } else {
         const errorData = await res.json()
-        alert(errorData.error || 'Failed to save product')
+        toast.error(errorData.error || 'Failed to save product')
       }
     } catch (error) {
       console.error('Error saving product:', error)
-      alert('Failed to save product')
+      toast.error('Failed to save product')
     } finally {
       setUploading(false)
     }
@@ -320,11 +400,11 @@ export default function AdminDashboard() {
         fetchProducts()
         alert('Product deleted successfully!')
       } else {
-        alert('Failed to delete product')
+        toast.error('Failed to delete product')
       }
     } catch (error) {
       console.error('Error deleting product:', error)
-      alert('Failed to delete product')
+      toast.error('Failed to delete product')
     }
   }
 
@@ -390,7 +470,7 @@ export default function AdminDashboard() {
     
     // Validate image for new slides
     if (!editingHero && !heroImageFile && !heroImagePreview) {
-      alert('Please upload a banner image')
+      toast.error('Please upload a banner image')
       return
     }
     
@@ -412,7 +492,7 @@ export default function AdminDashboard() {
           title: heroFormData.title || 'Hero Slide',
           description: heroFormData.description || '',
           buttonText: heroFormData.buttonText || 'Shop Now',
-          buttonLink: heroFormData.buttonLink || '/products',
+          buttonLink: heroFormData.buttonLink || '/home/products',
           icon: heroFormData.icon || '',
           order: heroFormData.order,
           isActive: heroFormData.isActive,
@@ -423,14 +503,14 @@ export default function AdminDashboard() {
       if (res.ok) {
         resetHeroForm()
         fetchHeroSections()
-        alert(editingHero ? 'Hero slide updated!' : 'Hero slide created!')
+        toast.success(editingHero ? 'Hero slide updated!' : 'Hero slide created!')
       } else {
         const errorData = await res.json()
         alert(errorData.error || 'Failed to save hero slide')
       }
     } catch (error) {
       console.error('Error saving hero slide:', error)
-      alert('Failed to save hero slide')
+      toast.error('Failed to save hero slide')
     } finally {
       setHeroLoading(false)
     }
@@ -442,7 +522,7 @@ export default function AdminDashboard() {
       title: hero.title || '',
       description: hero.description || '',
       buttonText: hero.buttonText || 'Shop Now',
-      buttonLink: hero.buttonLink || '/products',
+      buttonLink: hero.buttonLink || '/home/products',
       icon: hero.icon || '',
       order: hero.order,
       isActive: hero.isActive,
@@ -463,13 +543,13 @@ export default function AdminDashboard() {
 
       if (res.ok) {
         fetchHeroSections()
-        alert('Hero section deleted!')
+        toast.success('Hero section deleted!')
       } else {
-        alert('Failed to delete hero section')
+        toast.error('Failed to delete hero section')
       }
     } catch (error) {
       console.error('Error deleting hero section:', error)
-      alert('Failed to delete hero section')
+      toast.error('Failed to delete hero section')
     }
   }
 
@@ -497,13 +577,438 @@ export default function AdminDashboard() {
       title: '',
       description: '',
       buttonText: 'Shop Now',
-      buttonLink: '/products',
+      buttonLink: '/home/products',
       icon: '',
       order: 0,
       isActive: true,
     })
     setHeroImageFile(null)
     setHeroImagePreview(null)
+  }
+
+  // Orders functions
+  const fetchOrders = async (overrides?: { status?: string; payment?: string; dateFrom?: string; dateTo?: string; search?: string }) => {
+    try {
+      setOrdersLoading(true)
+      const status = overrides?.status ?? orderStatusFilter
+      const payment = overrides?.payment ?? orderPaymentFilter
+      const dateFrom = overrides?.dateFrom ?? orderDateFrom
+      const dateTo = overrides?.dateTo ?? orderDateTo
+      const search = overrides?.search ?? orderSearch
+
+      const params = new URLSearchParams()
+      if (status !== 'all') params.append('status', status)
+      if (payment !== 'all') params.append('paymentStatus', payment)
+      if (dateFrom) params.append('dateFrom', dateFrom)
+      if (dateTo) params.append('dateTo', dateTo)
+      if (search) params.append('search', search)
+
+      const res = await fetch(`/api/admin/orders?${params.toString()}`, { credentials: 'include' })
+      if (res.ok) {
+        const data = await res.json()
+        setOrders(data)
+      }
+    } catch (error) {
+      console.error('Error fetching orders:', error)
+      toast.error('Failed to fetch orders')
+    } finally {
+      setOrdersLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    if (activeTab === 'orders' && isAuthenticated && user?.role?.toUpperCase() === 'ADMIN') {
+      fetchOrders()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, orderStatusFilter, orderPaymentFilter, orderDateFrom, orderDateTo])
+
+  const clearOrderFilters = () => {
+    setOrderStatusFilter('all')
+    setOrderPaymentFilter('all')
+    setOrderDateFrom('')
+    setOrderDateTo('')
+    setOrderSearch('')
+    fetchOrders({ status: 'all', payment: 'all', dateFrom: '', dateTo: '', search: '' })
+    toast.success('Filters cleared')
+  }
+
+  const handleOrderSelect = (orderId: string) => {
+    setSelectedOrders((prev) => {
+      const newSet = new Set(prev)
+      if (newSet.has(orderId)) {
+        newSet.delete(orderId)
+      } else {
+        newSet.add(orderId)
+      }
+      return newSet
+    })
+  }
+
+  const handleSelectAll = () => {
+    if (selectedOrders.size === orders.filter(o => o.paymentStatus === 'paid').length) {
+      setSelectedOrders(new Set())
+    } else {
+      setSelectedOrders(new Set(orders.filter(o => o.paymentStatus === 'paid').map((o) => o.id)))
+    }
+  }
+
+  const handleUpdateOrder = async () => {
+    if (!editingOrder) return
+
+    try {
+      const res = await fetch('/api/admin/orders', {
+        method: 'PUT',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orderId: editingOrder.id,
+          ...shippingFormData,
+        }),
+      })
+
+      if (res.ok) {
+        toast.success('Order updated successfully')
+        setEditingOrder(null)
+        setShippingFormData({
+          status: '',
+          trackingNumber: '',
+          courierName: '',
+          expectedDelivery: '',
+          adminNotes: '',
+        })
+        fetchOrders()
+      } else {
+        toast.error('Failed to update order')
+      }
+    } catch (error) {
+      console.error('Error updating order:', error)
+      toast.error('Failed to update order')
+    }
+  }
+
+  const handleBulkShip = async () => {
+    if (selectedOrders.size === 0) {
+      toast.error('Please select orders to ship')
+      return
+    }
+
+    const courierName = prompt('Enter courier name (e.g., BlueDart, DTDC, Delhivery):')
+    if (!courierName) return
+
+    const expectedDelivery = prompt('Enter expected delivery date (YYYY-MM-DD):')
+
+    try {
+      const res = await fetch('/api/admin/orders', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orderIds: Array.from(selectedOrders),
+          status: 'shipped',
+          courierName,
+          expectedDelivery: expectedDelivery || undefined,
+        }),
+      })
+
+      if (res.ok) {
+        toast.success(`${selectedOrders.size} orders marked as shipped`)
+        setSelectedOrders(new Set())
+        fetchOrders()
+      } else {
+        toast.error('Failed to update orders')
+      }
+    } catch (error) {
+      console.error('Error bulk shipping:', error)
+      toast.error('Failed to update orders')
+    }
+  }
+
+  const handleBulkUpdateStatus = async () => {
+    if (selectedOrders.size === 0) {
+      toast.error('Please select orders')
+      return
+    }
+    if (!bulkStatus) {
+      toast.error('Please select a status')
+      return
+    }
+
+    try {
+      const payload: Record<string, unknown> = {
+        orderIds: Array.from(selectedOrders),
+        status: bulkStatus,
+      }
+      if (bulkStatus === 'shipped') {
+        const courierName = prompt('Courier name (optional):')
+        const expectedDelivery = prompt('Expected delivery date YYYY-MM-DD (optional):')
+        if (courierName) payload.courierName = courierName
+        if (expectedDelivery) payload.expectedDelivery = expectedDelivery
+      }
+
+      const res = await fetch('/api/admin/orders', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+
+      if (res.ok) {
+        toast.success(`${selectedOrders.size} order(s) updated to ${ORDER_STATUSES.find(s => s.value === bulkStatus)?.label || bulkStatus}`)
+        setSelectedOrders(new Set())
+        setShowBulkStatusModal(false)
+        setBulkStatus('')
+        fetchOrders()
+      } else {
+        toast.error('Failed to update orders')
+      }
+    } catch (error) {
+      console.error('Error bulk update:', error)
+      toast.error('Failed to update orders')
+    }
+  }
+
+  const handleDownloadLabels = async (orderIdsArg?: string[]) => {
+    const ids = orderIdsArg ?? Array.from(selectedOrders)
+    if (ids.length === 0) {
+      toast.error('Please select orders to download labels')
+      return
+    }
+
+    try {
+      const res = await fetch('/api/admin/orders/labels', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderIds: ids }),
+      })
+
+      if (res.ok) {
+        const { labels } = await res.json()
+        
+        // Generate PDF and download
+        const pdf = generateLabelsPDF(labels)
+        const filename = `shipping-labels-${new Date().toISOString().slice(0, 10)}.pdf`
+        pdf.save(filename)
+        toast.success(`Downloaded ${ids.length} label(s) as PDF`)
+      } else {
+        toast.error('Failed to generate labels')
+      }
+    } catch (error) {
+      console.error('Error downloading labels:', error)
+      toast.error('Failed to generate labels')
+    }
+  }
+
+  const generateLabelsPDF = (labels: Array<{
+    orderId: string
+    orderDate: string
+    customerName: string
+    customerEmail: string
+    customerPhone: string
+    shippingAddress: string
+    totalAmount: number
+    itemCount: number
+    items: Array<{ name: string; itemCode: string; weight: string; quantity: number; price: number }>
+    trackingNumber?: string
+    courierName?: string
+  }>) => {
+    const doc = new jsPDF({ unit: 'mm', format: 'a4' })
+    const pageWidth = doc.internal.pageSize.getWidth()
+    const margin = 15
+    let y = margin
+
+    labels.forEach((label, idx) => {
+      if (idx > 0) {
+        doc.addPage()
+        y = margin
+      }
+
+      // Header
+      doc.setFontSize(20)
+      doc.setFont('helvetica', 'bold')
+      doc.text('STN Products', margin, y)
+      y += 6
+      doc.setFontSize(10)
+      doc.setFont('helvetica', 'normal')
+      doc.setTextColor(100, 100, 100)
+      doc.text('Premium Quality Traditional Products', margin, y)
+      y += 10
+      doc.setTextColor(0, 0, 0)
+
+      // Order ID & Date
+      doc.setFontSize(10)
+      doc.setFont('helvetica', 'normal')
+      doc.text(`Order #${label.orderId.slice(-8).toUpperCase()}`, margin, y)
+      doc.text(new Date(label.orderDate).toLocaleDateString('en-IN'), pageWidth - margin, y, { align: 'right' })
+      y += 8
+
+      // Ship To
+      doc.setFontSize(12)
+      doc.setFont('helvetica', 'bold')
+      doc.text('SHIP TO:', margin, y)
+      y += 6
+      doc.setFont('helvetica', 'normal')
+      doc.setFontSize(11)
+      const shipLines = doc.splitTextToSize(`${label.customerName}\n${label.shippingAddress}\nPhone: ${label.customerPhone || 'N/A'}`, pageWidth - 2 * margin)
+      doc.text(shipLines, margin, y)
+      y += shipLines.length * 5 + 8
+
+      // Items table
+      doc.setFontSize(10)
+      doc.setFont('helvetica', 'bold')
+      doc.text(`ITEMS (${label.itemCount}):`, margin, y)
+      y += 6
+      doc.setFont('helvetica', 'normal')
+      label.items.forEach((item) => {
+        doc.text(`${item.name} (${item.itemCode})`, margin, y)
+        doc.text(`Qty: ${item.quantity} | ${item.weight}`, pageWidth - margin, y, { align: 'right' })
+        y += 5
+      })
+      y += 5
+
+      // Total & Courier
+      doc.setFont('helvetica', 'bold')
+      doc.text(`Total: ₹${label.totalAmount.toLocaleString('en-IN')}`, margin, y)
+      if (label.courierName) {
+        doc.text(`Courier: ${label.courierName}`, pageWidth - margin, y, { align: 'right' })
+      }
+      y += 6
+      if (label.trackingNumber) {
+        doc.setFont('helvetica', 'normal')
+        doc.text(`Tracking: ${label.trackingNumber}`, margin, y)
+        y += 6
+      }
+    })
+
+    return doc
+  }
+
+  const generateLabelHTML = (labels: Array<{
+    orderId: string
+    orderDate: string
+    customerName: string
+    customerEmail: string
+    customerPhone: string
+    shippingAddress: string
+    totalAmount: number
+    itemCount: number
+    items: Array<{
+      name: string
+      itemCode: string
+      weight: string
+      quantity: number
+      price: number
+    }>
+    trackingNumber?: string
+    courierName?: string
+  }>) => {
+    const labelsHTML = labels.map((label) => `
+      <div class="label" style="page-break-after: always; padding: 20px; border: 2px solid #000; margin: 10px; font-family: Arial, sans-serif;">
+        <div style="border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px;">
+          <h2 style="margin: 0; font-size: 24px;">STN Products</h2>
+          <p style="margin: 5px 0; font-size: 12px; color: #666;">Premium Quality Traditional Products</p>
+        </div>
+        
+        <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+          <div>
+            <p style="margin: 0; font-size: 12px; color: #666;">Order ID</p>
+            <p style="margin: 0; font-size: 16px; font-weight: bold;">#${label.orderId.slice(-8).toUpperCase()}</p>
+          </div>
+          <div style="text-align: right;">
+            <p style="margin: 0; font-size: 12px; color: #666;">Order Date</p>
+            <p style="margin: 0; font-size: 14px;">${new Date(label.orderDate).toLocaleDateString('en-IN')}</p>
+          </div>
+        </div>
+        
+        <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+          <h3 style="margin: 0 0 10px 0; font-size: 14px; color: #666;">SHIP TO:</h3>
+          <p style="margin: 0; font-size: 18px; font-weight: bold;">${label.customerName}</p>
+          <p style="margin: 5px 0; font-size: 14px; white-space: pre-wrap;">${label.shippingAddress}</p>
+          <p style="margin: 5px 0; font-size: 14px;"><strong>Phone:</strong> ${label.customerPhone || 'N/A'}</p>
+        </div>
+        
+        <div style="margin-bottom: 15px;">
+          <h3 style="margin: 0 0 10px 0; font-size: 14px; color: #666;">ITEMS (${label.itemCount}):</h3>
+          <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+            <thead>
+              <tr style="background: #eee;">
+                <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">Product</th>
+                <th style="padding: 8px; text-align: center; border: 1px solid #ddd;">Code</th>
+                <th style="padding: 8px; text-align: center; border: 1px solid #ddd;">Qty</th>
+                <th style="padding: 8px; text-align: right; border: 1px solid #ddd;">Weight</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${label.items.map(item => `
+                <tr>
+                  <td style="padding: 8px; border: 1px solid #ddd;">${item.name}</td>
+                  <td style="padding: 8px; text-align: center; border: 1px solid #ddd;">${item.itemCode}</td>
+                  <td style="padding: 8px; text-align: center; border: 1px solid #ddd;">${item.quantity}</td>
+                  <td style="padding: 8px; text-align: right; border: 1px solid #ddd;">${item.weight}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+        
+        <div style="display: flex; justify-content: space-between; border-top: 2px solid #000; padding-top: 15px;">
+          <div>
+            <p style="margin: 0; font-size: 12px; color: #666;">Total Amount</p>
+            <p style="margin: 0; font-size: 20px; font-weight: bold;">₹${label.totalAmount.toLocaleString('en-IN')}</p>
+          </div>
+          ${label.courierName ? `
+            <div style="text-align: right;">
+              <p style="margin: 0; font-size: 12px; color: #666;">Courier</p>
+              <p style="margin: 0; font-size: 14px; font-weight: bold;">${label.courierName}</p>
+            </div>
+          ` : ''}
+        </div>
+        
+        ${label.trackingNumber ? `
+          <div style="margin-top: 15px; padding: 10px; background: #e8f5e9; border-radius: 4px;">
+            <p style="margin: 0; font-size: 12px; color: #666;">Tracking Number</p>
+            <p style="margin: 0; font-size: 16px; font-weight: bold; font-family: monospace;">${label.trackingNumber}</p>
+          </div>
+        ` : ''}
+      </div>
+    `).join('')
+
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Shipping Labels - STN Products</title>
+        <style>
+          @media print {
+            body { margin: 0; padding: 0; }
+            .label { page-break-after: always; }
+            .label:last-child { page-break-after: auto; }
+          }
+          body { font-family: Arial, sans-serif; }
+        </style>
+      </head>
+      <body>
+        ${labelsHTML}
+      </body>
+      </html>
+    `
+  }
+
+  const getStatusColor = (status: string) => {
+    const statusObj = ORDER_STATUSES.find(s => s.value === status)
+    return statusObj?.color || 'bg-gray-100 text-gray-800'
+  }
+
+  const openEditOrder = (order: Order) => {
+    setEditingOrder(order)
+    setShippingFormData({
+      status: order.status,
+      trackingNumber: order.trackingNumber || '',
+      courierName: order.courierName || '',
+      expectedDelivery: order.expectedDelivery ? order.expectedDelivery.split('T')[0] : '',
+      adminNotes: order.adminNotes || '',
+    })
   }
 
   if (!isAuthenticated || user?.role?.toUpperCase() !== 'ADMIN') {
@@ -526,7 +1031,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2 mb-6 bg-white rounded-lg p-1 shadow-sm w-fit">
+        <div className="flex flex-wrap gap-2 mb-6 bg-white rounded-lg p-1 shadow-sm w-fit">
           <button
             onClick={() => setActiveTab('products')}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-md font-medium transition-all ${
@@ -537,6 +1042,22 @@ export default function AdminDashboard() {
           >
             <Package className="w-4 h-4" />
             Products
+          </button>
+          <button
+            onClick={() => setActiveTab('orders')}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-md font-medium transition-all ${
+              activeTab === 'orders'
+                ? 'bg-linear-to-r from-green-500 to-green-600 text-white shadow-md'
+                : 'text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            <ShoppingBag className="w-4 h-4" />
+            Orders
+            {orders.filter(o => o.status === 'pending' && o.paymentStatus === 'paid').length > 0 && (
+              <span className="bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full">
+                {orders.filter(o => o.status === 'pending' && o.paymentStatus === 'paid').length}
+              </span>
+            )}
           </button>
           <button
             onClick={() => setActiveTab('hero')}
@@ -808,6 +1329,417 @@ export default function AdminDashboard() {
           </>
         )}
 
+        {/* Orders Tab */}
+        {activeTab === 'orders' && (
+          <>
+            {/* Orders Header & Actions */}
+            <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
+              <div className="flex items-center gap-4">
+                <h2 className="text-xl font-bold text-gray-800">Order Management</h2>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fetchOrders()}
+                  className="gap-2"
+                >
+                  <RefreshCw className={`w-4 h-4 ${ordersLoading ? 'animate-spin' : ''}`} />
+                  Refresh
+                </Button>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {selectedOrders.size > 0 && (
+                  <>
+                    <Button
+                      onClick={() => setShowBulkStatusModal(true)}
+                      variant="outline"
+                      className="gap-2"
+                    >
+                      Update Status ({selectedOrders.size})
+                    </Button>
+                    <Button
+                      onClick={handleBulkShip}
+                      className="bg-indigo-600 hover:bg-indigo-700 text-white gap-2"
+                    >
+                      <Truck className="w-4 h-4" />
+                      Ship Selected ({selectedOrders.size})
+                    </Button>
+                    <Button
+                      onClick={() => handleDownloadLabels()}
+                      className="bg-amber-500 hover:bg-amber-600 text-white gap-2"
+                    >
+                      <Download className="w-4 h-4" />
+                      Download PDF ({selectedOrders.size})
+                    </Button>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Filters */}
+            <div className="bg-white rounded-xl p-4 shadow-sm mb-6">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                <div>
+                  <label className="text-xs font-medium text-gray-500 mb-1 block">Search</label>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <Input
+                      placeholder="Order ID, Name, Email..."
+                      value={orderSearch}
+                      onChange={(e) => setOrderSearch(e.target.value)}
+                      className="pl-9"
+                      onKeyDown={(e) => e.key === 'Enter' && fetchOrders()}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-gray-500 mb-1 block">Status</label>
+                  <select
+                    className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                    value={orderStatusFilter}
+                    onChange={(e) => setOrderStatusFilter(e.target.value)}
+                  >
+                    <option value="all">All Status</option>
+                    {ORDER_STATUSES.map((s) => (
+                      <option key={s.value} value={s.value}>{s.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-gray-500 mb-1 block">Payment</label>
+                  <select
+                    className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                    value={orderPaymentFilter}
+                    onChange={(e) => setOrderPaymentFilter(e.target.value)}
+                  >
+                    <option value="all">All Payments</option>
+                    <option value="paid">Paid</option>
+                    <option value="pending">Pending</option>
+                    <option value="failed">Failed</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-gray-500 mb-1 block">From Date</label>
+                  <Input
+                    type="date"
+                    value={orderDateFrom}
+                    onChange={(e) => setOrderDateFrom(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-gray-500 mb-1 block">To Date</label>
+                  <Input
+                    type="date"
+                    value={orderDateTo}
+                    onChange={(e) => setOrderDateTo(e.target.value)}
+                  />
+                </div>
+                <div className="flex items-end gap-2">
+                  <Button onClick={() => fetchOrders()} className="flex-1 gap-2">
+                    <Filter className="w-4 h-4" />
+                    Apply
+                  </Button>
+                  <Button variant="outline" onClick={clearOrderFilters} className="gap-2 shrink-0" title="Clear all filters">
+                    <X className="w-4 h-4" />
+                    Clear
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Orders Summary Cards */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+              <Card className="bg-yellow-50 border-yellow-200">
+                <CardContent className="p-4">
+                  <p className="text-sm text-yellow-700">Pending</p>
+                  <p className="text-2xl font-bold text-yellow-800">
+                    {orders.filter(o => o.status === 'pending' && o.paymentStatus === 'paid').length}
+                  </p>
+                </CardContent>
+              </Card>
+              <Card className="bg-blue-50 border-blue-200">
+                <CardContent className="p-4">
+                  <p className="text-sm text-blue-700">Processing</p>
+                  <p className="text-2xl font-bold text-blue-800">
+                    {orders.filter(o => ['confirmed', 'processing'].includes(o.status)).length}
+                  </p>
+                </CardContent>
+              </Card>
+              <Card className="bg-indigo-50 border-indigo-200">
+                <CardContent className="p-4">
+                  <p className="text-sm text-indigo-700">Shipped</p>
+                  <p className="text-2xl font-bold text-indigo-800">
+                    {orders.filter(o => ['shipped', 'out_for_delivery'].includes(o.status)).length}
+                  </p>
+                </CardContent>
+              </Card>
+              <Card className="bg-green-50 border-green-200">
+                <CardContent className="p-4">
+                  <p className="text-sm text-green-700">Delivered</p>
+                  <p className="text-2xl font-bold text-green-800">
+                    {orders.filter(o => o.status === 'delivered').length}
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Orders Table */}
+            {ordersLoading ? (
+              <div className="text-center py-12">
+                <div className="inline-block w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full animate-spin" />
+              </div>
+            ) : orders.length === 0 ? (
+              <div className="text-center py-12 bg-white rounded-lg shadow-sm">
+                <ShoppingBag className="w-12 h-12 mx-auto text-gray-300 mb-4" />
+                <p className="text-gray-600">No orders found</p>
+              </div>
+            ) : (
+              <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-gray-50 border-b">
+                      <tr>
+                        <th className="px-4 py-3 text-left">
+                          <button
+                            onClick={handleSelectAll}
+                            className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+                          >
+                            {selectedOrders.size === orders.filter(o => o.paymentStatus === 'paid').length ? (
+                              <CheckSquare className="w-4 h-4 text-green-600" />
+                            ) : (
+                              <Square className="w-4 h-4" />
+                            )}
+                          </button>
+                        </th>
+                        <th className="px-4 py-3 text-left font-semibold text-gray-600">Order</th>
+                        <th className="px-4 py-3 text-left font-semibold text-gray-600">Customer</th>
+                        <th className="px-4 py-3 text-left font-semibold text-gray-600">Items</th>
+                        <th className="px-4 py-3 text-left font-semibold text-gray-600">Amount</th>
+                        <th className="px-4 py-3 text-left font-semibold text-gray-600">Status</th>
+                        <th className="px-4 py-3 text-left font-semibold text-gray-600">Payment</th>
+                        <th className="px-4 py-3 text-left font-semibold text-gray-600">Date</th>
+                        <th className="px-4 py-3 text-left font-semibold text-gray-600">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y">
+                      {orders.map((order) => (
+                        <tr key={order.id} className="hover:bg-gray-50">
+                          <td className="px-4 py-3">
+                            {order.paymentStatus === 'paid' && (
+                              <button onClick={() => handleOrderSelect(order.id)}>
+                                {selectedOrders.has(order.id) ? (
+                                  <CheckSquare className="w-4 h-4 text-green-600" />
+                                ) : (
+                                  <Square className="w-4 h-4 text-gray-400" />
+                                )}
+                              </button>
+                            )}
+                          </td>
+                          <td className="px-4 py-3">
+                            <p className="font-mono font-medium">#{order.id.slice(-8).toUpperCase()}</p>
+                          </td>
+                          <td className="px-4 py-3">
+                            <p className="font-medium">{order.user.name || 'N/A'}</p>
+                            <p className="text-xs text-gray-500">{order.user.email}</p>
+                            {order.user.phoneNumber && (
+                              <p className="text-xs text-gray-500">{order.user.phoneNumber}</p>
+                            )}
+                          </td>
+                          <td className="px-4 py-3">
+                            <p className="text-sm">{order.items.reduce((sum, i) => sum + i.quantity, 0)} items</p>
+                            <p className="text-xs text-gray-500 truncate max-w-[150px]">
+                              {order.items.map(i => i.product.name).join(', ')}
+                            </p>
+                          </td>
+                          <td className="px-4 py-3">
+                            <p className="font-semibold">₹{order.totalAmount.toLocaleString('en-IN')}</p>
+                          </td>
+                          <td className="px-4 py-3">
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
+                              {ORDER_STATUSES.find(s => s.value === order.status)?.label || order.status}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3">
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              order.paymentStatus === 'paid' ? 'bg-green-100 text-green-800' :
+                              order.paymentStatus === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                              'bg-red-100 text-red-800'
+                            }`}>
+                              {order.paymentStatus}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3">
+                            <p className="text-sm">{new Date(order.createdAt).toLocaleDateString('en-IN')}</p>
+                            <p className="text-xs text-gray-500">{new Date(order.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</p>
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="flex gap-1">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => openEditOrder(order)}
+                                className="h-8 w-8 p-0"
+                              >
+                                <Pencil className="w-3 h-3" />
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleDownloadLabels([order.id])}
+                                className="h-8 w-8 p-0"
+                                disabled={order.paymentStatus !== 'paid'}
+                              >
+                                <Download className="w-3 h-3" />
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {/* Edit Order Modal */}
+            {editingOrder && (
+              <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                  <div className="p-6 border-b">
+                    <h3 className="text-xl font-bold">Edit Order #{editingOrder.id.slice(-8).toUpperCase()}</h3>
+                  </div>
+                  <div className="p-6 space-y-6">
+                    {/* Customer Info */}
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <h4 className="font-semibold mb-2">Customer Details</h4>
+                      <p><strong>Name:</strong> {editingOrder.user.name || 'N/A'}</p>
+                      <p><strong>Email:</strong> {editingOrder.user.email}</p>
+                      <p><strong>Phone:</strong> {editingOrder.user.phoneNumber || 'N/A'}</p>
+                      <p className="mt-2"><strong>Shipping Address:</strong></p>
+                      <p className="text-sm text-gray-600 whitespace-pre-wrap">{editingOrder.shippingAddress}</p>
+                    </div>
+
+                    {/* Order Items */}
+                    <div>
+                      <h4 className="font-semibold mb-2">Order Items</h4>
+                      <div className="space-y-2">
+                        {editingOrder.items.map((item) => (
+                          <div key={item.id} className="flex gap-3 p-3 bg-gray-50 rounded-lg">
+                            <div className="w-12 h-12 bg-gray-200 rounded overflow-hidden shrink-0">
+                              {item.product.image && (
+                                <Image src={item.product.image} alt={item.product.name} width={48} height={48} className="object-cover" unoptimized />
+                              )}
+                            </div>
+                            <div className="flex-1">
+                              <p className="font-medium">{item.product.name}</p>
+                              <p className="text-xs text-gray-500">{item.product.itemCode} • {item.product.weight}</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-medium">₹{item.price} × {item.quantity}</p>
+                              <p className="text-sm text-gray-600">₹{(item.price * item.quantity).toLocaleString('en-IN')}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="mt-3 text-right">
+                        <p className="text-lg font-bold">Total: ₹{editingOrder.totalAmount.toLocaleString('en-IN')}</p>
+                      </div>
+                    </div>
+
+                    {/* Status Update Form */}
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <Label>Order Status</Label>
+                        <select
+                          className="w-full rounded-md border border-gray-300 px-3 py-2 mt-1"
+                          value={shippingFormData.status}
+                          onChange={(e) => setShippingFormData({ ...shippingFormData, status: e.target.value })}
+                        >
+                          {ORDER_STATUSES.map((s) => (
+                            <option key={s.value} value={s.value}>{s.label}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <Label>Courier Name</Label>
+                        <Input
+                          value={shippingFormData.courierName}
+                          onChange={(e) => setShippingFormData({ ...shippingFormData, courierName: e.target.value })}
+                          placeholder="e.g., BlueDart, DTDC"
+                          className="mt-1"
+                        />
+                      </div>
+                      <div>
+                        <Label>Tracking Number</Label>
+                        <Input
+                          value={shippingFormData.trackingNumber}
+                          onChange={(e) => setShippingFormData({ ...shippingFormData, trackingNumber: e.target.value })}
+                          placeholder="Enter tracking number"
+                          className="mt-1"
+                        />
+                      </div>
+                      <div>
+                        <Label>Expected Delivery</Label>
+                        <Input
+                          type="date"
+                          value={shippingFormData.expectedDelivery}
+                          onChange={(e) => setShippingFormData({ ...shippingFormData, expectedDelivery: e.target.value })}
+                          className="mt-1"
+                        />
+                      </div>
+                      <div className="md:col-span-2">
+                        <Label>Admin Notes (Internal)</Label>
+                        <textarea
+                          className="w-full rounded-md border border-gray-300 px-3 py-2 mt-1"
+                          rows={2}
+                          value={shippingFormData.adminNotes}
+                          onChange={(e) => setShippingFormData({ ...shippingFormData, adminNotes: e.target.value })}
+                          placeholder="Internal notes..."
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="p-6 border-t flex justify-end gap-3">
+                    <Button variant="outline" onClick={() => setEditingOrder(null)}>Cancel</Button>
+                    <Button onClick={handleUpdateOrder} className="bg-green-600 hover:bg-green-700 text-white">
+                      Save Changes
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Bulk Update Status Modal */}
+            {showBulkStatusModal && (
+              <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                <div className="bg-white rounded-2xl w-full max-w-md p-6">
+                  <h3 className="text-xl font-bold mb-4">Update Status for {selectedOrders.size} Order(s)</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <Label>New Status</Label>
+                      <select
+                        className="w-full rounded-md border border-gray-300 px-3 py-2 mt-1"
+                        value={bulkStatus}
+                        onChange={(e) => setBulkStatus(e.target.value)}
+                      >
+                        <option value="">Select status...</option>
+                        {ORDER_STATUSES.map((s) => (
+                          <option key={s.value} value={s.value}>{s.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  <div className="flex justify-end gap-3 mt-6">
+                    <Button variant="outline" onClick={() => { setShowBulkStatusModal(false); setBulkStatus('') }}>Cancel</Button>
+                    <Button onClick={handleBulkUpdateStatus} className="bg-green-600 hover:bg-green-700 text-white" disabled={!bulkStatus}>
+                      Update
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+
         {/* Hero Sections Tab */}
         {activeTab === 'hero' && (
           <>
@@ -880,7 +1812,7 @@ export default function AdminDashboard() {
                           value={heroFormData.buttonLink}
                           onChange={(e) => setHeroFormData({ ...heroFormData, buttonLink: e.target.value })}
                           required
-                          placeholder="/products or /collections/wood-pressed-oils"
+                          placeholder="/home/products or /home/collections/oils"
                         />
                         <p className="text-xs text-gray-500 mt-1">Where should the button go when clicked?</p>
                       </div>

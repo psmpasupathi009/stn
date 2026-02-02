@@ -11,17 +11,27 @@ export async function GET(request: NextRequest) {
 
     // If orderId and email are provided, track specific order
     if (orderId && email) {
-      const user = await prisma.user.findUnique({
-        where: { email },
+      const normalizedOrderId = String(orderId).trim().toLowerCase()
+      const normalizedEmail = String(email).trim().toLowerCase()
+
+      if (!normalizedOrderId || !normalizedEmail) {
+        return NextResponse.json({ error: 'Order ID and email are required' }, { status: 400 })
+      }
+
+      const user = await prisma.user.findFirst({
+        where: {
+          email: { equals: normalizedEmail, mode: 'insensitive' },
+        },
       })
 
       if (!user) {
         return NextResponse.json({ error: 'Order not found' }, { status: 404 })
       }
 
-      const order = await prisma.order.findFirst({
+      // Try exact match first (full 24-char ObjectId)
+      let order = await prisma.order.findFirst({
         where: {
-          id: orderId,
+          id: normalizedOrderId,
           userId: user.id,
         },
         include: {
@@ -32,6 +42,24 @@ export async function GET(request: NextRequest) {
           },
         },
       })
+
+      // If no match and orderId is short (8 chars), try match by suffix
+      if (!order && normalizedOrderId.length >= 6 && normalizedOrderId.length <= 12) {
+        const allOrders = await prisma.order.findMany({
+          where: { userId: user.id },
+          include: {
+            items: {
+              include: {
+                product: true,
+              },
+            },
+          },
+        })
+        order = allOrders.find(
+          (o) => o.id.toLowerCase().endsWith(normalizedOrderId) ||
+            o.id.toLowerCase().slice(-8) === normalizedOrderId
+        ) ?? null
+      }
 
       if (!order) {
         return NextResponse.json({ error: 'Order not found' }, { status: 404 })
@@ -75,7 +103,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { items, shippingAddress } = await request.json()
+    const { items, shippingAddress, gstAmount, deliveryCharge, isBuyNow } = await request.json()
 
     if (!items || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json(
@@ -84,20 +112,25 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Calculate total
-    let totalAmount = 0
+    // Calculate subtotal
+    let subtotal = 0
     for (const item of items) {
       const product = await prisma.product.findUnique({
         where: { id: item.productId },
       })
       if (product) {
-        totalAmount += product.salePrice * item.quantity
+        subtotal += product.salePrice * item.quantity
       }
     }
 
+    // Calculate GST if not provided (5%)
+    const gst = gstAmount ?? Math.round(subtotal * 0.05 * 100) / 100
+    const delivery = deliveryCharge ?? 0
+    const totalAmount = subtotal + gst + delivery
+
     // Create Razorpay order
     const razorpayOrder = await createRazorpayOrder({
-      amount: totalAmount * 100, // Convert to paise
+      amount: Math.round(totalAmount * 100), // Convert to paise
       currency: 'INR',
       receipt: `order_${Date.now()}`,
     })
@@ -106,6 +139,9 @@ export async function POST(request: NextRequest) {
     const order = await prisma.order.create({
       data: {
         userId: session.userId,
+        subtotal,
+        gstAmount: gst,
+        deliveryCharge: delivery,
         totalAmount,
         shippingAddress: shippingAddress || '',
         razorpayOrderId: razorpayOrder.id,
@@ -126,15 +162,17 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    // Clear cart
-    const cart = await prisma.cart.findUnique({
-      where: { userId: session.userId },
-    })
-
-    if (cart) {
-      await prisma.cartItem.deleteMany({
-        where: { cartId: cart.id },
+    // Clear cart only if not a Buy Now order
+    if (!isBuyNow) {
+      const cart = await prisma.cart.findUnique({
+        where: { userId: session.userId },
       })
+
+      if (cart) {
+        await prisma.cartItem.deleteMany({
+          where: { cartId: cart.id },
+        })
+      }
     }
 
     return NextResponse.json({

@@ -99,18 +99,27 @@ model CartItem {
 }
 
 model Order {
-  id              String      @id @default(auto()) @map("_id") @db.ObjectId
-  userId          String      @db.ObjectId
-  user            User        @relation(fields: [userId], references: [id])
-  items           OrderItem[]
-  totalAmount     Float
-  status          String      @default("pending") // pending, processing, shipped, delivered, cancelled
-  paymentStatus   String      @default("pending") // pending, paid, failed
-  paymentId       String?     // Razorpay payment ID
-  razorpayOrderId String?
-  shippingAddress String
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+  id               String      @id @default(auto()) @map("_id") @db.ObjectId
+  userId           String      @db.ObjectId
+  user             User        @relation(fields: [userId], references: [id])
+  items            OrderItem[]
+  totalAmount      Float
+  subtotal         Float?      // Before GST
+  gstAmount        Float?      // GST amount
+  deliveryCharge   Float?      @default(0)
+  status           String      @default("pending") // pending, confirmed, processing, shipped, out_for_delivery, delivered, cancelled
+  paymentStatus    String      @default("pending") // pending, paid, failed, refunded
+  paymentId        String?     // Razorpay payment ID
+  razorpayOrderId  String?
+  shippingAddress  String
+  trackingNumber   String?     // Courier tracking number
+  courierName      String?     // Courier company name
+  shippedAt        DateTime?   // When order was shipped
+  expectedDelivery DateTime?   // Expected delivery date
+  deliveredAt      DateTime?   // Actual delivery date
+  adminNotes       String?     // Internal notes for admin
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
 }
 
 model OrderItem {
