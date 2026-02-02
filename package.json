@@ -6,6 +6,7 @@
     "dev": "next dev",
     "clean": "node -e \"const fs=require('fs');const p='.next';try{if(fs.existsSync(p)){fs.rmSync(p,{recursive:true});console.log('Cleared .next');}else{console.log('No .next folder');}}catch(e){console.warn('Could not clear .next - stop the dev server first:',e.message);}process.exit(0);\"",
     "dev:clean": "npm run clean && next dev",
+    "postinstall": "prisma generate",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
