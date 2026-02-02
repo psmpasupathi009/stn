@@ -154,3 +154,13 @@ model SiteSettings {
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
 }
+
+model GalleryMedia {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  url       String   // Cloudinary URL for image or video
+  type      String   // "image" or "video"
+  caption   String?
+  order     Int      @default(0) // Display order (lower = first)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

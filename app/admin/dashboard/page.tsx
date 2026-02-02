@@ -28,7 +28,11 @@ import {
   Filter,
   RefreshCw,
   X,
+  Images,
+  Video,
 } from 'lucide-react'
+import SortableGalleryList from '@/components/admin/SortableGalleryList'
+import SortableHeroGrid from '@/components/admin/SortableHeroGrid'
 
 interface Product {
   id: string
@@ -120,7 +124,15 @@ const CATEGORIES = [
   'Essential Millets',
 ]
 
-type TabType = 'products' | 'hero' | 'orders'
+interface GalleryItem {
+  id: string
+  url: string
+  type: string
+  caption?: string
+  order: number
+}
+
+type TabType = 'products' | 'hero' | 'orders' | 'gallery'
 
 export default function AdminDashboard() {
   const { user, isAuthenticated } = useAuth()
@@ -191,6 +203,14 @@ export default function AdminDashboard() {
     adminNotes: '',
   })
 
+  // Gallery state
+  const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([])
+  const [galleryLoading, setGalleryLoading] = useState(false)
+  const [galleryMediaFile, setGalleryMediaFile] = useState<File | null>(null)
+  const [galleryMediaType, setGalleryMediaType] = useState<'image' | 'video'>('image')
+  const [galleryCaption, setGalleryCaption] = useState('')
+  const [galleryUploading, setGalleryUploading] = useState(false)
+
   useEffect(() => {
     if (!isAuthenticated) {
       router.push('/home/login')
@@ -204,6 +224,7 @@ export default function AdminDashboard() {
     fetchCategories()
     fetchHeroSections()
     fetchOrders()
+    fetchGallery()
     // eslint-disable-next-line react-hooks/exhaustive-deps -- run once when auth is ready; fetch fns are stable in intent
   }, [isAuthenticated, user, router])
 
@@ -570,6 +591,24 @@ export default function AdminDashboard() {
     }
   }
 
+  const reorderHeroSections = async (orderedItems: HeroSection[]) => {
+    try {
+      const res = await fetch('/api/hero-sections', {
+        method: 'PUT',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderIds: orderedItems.map((h) => h.id) }),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setHeroSections(data)
+        toast.success('Order updated')
+      } else toast.error('Failed to update order')
+    } catch {
+      toast.error('Failed to update order')
+    }
+  }
+
   const resetHeroForm = () => {
     setShowHeroForm(false)
     setEditingHero(null)
@@ -650,6 +689,94 @@ export default function AdminDashboard() {
       setSelectedOrders(new Set())
     } else {
       setSelectedOrders(new Set(orders.filter(o => o.paymentStatus === 'paid').map((o) => o.id)))
+    }
+  }
+
+  // Gallery functions
+  const fetchGallery = async () => {
+    try {
+      setGalleryLoading(true)
+      const res = await fetch('/api/gallery')
+      if (res.ok) {
+        const data = await res.json()
+        setGalleryItems(data)
+      }
+    } catch (error) {
+      console.error('Error fetching gallery:', error)
+      toast.error('Failed to fetch gallery')
+    } finally {
+      setGalleryLoading(false)
+    }
+  }
+
+  const addGalleryMedia = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!galleryMediaFile) {
+      toast.error('Please select an image or video')
+      return
+    }
+    setGalleryUploading(true)
+    try {
+      const formData = new FormData()
+      formData.append('file', galleryMediaFile)
+      const uploadRes = await fetch('/api/upload/media', {
+        method: 'POST',
+        body: formData,
+        credentials: 'include',
+      })
+      if (!uploadRes.ok) throw new Error('Upload failed')
+      const { url } = await uploadRes.json()
+      const type = galleryMediaType
+      const res = await fetch('/api/gallery', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url, type, caption: galleryCaption || null }),
+      })
+      if (res.ok) {
+        toast.success('Media added to gallery')
+        setGalleryMediaFile(null)
+        setGalleryCaption('')
+        fetchGallery()
+      } else {
+        toast.error('Failed to add media')
+      }
+    } catch (error) {
+      console.error('Error adding gallery media:', error)
+      toast.error('Failed to add media')
+    } finally {
+      setGalleryUploading(false)
+    }
+  }
+
+  const deleteGalleryMedia = async (id: string) => {
+    if (!confirm('Remove this from gallery?')) return
+    try {
+      const res = await fetch(`/api/gallery/${id}`, { method: 'DELETE', credentials: 'include' })
+      if (res.ok) {
+        toast.success('Removed from gallery')
+        fetchGallery()
+      } else toast.error('Failed to remove')
+    } catch {
+      toast.error('Failed to remove')
+    }
+  }
+
+  const reorderGallery = async (orderedIds: string[]) => {
+    try {
+      const res = await fetch('/api/gallery', {
+        method: 'PUT',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderIds: orderedIds }),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setGalleryItems(data)
+        toast.success('Order updated')
+      } else toast.error('Failed to update order')
+    } catch {
+      toast.error('Failed to update order')
     }
   }
 
@@ -1069,6 +1196,17 @@ export default function AdminDashboard() {
           >
             <Layers className="w-4 h-4" />
             Hero Sections
+          </button>
+          <button
+            onClick={() => setActiveTab('gallery')}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-md font-medium transition-all ${
+              activeTab === 'gallery'
+                ? 'bg-linear-to-r from-green-500 to-green-600 text-white shadow-md'
+                : 'text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            <Images className="w-4 h-4" />
+            About Gallery
           </button>
         </div>
 
@@ -1740,6 +1878,167 @@ export default function AdminDashboard() {
           </>
         )}
 
+        {/* Gallery Tab */}
+        {activeTab === 'gallery' && (
+          <>
+            <div className="flex justify-between items-start mb-6">
+              <div>
+                <h2 className="text-xl font-bold text-gray-800 mb-1">About Page Gallery</h2>
+                <p className="text-gray-600 text-sm">Upload images and videos for Our Story page. Drag to reorder.</p>
+              </div>
+            </div>
+
+            {/* Add Media Form */}
+            <Card className="mb-8 shadow-lg overflow-hidden">
+              <CardHeader className="bg-gradient-to-r from-emerald-50 to-teal-50 border-b">
+                <CardTitle className="flex items-center gap-2 text-gray-800">
+                  <Images className="w-5 h-5 text-emerald-600" />
+                  Add Media
+                </CardTitle>
+                <p className="text-sm text-gray-600 mt-1">Images and videos shown on the Our Story page</p>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <form onSubmit={addGalleryMedia} className="space-y-6">
+                  {/* Media type tabs */}
+                  <div>
+                    <Label className="text-base font-medium block mb-2">Media Type</Label>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => { setGalleryMediaType('image'); setGalleryMediaFile(null) }}
+                        className={`flex-1 py-3 px-4 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${
+                          galleryMediaType === 'image'
+                            ? 'bg-emerald-600 text-white shadow-md'
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        }`}
+                      >
+                        <ImageIcon className="w-5 h-5" />
+                        Image
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setGalleryMediaType('video'); setGalleryMediaFile(null) }}
+                        className={`flex-1 py-3 px-4 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${
+                          galleryMediaType === 'video'
+                            ? 'bg-emerald-600 text-white shadow-md'
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        }`}
+                      >
+                        <Video className="w-5 h-5" />
+                        Video
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* File upload zone */}
+                  <div>
+                    <Label className="text-base font-medium block mb-2">Select File</Label>
+                    <label className="block">
+                      <div className={`border-2 border-dashed rounded-xl p-8 text-center transition-all cursor-pointer ${
+                        galleryMediaFile
+                          ? 'border-emerald-400 bg-emerald-50'
+                          : 'border-gray-300 hover:border-emerald-300 hover:bg-gray-50'
+                      }`}>
+                        {galleryMediaFile ? (
+                          <div className="space-y-2">
+                            {galleryMediaType === 'image' ? (
+                              <div className="relative w-32 h-32 mx-auto rounded-lg overflow-hidden bg-gray-100">
+                                <Image
+                                  src={URL.createObjectURL(galleryMediaFile)}
+                                  alt="Preview"
+                                  fill
+                                  className="object-cover"
+                                  unoptimized
+                                />
+                              </div>
+                            ) : (
+                              <div className="w-16 h-16 mx-auto rounded-full bg-emerald-100 flex items-center justify-center">
+                                <ImageIcon className="w-8 h-8 text-emerald-600" />
+                              </div>
+                            )}
+                            <p className="text-sm font-medium text-gray-700 truncate max-w-xs mx-auto">{galleryMediaFile.name}</p>
+                            <p className="text-xs text-gray-500">Click to change file</p>
+                          </div>
+                        ) : (
+                          <>
+                            <div className="w-16 h-16 mx-auto rounded-full bg-gray-100 flex items-center justify-center mb-4">
+                              <Images className="w-8 h-8 text-gray-400" />
+                            </div>
+                            <p className="text-gray-600 font-medium">Drop file here or click to browse</p>
+                            <p className="text-sm text-gray-500 mt-1">
+                              {galleryMediaType === 'image' ? 'PNG, JPG, WebP up to 10MB' : 'MP4, WebM, MOV up to 50MB'}
+                            </p>
+                          </>
+                        )}
+                        <input
+                          type="file"
+                          accept={galleryMediaType === 'video' ? 'video/*' : 'image/*'}
+                          onChange={(e) => setGalleryMediaFile(e.target.files?.[0] || null)}
+                          className="hidden"
+                        />
+                      </div>
+                    </label>
+                  </div>
+
+                  <div>
+                    <Label className="text-base font-medium">Caption (optional)</Label>
+                    <Input
+                      value={galleryCaption}
+                      onChange={(e) => setGalleryCaption(e.target.value)}
+                      placeholder="Brief description for the gallery"
+                      className="mt-2"
+                    />
+                  </div>
+
+                  <Button
+                    type="submit"
+                    disabled={galleryUploading || !galleryMediaFile}
+                    className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3"
+                  >
+                    {galleryUploading ? (
+                      <span className="flex items-center gap-2">
+                        <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        Uploading...
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-2">
+                        <Plus className="w-5 h-5" />
+                        Add to Gallery
+                      </span>
+                    )}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+
+            {/* Gallery List with Drag Reorder */}
+            <Card className="shadow-lg overflow-hidden">
+              <CardHeader className="bg-gradient-to-r from-gray-50 to-slate-50 border-b">
+                <CardTitle>Gallery Items</CardTitle>
+                <p className="text-sm text-gray-500 mt-1">Drag the handle to reorder. Changes reflect on Our Story page.</p>
+              </CardHeader>
+              <CardContent>
+                {galleryLoading ? (
+                  <div className="py-12 text-center">
+                    <div className="inline-block w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full animate-spin" />
+                  </div>
+                ) : galleryItems.length === 0 ? (
+                  <div className="py-12 text-center text-gray-500">
+                    <Images className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                    <p>No media in gallery yet. Add images or videos above.</p>
+                  </div>
+                ) : (
+                  <SortableGalleryList
+                    items={galleryItems}
+                    onReorder={reorderGallery}
+                    onDelete={deleteGalleryMedia}
+                  />
+                )}
+              </CardContent>
+            </Card>
+          </>
+        )}
+
         {/* Hero Sections Tab */}
         {activeTab === 'hero' && (
           <>
@@ -1867,10 +2166,13 @@ export default function AdminDashboard() {
                 </Button>
               </div>
             ) : (
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {heroSections.map((hero) => (
-                  <Card key={hero.id} className={`overflow-hidden transition-all hover:shadow-lg ${hero.isActive ? 'ring-2 ring-green-400' : ''}`}>
-                    {/* Image Preview */}
+              <>
+              <div className="mb-2 text-sm text-gray-500">Drag the handle on hover to reorder</div>
+              <SortableHeroGrid<HeroSection>
+                items={heroSections}
+                onReorder={reorderHeroSections}
+                renderCard={(hero) => (
+                  <Card className={`overflow-hidden transition-all hover:shadow-lg ${hero.isActive ? 'ring-2 ring-green-400' : ''}`}>
                     <div className="relative w-full h-40 bg-linear-to-br from-amber-100 to-orange-100">
                       {hero.image ? (
                         <Image src={hero.image} alt="Hero slide" fill className="object-cover" unoptimized />
@@ -1879,21 +2181,17 @@ export default function AdminDashboard() {
                           <ImageIcon className="w-12 h-12 text-green-300" />
                         </div>
                       )}
-                      {/* Status Badge */}
-                      <div className="absolute top-2 left-2">
+                      <div className="absolute top-2 right-2">
                         <span className={`text-xs px-2 py-1 rounded-full font-medium ${hero.isActive ? 'bg-amber-500 text-white' : 'bg-gray-500 text-white'}`}>
                           {hero.isActive ? 'Active' : 'Inactive'}
                         </span>
                       </div>
-                      {/* Order Badge */}
-                      <div className="absolute top-2 right-2">
+                      <div className="absolute bottom-2 right-2">
                         <span className="text-xs px-2 py-1 rounded-full bg-black/60 text-white font-medium">
                           #{hero.order + 1}
                         </span>
                       </div>
                     </div>
-                    
-                    {/* Content */}
                     <CardContent className="p-4">
                       <div className="mb-3">
                         <p className="text-sm text-gray-600 mb-1">Button Link:</p>
@@ -1903,8 +2201,6 @@ export default function AdminDashboard() {
                         <p className="text-sm text-gray-600 mb-1">Button Text:</p>
                         <p className="text-sm font-medium text-gray-800">{hero.buttonText || 'Shop Now'}</p>
                       </div>
-                      
-                      {/* Actions */}
                       <div className="flex gap-2 pt-3 border-t">
                         <Button
                           variant="outline"
@@ -1923,8 +2219,9 @@ export default function AdminDashboard() {
                       </div>
                     </CardContent>
                   </Card>
-                ))}
-              </div>
+                )}
+              />
+              </>
             )}
           </>
         )}

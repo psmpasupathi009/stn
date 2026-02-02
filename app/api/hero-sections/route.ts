@@ -55,3 +55,37 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to create hero section' }, { status: 500 })
   }
 }
+
+// PUT - Reorder hero sections (admin only)
+export async function PUT(request: NextRequest) {
+  try {
+    const session = await getSessionFromRequest(request)
+    if (!session || session.role?.toUpperCase() !== 'ADMIN') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const body = await request.json()
+    const { orderIds } = body
+
+    if (!orderIds || !Array.isArray(orderIds) || orderIds.length === 0) {
+      return NextResponse.json({ error: 'orderIds array required' }, { status: 400 })
+    }
+
+    await Promise.all(
+      orderIds.map((id: string, index: number) =>
+        prisma.heroSection.update({
+          where: { id },
+          data: { order: index },
+        })
+      )
+    )
+
+    const heroSections = await prisma.heroSection.findMany({
+      orderBy: { order: 'asc' },
+    })
+    return NextResponse.json(heroSections)
+  } catch (error) {
+    console.error('Error reordering hero sections:', error)
+    return NextResponse.json({ error: 'Failed to reorder' }, { status: 500 })
+  }
+}

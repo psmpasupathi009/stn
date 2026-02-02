@@ -42,3 +42,26 @@ export async function uploadImage(file: File | Buffer, folder?: string): Promise
     }
   })
 }
+
+// Upload image or video for gallery
+export async function uploadMedia(file: File | Buffer, folder?: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder: folder || 'gallery',
+        resource_type: 'auto', // auto-detect image or video
+      },
+      (error, result) => {
+        if (error) reject(error)
+        else resolve(result?.secure_url || '')
+      }
+    )
+    if (Buffer.isBuffer(file)) {
+      uploadStream.end(file)
+    } else if (file instanceof File) {
+      file.arrayBuffer().then(buf => uploadStream.end(Buffer.from(buf))).catch(reject)
+    } else {
+      reject(new Error('Invalid file type'))
+    }
+  })
+}
