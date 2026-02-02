@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
 import { useAuth } from '@/lib/context'
 import { toast } from 'sonner'
 
@@ -100,10 +99,6 @@ export default function ProductDetailPage() {
       </div>
     )
   }
-
-  const discount = product.mrp > product.salePrice
-    ? Math.round(((product.mrp - product.salePrice) / product.mrp) * 100)
-    : 0
 
   return (
     <div className="min-h-screen bg-neutral-50">

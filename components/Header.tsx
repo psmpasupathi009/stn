@@ -42,10 +42,10 @@ export default function Header() {
   useEffect(() => {
     if (isAuthenticated) {
       refreshCartCount()
-    } else {
-      setCartCount(0)
     }
   }, [isAuthenticated, refreshCartCount])
+
+  const displayCartCount = isAuthenticated ? cartCount : 0
 
   useEffect(() => {
     const handler = () => refreshCartCount()
@@ -146,12 +146,12 @@ export default function Header() {
             <Link
               href="/cart"
               className={`${iconButtonClass} relative`}
-              aria-label={`Cart${cartCount > 0 ? `, ${cartCount} items` : ''}`}
+              aria-label={`Cart${displayCartCount > 0 ? `, ${displayCartCount} items` : ''}`}
             >
               <ShoppingCart size={ICON_SIZE} strokeWidth={2} />
-              {cartCount > 0 && (
+              {displayCartCount > 0 && (
                 <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center bg-red-500 text-white text-xs font-semibold rounded-full">
-                  {cartCount > 99 ? '99+' : cartCount}
+                  {displayCartCount > 99 ? '99+' : displayCartCount}
                 </span>
               )}
             </Link>

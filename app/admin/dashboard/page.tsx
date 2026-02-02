@@ -16,9 +16,6 @@ import {
   Trash2,
   Eye,
   EyeOff,
-  GripVertical,
-  ChevronDown,
-  ChevronUp,
 } from 'lucide-react'
 
 interface Product {
@@ -61,15 +58,6 @@ const CATEGORIES = [
   'NATURAL SWEETNERS',
   'Explorer pack / Trail pack',
   'Essential Millets',
-]
-
-const ICON_OPTIONS = [
-  { value: 'Droplets', label: 'Droplets (Oils)' },
-  { value: 'Wheat', label: 'Wheat (Mixes)' },
-  { value: 'Cookie', label: 'Cookie (Snacks)' },
-  { value: 'Flame', label: 'Flame (Spices)' },
-  { value: 'ChefHat', label: 'Chef Hat (Masala)' },
-  { value: 'Leaf', label: 'Leaf (Millets)' },
 ]
 
 type TabType = 'products' | 'hero'
@@ -526,7 +514,7 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="bg-gradient-to-br from-gray-50 to-green-50 min-h-screen">
+    <div className="bg-linear-to-br from-gray-50 to-green-50 min-h-screen">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -540,7 +528,7 @@ export default function AdminDashboard() {
             onClick={() => setActiveTab('products')}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-md font-medium transition-all ${
               activeTab === 'products'
-                ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-md'
+                ? 'bg-linear-to-r from-green-500 to-green-600 text-white shadow-md'
                 : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
@@ -551,7 +539,7 @@ export default function AdminDashboard() {
             onClick={() => setActiveTab('hero')}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-md font-medium transition-all ${
               activeTab === 'hero'
-                ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-md'
+                ? 'bg-linear-to-r from-green-500 to-green-600 text-white shadow-md'
                 : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
@@ -570,7 +558,7 @@ export default function AdminDashboard() {
                   if (showForm) resetForm()
                   else setShowForm(true)
                 }}
-                className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
+                className="bg-linear-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 {showForm ? 'Cancel' : 'Add New Product'}
@@ -601,7 +589,7 @@ export default function AdminDashboard() {
             {/* Product Form */}
             {showForm && (
               <Card className="mb-8 shadow-lg">
-                <CardHeader className="bg-gradient-to-r from-green-50 to-green-100">
+                <CardHeader className="bg-linear-to-r from-green-50 to-green-100">
                   <CardTitle className="flex items-center gap-2">
                     {editingProduct ? <Pencil className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
                     {editingProduct ? 'Edit Product' : 'Create New Product'}
@@ -740,7 +728,7 @@ export default function AdminDashboard() {
                       <Label htmlFor="inStock" className="cursor-pointer">In Stock</Label>
                     </div>
                     <div className="flex gap-4">
-                      <Button type="submit" disabled={uploading} className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600">
+                      <Button type="submit" disabled={uploading} className="bg-linear-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600">
                         {uploading ? 'Saving...' : editingProduct ? 'Update Product' : 'Create Product'}
                       </Button>
                       <Button type="button" variant="outline" onClick={resetForm}>Cancel</Button>
@@ -762,7 +750,7 @@ export default function AdminDashboard() {
                   <div className="text-center py-12 bg-white rounded-lg shadow-sm">
                     <Package className="w-12 h-12 mx-auto text-gray-300 mb-4" />
                     <p className="text-gray-600 mb-4">No products found</p>
-                    <Button onClick={() => setShowForm(true)} className="bg-gradient-to-r from-amber-500 to-orange-500">
+                    <Button onClick={() => setShowForm(true)} className="bg-linear-to-r from-amber-500 to-orange-500">
                       Add Your First Product
                     </Button>
                   </div>
@@ -770,7 +758,7 @@ export default function AdminDashboard() {
                   <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {products.map((product) => (
                       <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow bg-white">
-                        <div className="aspect-square bg-gradient-to-br from-green-50 to-green-100 relative">
+                        <div className="aspect-square bg-linear-to-br from-green-50 to-green-100 relative">
                           {product.image ? (
                             <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
                           ) : (
@@ -826,7 +814,7 @@ export default function AdminDashboard() {
                   if (showHeroForm) resetHeroForm()
                   else setShowHeroForm(true)
                 }}
-                className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
+                className="bg-linear-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 {showHeroForm ? 'Cancel' : 'Add Hero Slide'}
@@ -836,7 +824,7 @@ export default function AdminDashboard() {
             {/* Hero Form - Simplified */}
             {showHeroForm && (
               <Card className="mb-8 shadow-lg">
-                <CardHeader className="bg-gradient-to-r from-green-50 to-green-100">
+                <CardHeader className="bg-linear-to-r from-green-50 to-green-100">
                   <CardTitle className="flex items-center gap-2">
                     {editingHero ? <Pencil className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
                     {editingHero ? 'Edit Hero Slide' : 'Create Hero Slide'}
@@ -918,7 +906,7 @@ export default function AdminDashboard() {
                     </div>
 
                     <div className="flex gap-4 pt-4 border-t">
-                      <Button type="submit" disabled={heroLoading} className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600">
+                      <Button type="submit" disabled={heroLoading} className="bg-linear-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600">
                         {heroLoading ? 'Saving...' : editingHero ? 'Update Slide' : 'Create Slide'}
                       </Button>
                       <Button type="button" variant="outline" onClick={resetHeroForm}>Cancel</Button>
@@ -934,7 +922,7 @@ export default function AdminDashboard() {
                 <Layers className="w-12 h-12 mx-auto text-gray-300 mb-4" />
                 <p className="text-gray-600 mb-2">No hero slides yet</p>
                 <p className="text-sm text-gray-500 mb-4">Default slides will be shown until you create custom ones.</p>
-                <Button onClick={() => setShowHeroForm(true)} className="bg-gradient-to-r from-amber-500 to-orange-500">
+                <Button onClick={() => setShowHeroForm(true)} className="bg-linear-to-r from-amber-500 to-orange-500">
                   Create Your First Slide
                 </Button>
               </div>
@@ -943,7 +931,7 @@ export default function AdminDashboard() {
                 {heroSections.map((hero) => (
                   <Card key={hero.id} className={`overflow-hidden transition-all hover:shadow-lg ${hero.isActive ? 'ring-2 ring-green-400' : ''}`}>
                     {/* Image Preview */}
-                    <div className="relative w-full h-40 bg-gradient-to-br from-amber-100 to-orange-100">
+                    <div className="relative w-full h-40 bg-linear-to-br from-amber-100 to-orange-100">
                       {hero.image ? (
                         <img src={hero.image} alt="Hero slide" className="w-full h-full object-cover" />
                       ) : (

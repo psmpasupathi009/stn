@@ -89,7 +89,7 @@ function SignupForm() {
       } else {
         setError(data.error || 'Failed to send OTP. Please try again.')
       }
-    } catch (err) {
+    } catch {
       setError('Network error. Please check your connection and try again.')
     } finally {
       setLoading(false)
@@ -156,7 +156,7 @@ function SignupForm() {
       } else {
         setError(data.error || 'Invalid or expired OTP')
       }
-    } catch (err) {
+    } catch {
       setError('Network error. Please check your connection and try again.')
     } finally {
       setLoading(false)
@@ -212,7 +212,7 @@ function SignupForm() {
       } else {
         setError(data.error || 'Failed to create account. Please try again.')
       }
-    } catch (err) {
+    } catch {
       setError('Network error. Please check your connection and try again.')
     } finally {
       setLoading(false)

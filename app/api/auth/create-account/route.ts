@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { prisma } from '@/lib/prisma'
 import { createUser } from '@/lib/auth'
-import { verifyOTP } from '@/lib/otp'
 import { signSession, getSessionCookieOptions, SESSION_COOKIE_NAME } from '@/lib/session'
 import { normalizeEmail, isValidEmail } from '@/lib/email'
 

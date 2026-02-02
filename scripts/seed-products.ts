@@ -41,7 +41,7 @@ async function main() {
       if (successCount % 10 === 0) {
         console.log(`✓ Processed ${successCount} products...`)
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       errorCount++
       console.error(`✗ Error seeding ${product['Product Name']}:`, error.message)
     }

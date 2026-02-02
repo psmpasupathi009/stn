@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
+import Image from 'next/image'
 import { useAuth } from '@/lib/context'
 import { toast } from 'sonner'
 import {
@@ -97,7 +97,18 @@ export default function HomePage() {
   const [currentSlide, setCurrentSlide] = useState(0)
   const [heroSlides, setHeroSlides] = useState<HeroSlide[]>(defaultHeroSlides)
   const [isPlaying, setIsPlaying] = useState(true)
+  const [heroImageErrors, setHeroImageErrors] = useState<Set<number>>(new Set())
   const { isAuthenticated } = useAuth()
+
+  const heroImageUrl = (slide: HeroSlide) => {
+    const url = typeof slide.image === 'string' ? slide.image.trim() : ''
+    return url && (url.startsWith('http://') || url.startsWith('https://')) ? url : ''
+  }
+
+  const showHeroImage = (slide: HeroSlide, index: number) => {
+    const url = heroImageUrl(slide)
+    return url.length > 0 && !heroImageErrors.has(index)
+  }
 
   // Fetch hero sections from database
   useEffect(() => {
@@ -108,6 +119,7 @@ export default function HomePage() {
           const data = await res.json()
           if (data && data.length > 0) {
             setHeroSlides(data)
+            setHeroImageErrors(new Set())
           }
           // If empty, keep default slides
         }
@@ -179,10 +191,6 @@ export default function HomePage() {
     }
   }
 
-  const goToSlide = useCallback((index: number) => {
-    setCurrentSlide(index)
-  }, [])
-
   const goToNext = useCallback(() => {
     setCurrentSlide((prev) => (prev + 1) % heroSlides.length)
   }, [heroSlides.length])
@@ -209,17 +217,25 @@ export default function HomePage() {
                 }`}
               >
                 {/* Background Image or Gradient with Icon */}
-                {slide.image && slide.image.length > 0 ? (
+                {showHeroImage(slide, index) ? (
                   <>
-                    <img
-                      src={slide.image}
-                      alt={slide.title || 'Hero banner'}
-                      className="absolute inset-0 w-full h-full object-cover object-center"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent pointer-events-none" />
+                    <div className="absolute inset-0">
+                      <div className="relative w-full h-full">
+                        <Image
+                          src={heroImageUrl(slide)}
+                          alt={slide.title || 'Hero banner'}
+                          fill
+                          className="object-cover object-center"
+                          sizes="100vw"
+                          unoptimized={!heroImageUrl(slide).includes('res.cloudinary.com')}
+                          onError={() => setHeroImageErrors((prev) => new Set(prev).add(index))}
+                        />
+                      </div>
+                    </div>
+                    <div className="absolute inset-0 bg-linear-to-t from-black/30 via-transparent to-transparent pointer-events-none" />
                   </>
                 ) : (
-                  <div className="absolute inset-0 bg-gradient-to-br from-green-100 via-green-50 to-green-200 flex items-center justify-center">
+                  <div className="absolute inset-0 bg-linear-to-br from-green-100 via-green-50 to-green-200 flex items-center justify-center">
                     <div className="text-center px-4">
                       <HeroIcon
                         iconName={slide.icon}
@@ -303,7 +319,7 @@ export default function HomePage() {
               {featuredProducts.slice(0, 4).map((product) => (
                 <div key={product.id} className="group bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden border border-gray-100">
                   <Link href={`/products/${product.id}`}>
-                    <div className="aspect-square bg-gradient-to-br from-green-50 to-green-100 overflow-hidden">
+                    <div className="aspect-square bg-linear-to-br from-green-50 to-green-100 overflow-hidden">
                       {product.image ? (
                         <img
                           src={product.image}
@@ -332,7 +348,7 @@ export default function HomePage() {
                           <span className="text-sm text-gray-400 line-through">
                             ₹{product.mrp}
                           </span>
-                          <span className="bg-gradient-to-r from-green-500 to-green-600 text-white text-xs px-2 py-0.5 rounded-full">
+                          <span className="bg-linear-to-r from-green-500 to-green-600 text-white text-xs px-2 py-0.5 rounded-full">
                             Sale
                           </span>
                         </>
@@ -340,7 +356,7 @@ export default function HomePage() {
                     </div>
                     <button
                       onClick={() => addToCart(product.id)}
-                      className="w-full bg-gradient-to-r from-gray-800 to-gray-900 text-white py-2.5 px-4 rounded-lg hover:from-gray-900 hover:to-black transition-all duration-200 text-sm font-medium"
+                      className="w-full bg-linear-to-r from-gray-800 to-gray-900 text-white py-2.5 px-4 rounded-lg hover:from-gray-900 hover:to-black transition-all duration-200 text-sm font-medium"
                     >
                       Add to cart
                     </button>
@@ -359,7 +375,7 @@ export default function HomePage() {
       </section>
 
       {/* Healthy Mixes Section */}
-      <section className="py-12 sm:py-16 bg-gradient-to-br from-green-50 to-green-100">
+      <section className="py-12 sm:py-16 bg-linear-to-br from-green-50 to-green-100">
         <div className="container mx-auto px-4">
           <div className="text-center mb-8 sm:mb-12">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
@@ -378,7 +394,7 @@ export default function HomePage() {
               {healthyMixes.map((product) => (
                 <div key={product.id} className="group bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden border border-green-100">
                   <Link href={`/products/${product.id}`}>
-                    <div className="aspect-square bg-gradient-to-br from-green-50 to-yellow-50 overflow-hidden">
+                    <div className="aspect-square bg-linear-to-br from-green-50 to-yellow-50 overflow-hidden">
                       {product.image ? (
                         <img
                           src={product.image}
@@ -407,7 +423,7 @@ export default function HomePage() {
                           <span className="text-sm text-gray-400 line-through">
                             ₹{product.mrp}
                           </span>
-                          <span className="bg-gradient-to-r from-green-500 to-green-600 text-white text-xs px-2 py-0.5 rounded-full">
+                          <span className="bg-linear-to-r from-green-500 to-green-600 text-white text-xs px-2 py-0.5 rounded-full">
                             Sale
                           </span>
                         </>
@@ -422,7 +438,7 @@ export default function HomePage() {
                     )}
                     <button
                       onClick={() => addToCart(product.id)}
-                      className="w-full bg-gradient-to-r from-gray-800 to-gray-900 text-white py-2.5 px-4 rounded-lg hover:from-gray-900 hover:to-black transition-all duration-200 text-sm font-medium"
+                      className="w-full bg-linear-to-r from-gray-800 to-gray-900 text-white py-2.5 px-4 rounded-lg hover:from-gray-900 hover:to-black transition-all duration-200 text-sm font-medium"
                     >
                       Add to cart
                     </button>
@@ -460,7 +476,7 @@ export default function HomePage() {
               {kovilpattiSpecial.map((product) => (
                 <div key={product.id} className="group bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden border border-gray-100">
                   <Link href={`/products/${product.id}`}>
-                    <div className="aspect-square bg-gradient-to-br from-green-50 to-green-100 overflow-hidden">
+                    <div className="aspect-square bg-linear-to-br from-green-50 to-green-100 overflow-hidden">
                       {product.image ? (
                         <img
                           src={product.image}
@@ -489,7 +505,7 @@ export default function HomePage() {
                           <span className="text-sm text-gray-400 line-through">
                             ₹{product.mrp}
                           </span>
-                          <span className="bg-gradient-to-r from-green-500 to-green-600 text-white text-xs px-2 py-0.5 rounded-full">
+                          <span className="bg-linear-to-r from-green-500 to-green-600 text-white text-xs px-2 py-0.5 rounded-full">
                             Sale
                           </span>
                         </>
@@ -504,7 +520,7 @@ export default function HomePage() {
                     )}
                     <button
                       onClick={() => addToCart(product.id)}
-                      className="w-full bg-gradient-to-r from-gray-800 to-gray-900 text-white py-2.5 px-4 rounded-lg hover:from-gray-900 hover:to-black transition-all duration-200 text-sm font-medium"
+                      className="w-full bg-linear-to-r from-gray-800 to-gray-900 text-white py-2.5 px-4 rounded-lg hover:from-gray-900 hover:to-black transition-all duration-200 text-sm font-medium"
                     >
                       Add to cart
                     </button>
@@ -523,40 +539,40 @@ export default function HomePage() {
       </section>
 
       {/* Trust Section - Modern Design */}
-      <section className="py-12 sm:py-16 bg-gradient-to-br from-gray-50 to-green-50">
+      <section className="py-12 sm:py-16 bg-linear-to-br from-gray-50 to-green-50">
         <div className="container mx-auto px-4">
           <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-12 text-gray-900">Why Customers Trust Us</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6 text-center">
             <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm hover:shadow-md transition-shadow">
-              <div className="w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-3 sm:mb-4 bg-gradient-to-br from-green-100 to-green-200 rounded-full flex items-center justify-center">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-3 sm:mb-4 bg-linear-to-br from-green-100 to-green-200 rounded-full flex items-center justify-center">
                 <Gem className="w-6 h-6 sm:w-7 sm:h-7 text-green-600" />
               </div>
               <h3 className="font-semibold text-sm sm:text-base mb-1 sm:mb-2 text-gray-800">Premium Quality</h3>
               <p className="text-xs sm:text-sm text-gray-600">Carefully selected ingredients.</p>
             </div>
             <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm hover:shadow-md transition-shadow">
-              <div className="w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-3 sm:mb-4 bg-gradient-to-br from-amber-100 to-orange-100 rounded-full flex items-center justify-center">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-3 sm:mb-4 bg-linear-to-br from-amber-100 to-orange-100 rounded-full flex items-center justify-center">
                 <Truck className="w-6 h-6 sm:w-7 sm:h-7 text-green-600" />
               </div>
               <h3 className="font-semibold text-sm sm:text-base mb-1 sm:mb-2 text-gray-800">Free Delivery</h3>
               <p className="text-xs sm:text-sm text-gray-600">Zero delivery charges on all orders</p>
             </div>
             <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm hover:shadow-md transition-shadow">
-              <div className="w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-3 sm:mb-4 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-3 sm:mb-4 bg-linear-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center">
                 <Lock className="w-6 h-6 sm:w-7 sm:h-7 text-blue-600" />
               </div>
               <h3 className="font-semibold text-sm sm:text-base mb-1 sm:mb-2 text-gray-800">Secure Checkout</h3>
               <p className="text-xs sm:text-sm text-gray-600">Encrypted & safe transactions</p>
             </div>
             <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm hover:shadow-md transition-shadow">
-              <div className="w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-3 sm:mb-4 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-3 sm:mb-4 bg-linear-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center">
                 <MessageCircle className="w-6 h-6 sm:w-7 sm:h-7 text-purple-600" />
               </div>
               <h3 className="font-semibold text-sm sm:text-base mb-1 sm:mb-2 text-gray-800">Customer Support</h3>
               <p className="text-xs sm:text-sm text-gray-600">Your questions answered with care</p>
             </div>
             <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm hover:shadow-md transition-shadow col-span-2 md:col-span-1">
-              <div className="w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-3 sm:mb-4 bg-gradient-to-br from-green-100 to-green-200 rounded-full flex items-center justify-center">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-3 sm:mb-4 bg-linear-to-br from-green-100 to-green-200 rounded-full flex items-center justify-center">
                 <Globe className="w-6 h-6 sm:w-7 sm:h-7 text-green-600" />
               </div>
               <h3 className="font-semibold text-sm sm:text-base mb-1 sm:mb-2 text-gray-800">Pan-India Shipping</h3>

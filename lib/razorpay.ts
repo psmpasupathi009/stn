@@ -21,8 +21,8 @@ export async function verifyPayment(
   razorpay_payment_id: string,
   razorpay_signature: string
 ): Promise<boolean> {
-  const crypto = require('crypto')
-  const hmac = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET || '')
+  const { createHmac } = await import('crypto')
+  const hmac = createHmac('sha256', process.env.RAZORPAY_KEY_SECRET || '')
   hmac.update(razorpay_order_id + '|' + razorpay_payment_id)
   const generated_signature = hmac.digest('hex')
   return generated_signature === razorpay_signature

@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
     })
 
     return NextResponse.json(orders)
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Get orders error:', error)
     return NextResponse.json(
       { error: 'Failed to fetch orders' },
@@ -110,10 +110,10 @@ export async function POST(request: NextRequest) {
         shippingAddress: shippingAddress || '',
         razorpayOrderId: razorpayOrder.id,
         items: {
-          create: items.map((item: any) => ({
-            productId: item.productId,
+          create: items.map((item: { productId: string; quantity: number; price?: number }) => ({
+            product: { connect: { id: item.productId } },
             quantity: item.quantity,
-            price: item.price,
+            price: item.price ?? 0,
           })),
         },
       },
@@ -142,7 +142,7 @@ export async function POST(request: NextRequest) {
       razorpayOrderId: razorpayOrder.id,
       key: process.env.RAZORPAY_KEY_ID,
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Create order error:', error)
     return NextResponse.json(
       { error: 'Failed to create order' },

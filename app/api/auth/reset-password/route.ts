@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
         isEmailVerified: updatedUser!.isEmailVerified,
       },
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Reset password error:', error)
     return NextResponse.json(
       { error: 'Failed to reset password' },

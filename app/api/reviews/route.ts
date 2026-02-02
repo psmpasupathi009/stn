@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
     })
 
     return NextResponse.json({ success: true })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Create review error:', error)
     return NextResponse.json(
       { error: 'Failed to create review' },
@@ -98,7 +98,7 @@ export async function GET(request: NextRequest) {
     })
 
     return NextResponse.json(reviews)
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Get reviews error:', error)
     return NextResponse.json(
       { error: 'Failed to fetch reviews' },

@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
       message: 'OTP sent to your email',
       expiresIn: 10, // minutes
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Send OTP error:', error)
     return NextResponse.json(
       { error: 'Failed to send OTP' },

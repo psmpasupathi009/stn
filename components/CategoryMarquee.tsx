@@ -90,7 +90,7 @@ const categories = [
 
 export default function CategoryMarquee() {
   return (
-    <div className="bg-gradient-to-r from-green-50 via-white to-green-50 border-b border-green-100 py-2.5 sm:py-3 overflow-hidden">
+    <div className="bg-linear-to-r from-green-50 via-white to-green-50 border-b border-green-100 py-2.5 sm:py-3 overflow-hidden">
       <Marquee
         gradient={true}
         gradientColor="#fffbeb"
@@ -100,7 +100,9 @@ export default function CategoryMarquee() {
         className="overflow-hidden"
       >
         {categories.map((category) => {
-          const href = category.href || `/collections/${category.slug}`
+          // Link to products page with category filter (same category names as API/sidebar)
+          const categoryParam = categoryMapping[category.slug] ?? category.slug
+          const href = category.href ?? (categoryParam ? `/products?category=${encodeURIComponent(categoryParam)}` : '/products')
           const IconComponent = category.icon
           return (
             <Link
@@ -112,7 +114,7 @@ export default function CategoryMarquee() {
                 className={`w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12 rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg ${
                   category.dashed
                     ? 'border-2 border-dashed border-green-400 bg-green-50'
-                    : `bg-gradient-to-br ${category.color} shadow-md`
+                    : `bg-linear-to-br ${category.color} shadow-md`
                 }`}
               >
                 <IconComponent

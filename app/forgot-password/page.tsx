@@ -65,7 +65,7 @@ export default function ForgotPasswordPage() {
       } else {
         setError(data.error || 'Failed to send OTP. Please try again.')
       }
-    } catch (err) {
+    } catch {
       setError('Network error. Please check your connection and try again.')
     } finally {
       setLoading(false)
@@ -154,7 +154,7 @@ export default function ForgotPasswordPage() {
       } else {
         setError(data.error || 'Failed to reset password. Please try again.')
       }
-    } catch (err) {
+    } catch {
       setError('Network error. Please check your connection and try again.')
     } finally {
       setLoading(false)

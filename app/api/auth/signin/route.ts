@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
         isEmailVerified: user.isEmailVerified,
       },
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Sign in error:', error)
     return NextResponse.json(
       { error: 'Failed to sign in' },

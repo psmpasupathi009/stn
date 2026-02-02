@@ -108,7 +108,7 @@ async function testEmail() {
     console.log('='.repeat(60))
     console.log('🎉 Email configuration is working correctly!')
     console.log('='.repeat(60))
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ Failed to send test email!')
     console.error('')
     console.error('Error:', error.message)

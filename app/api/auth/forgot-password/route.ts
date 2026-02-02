@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
       success: true,
       message: 'If the email exists, an OTP has been sent to your email',
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Forgot password error:', error)
     return NextResponse.json(
       { error: 'Failed to process request' },

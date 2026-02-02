@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json(cart)
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Get cart error:', error)
     return NextResponse.json(
       { error: 'Failed to fetch cart' },
@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
     })
 
     return NextResponse.json(updatedCart)
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Add to cart error:', error)
     return NextResponse.json(
       { error: 'Failed to add to cart' },

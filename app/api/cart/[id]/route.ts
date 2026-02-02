@@ -35,7 +35,7 @@ export async function PUT(
     }
 
     return NextResponse.json({ success: true })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Update cart item error:', error)
     return NextResponse.json(
       { error: 'Failed to update cart item' },

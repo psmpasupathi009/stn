@@ -122,7 +122,7 @@ export default function CartPage() {
           name: 'STN Products',
           description: 'Order Payment',
           order_id: data.razorpayOrderId,
-          handler: async function (response: any) {
+          handler: async function (response: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }) {
             // Verify payment
             const verifyRes = await fetch('/api/payments/verify', {
               method: 'POST',
@@ -153,7 +153,8 @@ export default function CartPage() {
           },
         }
 
-        const razorpay = new (window as any).Razorpay(options)
+        const RazorpayConstructor = (window as unknown as { Razorpay: new (opts: unknown) => { open: () => void } }).Razorpay
+        const razorpay = new RazorpayConstructor(options)
         razorpay.open()
       } else {
         toast.error(data?.error || 'Failed to create order')

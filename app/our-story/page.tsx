@@ -63,7 +63,7 @@ export default function OurStoryPage() {
 
             <div className="bg-gray-50 p-8 rounded-lg mb-12">
               <p className="text-xl md:text-2xl font-semibold text-gray-900 text-center mb-4">
-                At STN GOLDEN HEALTHY FOODS, we believe food is not just fuel—it's a foundation for
+                At STN GOLDEN HEALTHY FOODS, we believe food is not just fuel—it&apos;s a foundation for
                 a healthier life.
               </p>
               <p className="text-lg text-gray-700 text-center">

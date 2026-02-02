@@ -5,7 +5,7 @@ import { prisma } from '@/lib/prisma'
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, name, phoneNumber } = await request.json()
+    const { email, name } = await request.json()
 
     if (!email) {
       return NextResponse.json({ error: 'Email is required' }, { status: 400 })
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
       message: 'OTP sent to your email',
       expiresIn: 10, // minutes
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Signup error:', error)
     return NextResponse.json(
       { error: 'Failed to initiate signup' },

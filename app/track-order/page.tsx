@@ -46,7 +46,7 @@ export default function TrackOrderPage() {
       } else {
         setError('Order not found. Please check your order ID and email.')
       }
-    } catch (err) {
+    } catch {
       setError('Failed to track order. Please try again.')
     } finally {
       setLoading(false)

@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
       message: 'OTP sent to your email',
       isAdmin,
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Signup init error:', error)
     return NextResponse.json(
       { error: 'Failed to initiate signup. Please try again.' },
