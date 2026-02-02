@@ -2,16 +2,13 @@
 
 import { useEffect, useState, useCallback, Suspense, useMemo } from 'react'
 import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardFooter } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import Image from 'next/image'
 import { useAuth } from '@/lib/context'
 import { toast } from 'sonner'
-import { Search, Package, ShoppingCart, Star, LayoutGrid } from 'lucide-react'
+import { Search, Package, LayoutGrid } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import ProductCard from '@/components/homepage/ProductCard'
 
 // --- Types ---
 interface Product {
@@ -26,92 +23,6 @@ interface Product {
   reviewCount?: number
 }
 
-// --- Constants ---
-const PLACEHOLDER_IMAGE = (
-  <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400">
-    <Package className="w-16 h-16" strokeWidth={1.25} />
-  </div>
-)
-
-// --- Product card ---
-function ProductCard({
-  product,
-  onAddToCart,
-  className,
-}: {
-  product: Product
-  onAddToCart: (id: string) => void
-  className?: string
-}) {
-  return (
-    <Card className={cn('group overflow-hidden border-gray-200 bg-white shadow-sm transition-all duration-200 hover:shadow-md hover:border-green-200 rounded-2xl', className)}>
-      <Link href={`/home/products/${product.id}`} className="block min-w-0">
-        <div className="aspect-square overflow-hidden bg-gray-50 relative w-full">
-          {product.image ? (
-            <Image
-              src={product.image}
-              alt={product.name}
-              fill
-              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-              className="object-cover transition-transform duration-300 group-hover:scale-105"
-              unoptimized
-            />
-          ) : (
-            PLACEHOLDER_IMAGE
-          )}
-          {product.mrp > product.salePrice && (
-            <Badge
-              variant="default"
-              className="absolute top-2 left-2 text-[10px] px-1.5 py-0"
-            >
-              Sale
-            </Badge>
-          )}
-        </div>
-      </Link>
-      <CardContent className="p-3 sm:p-4 pb-2 min-w-0 overflow-hidden">
-        <Link href={`/home/products/${product.id}`} className="block min-w-0">
-          <h3 className="font-semibold text-gray-900 line-clamp-2 mb-2 hover:text-green-700 transition-colors min-w-0 overflow-hidden">
-            {product.name}
-          </h3>
-        </Link>
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-lg font-bold text-gray-900">
-            ₹{product.salePrice}
-          </span>
-          {product.mrp > product.salePrice && (
-            <span className="text-sm text-gray-500 line-through">
-              ₹{product.mrp}
-            </span>
-          )}
-        </div>
-        {product.rating != null && product.rating > 0 && (
-          <div className="flex items-center gap-1 mt-1.5 text-sm text-gray-600">
-            <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
-            <span className="font-medium">{product.rating.toFixed(1)}</span>
-            {product.reviewCount != null && product.reviewCount > 0 && (
-              <span className="text-gray-500">({product.reviewCount})</span>
-            )}
-          </div>
-        )}
-      </CardContent>
-      <CardFooter className="p-4 pt-0">
-        <Button
-          onClick={(e) => {
-            e.preventDefault()
-            onAddToCart(product.id)
-          }}
-          className="w-full bg-gray-900 hover:bg-gray-800 text-white gap-2"
-          size="sm"
-        >
-          <ShoppingCart className="w-4 h-4" />
-          Add to cart
-        </Button>
-      </CardFooter>
-    </Card>
-  )
-}
-
 // --- Products page: sidebar filter + single grid ---
 function ProductsPageContent() {
   const searchParams = useSearchParams()
@@ -121,6 +32,7 @@ function ProductsPageContent() {
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const { isAuthenticated } = useAuth()
+  const router = useRouter()
 
   // Fetch categories and all products
   useEffect(() => {
@@ -167,7 +79,7 @@ function ProductsPageContent() {
   const addToCart = useCallback(
     async (productId: string) => {
       if (!isAuthenticated) {
-        window.location.href = '/home/login'
+        router.push('/home/login')
         return
       }
       try {
@@ -188,7 +100,34 @@ function ProductsPageContent() {
         toast.error('Failed to add to cart')
       }
     },
-    [isAuthenticated]
+    [isAuthenticated, router]
+  )
+
+  const buyNow = useCallback(
+    async (productId: string) => {
+      if (!isAuthenticated) {
+        router.push('/home/login')
+        return
+      }
+      try {
+        const res = await fetch('/api/cart', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ productId, quantity: 1 }),
+        })
+        if (res.ok) {
+          window.dispatchEvent(new CustomEvent('cart-updated'))
+          router.push('/home/checkout')
+        } else {
+          const data = await res.json().catch(() => ({}))
+          toast.error(data.error || 'Failed to proceed')
+        }
+      } catch {
+        toast.error('Failed to proceed')
+      }
+    },
+    [isAuthenticated, router]
   )
 
   if (loading) {
@@ -330,7 +269,7 @@ function ProductsPageContent() {
                     key={product.id}
                     product={product}
                     onAddToCart={addToCart}
-                    className="w-full"
+                    onBuyNow={buyNow}
                   />
                 ))}
               </div>

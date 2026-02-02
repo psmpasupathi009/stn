@@ -1,9 +1,9 @@
 'use client'
 
 import CategoryMarquee from '@/components/CategoryMarquee'
-import HeroSection from './components/HeroSection'
-import ProductsByCategory from './components/ProductsByCategory'
-import TrustSection from './components/TrustSection'
+import HeroSection from '@/components/homepage/HeroSection'
+import ProductsByCategory from '@/components/homepage/ProductsByCategory'
+import TrustSection from '@/components/homepage/TrustSection'
 
 export default function HomePage() {
   return (

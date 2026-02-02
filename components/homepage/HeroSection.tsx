@@ -15,7 +15,7 @@ import {
   Pause,
   Play,
 } from 'lucide-react'
-import type { HeroSlide } from '../types'
+import type { HeroSlide } from './types'
 
 const HERO_ICONS: Record<string, React.ComponentType<{ className?: string; strokeWidth?: number }>> = {
   Droplets,
