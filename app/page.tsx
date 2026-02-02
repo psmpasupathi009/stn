@@ -297,9 +297,18 @@ export default function HomePage() {
             <div className="space-y-14 md:space-y-16">
               {productsByCategory.map(({ category, products: categoryProducts }) => (
                 <div key={category}>
-                  <h3 className="text-lg font-semibold text-gray-800 mb-4 sm:mb-6 pb-2 border-b border-gray-200">
-                    {category}
-                  </h3>
+                  <div className="flex flex-wrap items-center justify-between gap-3 mb-4 sm:mb-6 pb-2 border-b border-gray-200">
+                    <h3 className="text-lg font-semibold text-gray-800">
+                      {category}
+                    </h3>
+                    <Link
+                      href={`/products?category=${encodeURIComponent(category)}`}
+                      className="inline-flex items-center gap-1.5 text-sm font-medium text-green-600 hover:text-green-700 transition-colors group"
+                    >
+                      View more products
+                      <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                    </Link>
+                  </div>
                   <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 md:gap-6 lg:gap-8">
                     {categoryProducts.map((product) => (
                       <div
