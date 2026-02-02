@@ -92,7 +92,7 @@ export default function CategoryPage() {
 
   const addToCart = async (productId: string) => {
     if (!isAuthenticated) {
-      window.location.href = '/login'
+      window.location.href = '/home/login'
       return
     }
 
@@ -139,7 +139,7 @@ export default function CategoryPage() {
         ) : products.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-gray-600 mb-4">No products found in this category.</p>
-            <Link href="/products">
+            <Link href="/home/products">
               <button className="bg-black text-white px-6 py-2 rounded hover:bg-gray-800">
                 View All Products
               </button>
@@ -149,7 +149,7 @@ export default function CategoryPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {products.map((product) => (
               <div key={product.id} className="group">
-                <Link href={`/products/${product.id}`}>
+                <Link href={`/home/products/${product.id}`}>
                   <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden mb-4 group-hover:opacity-90 transition-opacity relative">
                     {product.image ? (
                       <Image
@@ -167,7 +167,7 @@ export default function CategoryPage() {
                   </div>
                 </Link>
                 <div className="text-center">
-                  <Link href={`/products/${product.id}`}>
+                  <Link href={`/home/products/${product.id}`}>
                     <h3 className="font-semibold text-lg mb-2 hover:text-amber-900">
                       {product.name}
                     </h3>

@@ -9,24 +9,24 @@ export default function Footer() {
             <h3 className="text-xl font-bold mb-4">Shop</h3>
             <ul className="space-y-2 text-gray-400">
               <li>
-                <Link href="/products" className="hover:text-white">
+                <Link href="/home/products" className="hover:text-white">
                   Shop All
                 </Link>
               </li>
               <li>
               </li>
               <li>
-                <Link href="/our-story" className="hover:text-white">
+                <Link href="/home/our-story" className="hover:text-white">
                   Our Story
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="hover:text-white">
+                <Link href="/home/contact" className="hover:text-white">
                   Contact
                 </Link>
               </li>
               <li>
-                <Link href="/track-order" className="hover:text-white">
+                <Link href="/home/track-order" className="hover:text-white">
                   Track Order
                 </Link>
               </li>
@@ -77,7 +77,7 @@ export default function Footer() {
               <Link href="/refund-policy" className="hover:text-white">Refund policy</Link>
               <Link href="/terms-of-service" className="hover:text-white">Terms of service</Link>
               <Link href="/shipping-policy" className="hover:text-white">Shipping policy</Link>
-              <Link href="/contact" className="hover:text-white">Contact information</Link>
+              <Link href="/home/contact" className="hover:text-white">Contact information</Link>
             </div>
           </div>
         </div>

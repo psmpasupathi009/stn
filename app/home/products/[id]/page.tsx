@@ -57,7 +57,7 @@ export default function ProductDetailPage() {
 
   const addToCart = async () => {
     if (!isAuthenticated) {
-      router.push('/login')
+      router.push('/home/login')
       return
     }
 
@@ -97,7 +97,7 @@ export default function ProductDetailPage() {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4">
         <p className="text-neutral-600">Product not found</p>
-        <Button onClick={() => router.push('/products')} variant="outline">Browse products</Button>
+        <Button onClick={() => router.push('/home/products')} variant="outline">Browse products</Button>
       </div>
     )
   }
@@ -228,7 +228,7 @@ export default function ProductDetailPage() {
               <button
                 onClick={() => {
                   addToCart()
-                  router.push('/cart')
+                  router.push('/home/cart')
                 }}
                 disabled={!product.inStock}
                 className="flex-1 bg-amber-600 text-white py-3 px-6 rounded-xl font-semibold hover:bg-amber-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"

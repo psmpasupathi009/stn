@@ -34,7 +34,7 @@ export default function OrdersPage() {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      router.push('/login')
+      router.push('/home/login')
       return
     }
     fetchOrders()
@@ -67,7 +67,7 @@ export default function OrdersPage() {
         <div className="text-center py-12">
           <p className="text-gray-600 mb-4">You have no orders yet</p>
           <button
-            onClick={() => router.push('/')}
+            onClick={() => router.push('/home')}
             className="text-blue-600 hover:underline"
           >
             Continue Shopping

@@ -76,7 +76,7 @@ export default function OurStoryPage() {
               <p className="text-2xl md:text-3xl font-bold text-green-700 mb-8">
                 Pure. Honest. Naturally Cold-Pressed.
               </p>
-              <Link href="/products">
+              <Link href="/home/products">
                 <Button size="lg" className="bg-black text-white hover:bg-gray-800 px-8 py-6 text-lg">
                   Explore Our Products
                 </Button>

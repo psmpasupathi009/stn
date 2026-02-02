@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, Suspense } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -16,25 +16,12 @@ import Image from 'next/image'
 
 type Step = 'email' | 'otp' | 'password'
 
-interface FormData {
-  email: string
-  name: string
-  phoneNumber: string
-  password: string
-  confirmPassword: string
-}
-
-function SignupForm() {
-  const searchParams = useSearchParams()
+export default function ForgotPasswordPage() {
   const [step, setStep] = useState<Step>('email')
-  const [formData, setFormData] = useState<FormData>({
-    email: searchParams.get('email') || '',
-    name: '',
-    phoneNumber: '',
-    password: '',
-    confirmPassword: '',
-  })
+  const [email, setEmail] = useState('')
   const [otp, setOtp] = useState('')
+  const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
@@ -45,41 +32,30 @@ function SignupForm() {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
   }
 
-  // Step 1: Send signup request (email + name)
-  const handleSignup = async (e: React.FormEvent) => {
+  const handleSendOTP = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError('')
     setSuccess('')
 
-    if (!formData.email.trim()) {
+    if (!email.trim()) {
       setError('Email is required')
       setLoading(false)
       return
     }
 
-    if (!isValidEmail(formData.email)) {
+    if (!isValidEmail(email)) {
       setError('Please enter a valid email address')
       setLoading(false)
       return
     }
 
-    if (!formData.name || formData.name.trim().length < 2) {
-      setError('Name is required and must be at least 2 characters')
-      setLoading(false)
-      return
-    }
-
     try {
-      const res = await fetch('/api/auth/signup', {
+      const res = await fetch('/api/auth/forgot-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({
-          email: formData.email.trim().toLowerCase(),
-          name: formData.name.trim(),
-          phoneNumber: formData.phoneNumber.trim() || undefined,
-        }),
+        body: JSON.stringify({ email: email.trim().toLowerCase() }),
       })
 
       const data = await res.json()
@@ -99,19 +75,15 @@ function SignupForm() {
 
   const handleResendOTP = async (): Promise<boolean> => {
     try {
-      const res = await fetch('/api/auth/signup', {
+      const res = await fetch('/api/auth/forgot-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({
-          email: formData.email.trim().toLowerCase(),
-          name: formData.name.trim(),
-          phoneNumber: formData.phoneNumber.trim() || undefined,
-        }),
+        body: JSON.stringify({ email: email.trim().toLowerCase() }),
       })
       const data = await res.json()
       if (res.ok && data.success) {
-        setOtp('') // Clear old OTP - new code was sent
+        setOtp('')
         setSuccess('New OTP sent to your email! Please enter the new code.')
         setError('')
         return true
@@ -124,94 +96,62 @@ function SignupForm() {
     }
   }
 
-  // Step 2: Verify OTP
-  const handleVerifyOTP = async (e: React.FormEvent) => {
+  const handleContinueToPassword = (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
     setError('')
     setSuccess('')
-
     if (!otp || otp.length !== 6) {
       setError('Please enter a valid 6-digit OTP')
-      setLoading(false)
       return
     }
-
-    try {
-      const res = await fetch('/api/auth/verify-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          email: formData.email.trim().toLowerCase(),
-          code: otp,
-          type: 'SIGNUP',
-        }),
-      })
-
-      const data = await res.json()
-
-      if (res.ok && data.verified) {
-        setSuccess('OTP verified! Please create your password.')
-        setStep('password')
-      } else {
-        setError(data.error || 'Invalid or expired OTP')
-      }
-    } catch {
-      setError('Network error. Please check your connection and try again.')
-    } finally {
-      setLoading(false)
-    }
+    setSuccess('Enter your new password below.')
+    setStep('password')
   }
 
-  // Step 3: Create account with password
-  const handleCreateAccount = async (e: React.FormEvent) => {
+  const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError('')
     setSuccess('')
 
-    if (!formData.password || formData.password.length < 6) {
+    if (!password || password.length < 6) {
       setError('Password must be at least 6 characters')
       setLoading(false)
       return
     }
 
-    if (formData.password !== formData.confirmPassword) {
+    if (password !== confirmPassword) {
       setError('Passwords do not match')
       setLoading(false)
       return
     }
 
     try {
-      const res = await fetch('/api/auth/create-account', {
+      const res = await fetch('/api/auth/reset-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({
-          email: formData.email.trim().toLowerCase(),
-          password: formData.password,
-          name: formData.name.trim(),
-          phoneNumber: formData.phoneNumber.trim() || undefined,
+          email: email.trim().toLowerCase(),
+          password,
+          code: otp,
         }),
       })
 
       const data = await res.json()
 
       if (res.ok && data.success && data.user) {
-        // Cookie is set by server, just update user state
         setUser(data.user)
-        setSuccess('Account created successfully! Redirecting...')
-        
+        setSuccess('Password reset successfully! Redirecting...')
         setTimeout(() => {
           if (data.user.role === 'ADMIN') {
             router.push('/admin/dashboard')
           } else {
-            router.push('/')
+            router.push('/home')
           }
         }, 1000)
       } else {
-        setError(data.error || 'Failed to create account. Please try again.')
+        setError(data.error || 'Failed to reset password. Please try again.')
       }
     } catch {
       setError('Network error. Please check your connection and try again.')
@@ -228,18 +168,16 @@ function SignupForm() {
       setOtp('')
     } else if (step === 'password') {
       setStep('otp')
-      setFormData(prev => ({ ...prev, password: '', confirmPassword: '' }))
+      setPassword('')
+      setConfirmPassword('')
     }
   }
-
-  const passwordsMatch = formData.password === formData.confirmPassword
-  const isPasswordValid = formData.password.length >= 6
 
   return (
     <div className="flex min-h-svh w-full min-w-0 flex-col items-center justify-center overflow-x-hidden bg-gray-50 px-4 py-6 sm:px-6 sm:py-8 md:px-8 md:py-10 lg:px-10 lg:py-12">
       <div className="flex w-full min-w-0 max-w-full flex-col gap-4 sm:max-w-sm md:max-w-md sm:gap-5 md:gap-6">
         <Link
-          href="/"
+          href="/home"
           className="flex min-w-0 max-w-full items-center justify-center gap-2 self-center font-semibold text-gray-900 transition-colors hover:text-green-800 text-sm sm:text-base md:text-lg"
         >
           <Image src="/STN LOGO.png" alt="STN" width={36} height={36} className="h-7 w-7 shrink-0 rounded-md sm:h-8 sm:w-8 md:h-9 md:w-9" />
@@ -249,12 +187,18 @@ function SignupForm() {
         <Card className="rounded-xl">
         <CardHeader className="space-y-1 p-4 sm:p-6">
           <CardTitle className="text-xl sm:text-2xl font-bold text-center">
-            Create Account
+            {step === 'email' && 'Reset Password'}
+            {step === 'otp' && 'Verify OTP'}
+            {step === 'password' && 'Set New Password'}
           </CardTitle>
           <CardDescription className="text-center">
-            {step === 'email' && 'Enter your details to get started'}
-            {step === 'otp' && 'Verify your email with OTP'}
-            {step === 'password' && 'Create your password'}
+            {step === 'email' && 'Enter your email to receive an OTP'}
+            {step === 'otp' && (
+              <>
+                We sent a 6-digit code to <span className="break-all font-medium">{email}</span>
+              </>
+            )}
+            {step === 'password' && 'Enter your new password'}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4 p-4 sm:p-6 pt-0">
@@ -270,14 +214,14 @@ function SignupForm() {
           )}
 
           {step === 'email' && (
-            <form onSubmit={handleSignup} className="space-y-4">
+            <form onSubmit={handleSendOTP} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email Address *</Label>
+                <Label htmlFor="email">Email Address</Label>
                 <Input
                   id="email"
                   type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
                   placeholder="your.email@example.com"
                   className="mt-1"
@@ -285,44 +229,12 @@ function SignupForm() {
                   autoFocus
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="name">Full Name *</Label>
-                <Input
-                  id="name"
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                  required
-                  placeholder="Enter your full name"
-                  className="mt-1"
-                  autoComplete="name"
-                />
-                {formData.name && formData.name.trim().length < 2 && (
-                  <p className="text-xs text-red-500">Name must be at least 2 characters</p>
-                )}
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="phoneNumber">Phone Number</Label>
-                <Input
-                  id="phoneNumber"
-                  type="tel"
-                  value={formData.phoneNumber}
-                  onChange={(e) => setFormData(prev => ({ ...prev, phoneNumber: e.target.value }))}
-                  placeholder="Enter your phone number (optional)"
-                  className="mt-1"
-                  autoComplete="tel"
-                />
-              </div>
-              <Button 
-                type="submit" 
-                className="w-full" 
-                disabled={loading || !formData.email.trim() || formData.name.trim().length < 2}
-              >
-                {loading ? 'Sending OTP...' : 'Continue'}
+              <Button type="submit" className="w-full" disabled={loading || !email.trim()}>
+                {loading ? 'Sending OTP...' : 'Send OTP'}
               </Button>
               <p className="text-sm text-center text-gray-600">
-                Already have an account?{' '}
-                <Link href="/login" className="text-blue-600 hover:underline font-medium">
+                Remember your password?{' '}
+                <Link href="/home/login" className="text-blue-600 hover:underline font-medium">
                   Sign in
                 </Link>
               </p>
@@ -330,7 +242,7 @@ function SignupForm() {
           )}
 
           {step === 'otp' && (
-            <form onSubmit={handleVerifyOTP} className="space-y-4">
+            <form onSubmit={handleContinueToPassword} className="space-y-4">
               <div className="space-y-2">
                 <Label>Enter 6-Digit OTP</Label>
                 <InputOTP
@@ -339,24 +251,23 @@ function SignupForm() {
                   onChange={setOtp}
                   className="mt-1 justify-center"
                 />
-                <p className="text-xs text-gray-500 text-center break-all">
-                  OTP sent to {formData.email}
+                <p className="text-xs text-gray-500 text-center">
+                  Check your email for the verification code
                 </p>
                 <ResendOTP onResend={handleResendOTP} className="mt-1" />
               </div>
-              <Button 
-                type="submit" 
-                className="w-full" 
-                disabled={loading || otp.length !== 6}
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={otp.length !== 6}
               >
-                {loading ? 'Verifying...' : 'Verify OTP'}
+                Continue
               </Button>
               <Button
                 type="button"
                 variant="outline"
                 className="w-full"
                 onClick={handleBack}
-                disabled={loading}
               >
                 Back
               </Button>
@@ -364,42 +275,37 @@ function SignupForm() {
           )}
 
           {step === 'password' && (
-            <form onSubmit={handleCreateAccount} className="space-y-4">
+            <form onSubmit={handleResetPassword} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="password">Password *</Label>
+                <Label htmlFor="password">New Password</Label>
                 <PasswordInput
                   id="password"
-                  value={formData.password}
-                  onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   required
-                  placeholder="Enter password (min 6 characters)"
+                  placeholder="Enter new password (min 6 characters)"
                   className="mt-1"
+                  autoComplete="new-password"
                   autoFocus
                 />
-                {formData.password && !isPasswordValid && (
-                  <p className="text-xs text-red-500">Password must be at least 6 characters</p>
-                )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm Password *</Label>
+                <Label htmlFor="confirmPassword">Confirm Password</Label>
                 <PasswordInput
                   id="confirmPassword"
-                  value={formData.confirmPassword}
-                  onChange={(e) => setFormData(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
                   required
-                  placeholder="Confirm your password"
+                  placeholder="Confirm new password"
                   className="mt-1"
+                  autoComplete="new-password"
                 />
-                {formData.confirmPassword && !passwordsMatch && (
+                {confirmPassword && password !== confirmPassword && (
                   <p className="text-xs text-red-500">Passwords do not match</p>
                 )}
               </div>
-              <Button 
-                type="submit" 
-                className="w-full" 
-                disabled={loading || !passwordsMatch || !isPasswordValid}
-              >
-                {loading ? 'Creating Account...' : 'Create Account'}
+              <Button type="submit" className="w-full" disabled={loading || !password || password !== confirmPassword}>
+                {loading ? 'Resetting Password...' : 'Reset Password'}
               </Button>
               <Button
                 type="button"
@@ -417,20 +323,5 @@ function SignupForm() {
         </div>
       </div>
     </div>
-  )
-}
-
-export default function SignupPage() {
-  return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
-          <p className="mt-2 text-gray-600">Loading...</p>
-        </div>
-      </div>
-    }>
-      <SignupForm />
-    </Suspense>
   )
 }

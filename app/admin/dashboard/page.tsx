@@ -118,7 +118,7 @@ export default function AdminDashboard() {
       return
     }
     if (user?.role?.toUpperCase() !== 'ADMIN') {
-      router.push('/')
+      router.push('/home')
       return
     }
     fetchProducts()

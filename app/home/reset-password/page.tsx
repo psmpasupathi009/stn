@@ -52,7 +52,7 @@ function ResetPasswordForm() {
       if (res.ok) {
         setSuccess(true)
         setTimeout(() => {
-          router.push('/login')
+          router.push('/home/login')
         }, 2000)
       } else {
         setError(data.error || 'Failed to reset password')

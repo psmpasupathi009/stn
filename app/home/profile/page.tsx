@@ -14,7 +14,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      router.push('/login')
+      router.push('/home/login')
     }
   }, [isAuthenticated, router])
 
@@ -61,7 +61,7 @@ export default function ProfilePage() {
                   Admin Dashboard
                 </Button>
               )}
-              <Button variant="outline" className="w-full" onClick={() => router.push('/orders')}>
+              <Button variant="outline" className="w-full" onClick={() => router.push('/home/orders')}>
                 My Orders
               </Button>
               <Button variant="destructive" className="w-full" onClick={logout}>

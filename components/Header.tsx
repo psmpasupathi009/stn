@@ -20,10 +20,10 @@ import {
 
 const ICON_SIZE = 22
 const NAV_LINKS = [
-  { href: '/our-story', label: 'Our Story' },
-  { href: '/contact', label: 'Contact' },
-  { href: '/orders', label: 'My Orders' },
-  { href: '/track-order', label: 'Track Order' },
+  { href: '/home/our-story', label: 'Our Story' },
+  { href: '/home/contact', label: 'Contact' },
+  { href: '/home/orders', label: 'My Orders' },
+  { href: '/home/track-order', label: 'Track Order' },
 ]
 
 export default function Header() {
@@ -105,7 +105,7 @@ export default function Header() {
                 </SheetHeader>
                 <nav className="flex flex-col py-4 flex-1 overflow-y-auto">
                   <Link
-                    href="/products"
+                    href="/home/products"
                     className="px-5 py-3.5 text-sm font-medium text-neutral-800 hover:bg-neutral-100 hover:text-neutral-900 transition-colors border-b border-neutral-100 uppercase tracking-wide"
                     onClick={() => setMenuOpen(false)}
                   >
@@ -142,7 +142,7 @@ export default function Header() {
             {isAuthenticated ? (
               <div className="relative flex items-center">
                 <Link
-                  href="/profile"
+                  href="/home/profile"
                   className={iconButtonClass}
                   aria-label="Profile"
                 >
@@ -168,7 +168,7 @@ export default function Header() {
               </div>
             ) : (
               <Link
-                href="/login"
+                href="/home/login"
                 className={iconButtonClass}
                 aria-label="Log in"
               >
@@ -177,7 +177,7 @@ export default function Header() {
             )}
 
             <Link
-              href="/cart"
+              href="/home/cart"
               className={`${iconButtonClass} relative`}
               aria-label={`Cart${displayCartCount > 0 ? `, ${displayCartCount} items` : ''}`}
             >

@@ -45,7 +45,7 @@ function ProductCard({
 }) {
   return (
     <Card className={cn('group overflow-hidden border-gray-200 bg-white shadow-sm transition-all duration-200 hover:shadow-md hover:border-green-200 rounded-2xl', className)}>
-      <Link href={`/products/${product.id}`} className="block min-w-0">
+      <Link href={`/home/products/${product.id}`} className="block min-w-0">
         <div className="aspect-square overflow-hidden bg-gray-50 relative w-full">
           {product.image ? (
             <Image
@@ -70,7 +70,7 @@ function ProductCard({
         </div>
       </Link>
       <CardContent className="p-3 sm:p-4 pb-2 min-w-0 overflow-hidden">
-        <Link href={`/products/${product.id}`} className="block min-w-0">
+        <Link href={`/home/products/${product.id}`} className="block min-w-0">
           <h3 className="font-semibold text-gray-900 line-clamp-2 mb-2 hover:text-green-700 transition-colors min-w-0 overflow-hidden">
             {product.name}
           </h3>
@@ -167,7 +167,7 @@ function ProductsPageContent() {
   const addToCart = useCallback(
     async (productId: string) => {
       if (!isAuthenticated) {
-        window.location.href = '/login'
+        window.location.href = '/home/login'
         return
       }
       try {
@@ -232,7 +232,7 @@ function ProductsPageContent() {
             </h2>
             <nav className="flex flex-col gap-0.5">
               <Link
-                href="/products"
+                href="/home/products"
                 className={cn(
                   'px-3 py-2 rounded-lg text-sm font-medium transition-colors',
                   !categoryFromUrl
@@ -249,7 +249,7 @@ function ProductsPageContent() {
                 return (
                   <Link
                     key={cat}
-                    href={`/products?category=${encodeURIComponent(cat?.trim() || '')}`}
+                    href={`/home/products?category=${encodeURIComponent(cat?.trim() || '')}`}
                     className={cn(
                       'px-3 py-2 rounded-lg text-sm font-medium transition-colors',
                       isActive ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-gray-100'
@@ -276,7 +276,7 @@ function ProductsPageContent() {
               {/* Mobile category filter (sidebar hidden on small screens) */}
               <div className="flex flex-wrap gap-2 lg:hidden">
                 <Link
-                  href="/products"
+                  href="/home/products"
                   className={cn(
                     'px-3 py-1.5 rounded-full text-sm font-medium transition-colors border',
                     !categoryFromUrl
@@ -293,7 +293,7 @@ function ProductsPageContent() {
                   return (
                     <Link
                       key={cat}
-                      href={`/products?category=${encodeURIComponent(cat?.trim() || '')}`}
+                      href={`/home/products?category=${encodeURIComponent(cat?.trim() || '')}`}
                       className={cn(
                         'px-3 py-1.5 rounded-full text-sm font-medium transition-colors border',
                         isActive

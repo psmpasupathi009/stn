@@ -82,7 +82,7 @@ const categories = [
     name: 'Shop All',
     icon: Package,
     slug: 'all',
-    href: '/products',
+    href: '/home/products',
     dashed: true,
     color: 'from-gray-400 to-gray-500',
   },
@@ -102,7 +102,7 @@ export default function CategoryMarquee() {
         {categories.map((category) => {
           // Link to products page with category filter (same category names as API/sidebar)
           const categoryParam = categoryMapping[category.slug] ?? category.slug
-          const href = category.href ?? (categoryParam ? `/products?category=${encodeURIComponent(categoryParam)}` : '/products')
+          const href = category.href ?? (categoryParam ? `/home/products?category=${encodeURIComponent(categoryParam)}` : '/home/products')
           const IconComponent = category.icon
           return (
             <Link

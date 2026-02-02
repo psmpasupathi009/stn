@@ -61,7 +61,7 @@ export function LoginForm() {
         if (data.user.role === 'ADMIN') {
           router.push('/admin/dashboard')
         } else {
-          router.push('/')
+          router.push('/home')
         }
       } else {
         setError(data.error || 'Invalid email or password')
@@ -107,7 +107,7 @@ export function LoginForm() {
           <div className="flex flex-wrap items-center justify-between gap-1">
             <Label htmlFor="password" className="text-sm sm:text-base">Password</Label>
             <Link
-              href="/forgot-password"
+              href="/home/forgot-password"
               className="text-xs text-gray-500 hover:text-gray-900 hover:underline underline-offset-4 sm:text-sm shrink-0"
             >
               Forgot password?
@@ -135,7 +135,7 @@ export function LoginForm() {
       <p className="text-center text-xs text-gray-500 sm:text-sm">
         Don&apos;t have an account?{' '}
         <Link
-          href="/signup"
+          href="/home/signup"
           className="font-medium text-gray-900 hover:underline underline-offset-4"
         >
           Sign up

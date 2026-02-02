@@ -34,7 +34,7 @@ export default function CartPage() {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      router.push('/login')
+      router.push('/home/login')
       return
     }
     fetchCart()
@@ -140,7 +140,7 @@ export default function CartPage() {
             if (verifyRes.ok) {
               window.dispatchEvent(new CustomEvent('cart-updated'))
               toast.success('Payment successful!')
-              router.push('/orders')
+              router.push('/home/orders')
             } else {
               toast.error('Payment verification failed')
             }
@@ -187,7 +187,7 @@ export default function CartPage() {
           <h2 className="text-2xl font-bold text-neutral-900 mb-2">Your cart is empty</h2>
           <p className="text-neutral-600 mb-6">Add some products to get started!</p>
           <Button
-            onClick={() => router.push('/products')}
+            onClick={() => router.push('/home/products')}
             className="bg-green-600 hover:bg-green-700 text-white px-8 py-6 text-base rounded-xl"
           >
             Continue Shopping
