@@ -23,17 +23,17 @@ export default function ContactPage() {
   }
 
   return (
-    <div className="bg-white min-h-screen">
-      <div className="container mx-auto px-4 py-16 md:py-24">
-        <div className="max-w-3xl mx-auto">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 text-center">
+    <div className="bg-white min-h-screen w-full min-w-0 overflow-x-hidden">
+      <div className="container mx-auto w-full max-w-full min-w-0 px-3 sm:px-4 md:px-6 py-10 sm:py-14 md:py-20 lg:py-24">
+        <div className="max-w-3xl mx-auto min-w-0">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 sm:mb-4 text-center">
             Contact Us
           </h1>
-          <p className="text-lg text-gray-600 text-center mb-12">
+          <p className="text-base sm:text-lg text-gray-600 text-center mb-8 sm:mb-12 px-1">
             We&apos;d love to hear from you. Send us a message and we&apos;ll respond as soon as possible.
           </p>
 
-          <div className="grid md:grid-cols-2 gap-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-10 md:gap-12">
             <div>
               <h2 className="text-2xl font-bold text-gray-900 mb-6">Get in Touch</h2>
               <div className="space-y-6">
@@ -111,13 +111,13 @@ export default function ContactPage() {
                     rows={6}
                     value={formData.message}
                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                    className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-900"
+                    className="w-full min-w-0 rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary-green)] focus:ring-offset-1 resize-y min-h-[120px]"
                     required
                   />
                 </div>
                 <Button
                   type="submit"
-                  className="w-full bg-black text-white hover:bg-gray-800"
+                  className="w-full bg-[var(--primary-green)] text-white hover:opacity-90"
                 >
                   {submitted ? 'Message Sent!' : 'Send Message'}
                 </Button>

@@ -317,7 +317,7 @@ function SignupForm() {
               </Button>
               <p className="text-sm text-center text-gray-600">
                 Already have an account?{' '}
-                <Link href="/home/login" className="text-blue-600 hover:underline font-medium">
+                <Link href="/home/login" className="text-[var(--primary-green)] hover:underline font-medium">
                   Sign in
                 </Link>
               </p>

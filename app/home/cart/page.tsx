@@ -126,15 +126,15 @@ export default function CartPage() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50">
-        <div className="container mx-auto px-4 py-8 md:py-12">
-          <h1 className="text-2xl md:text-3xl font-bold text-neutral-900 mb-8">Shopping Cart</h1>
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="md:col-span-2 space-y-4">
+    <div className="min-h-screen bg-neutral-50 w-full min-w-0 overflow-x-hidden">
+        <div className="container mx-auto w-full max-w-full min-w-0 px-3 sm:px-4 md:px-6 py-6 sm:py-8 md:py-12">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-neutral-900 mb-6 sm:mb-8">Shopping Cart</h1>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+            <div className="md:col-span-2 space-y-4 min-w-0">
               {cart.items.map((item) => (
-                <div key={item.id} className="bg-white border border-neutral-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow">
-                  <div className="flex gap-5">
-                    <div className="relative w-24 h-24 bg-neutral-100 rounded-lg overflow-hidden shrink-0">
+                <div key={item.id} className="bg-white border border-neutral-200 rounded-xl p-3 sm:p-5 shadow-sm hover:shadow-md transition-shadow">
+                  <div className="flex gap-3 sm:gap-5">
+                    <div className="relative w-20 h-20 sm:w-24 sm:h-24 bg-neutral-100 rounded-lg overflow-hidden shrink-0">
                       {item.product.image ? (
                         <Image src={item.product.image} alt={item.product.name} fill className="object-cover" unoptimized />
                       ) : (

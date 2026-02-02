@@ -258,7 +258,7 @@ export default function TrackOrderPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-      <div className="container mx-auto px-4 py-12 md:py-16 max-w-3xl">
+      <div className="container mx-auto w-full max-w-full min-w-0 px-3 sm:px-4 md:px-6 py-8 sm:py-12 md:py-16 max-w-3xl">
         {/* Header */}
         <div className="text-center mb-10">
           <div className="w-16 h-16 mx-auto mb-4 bg-green-100 rounded-full flex items-center justify-center">

@@ -1039,94 +1039,93 @@ export default function AdminDashboard() {
 
   return (
     <div className="bg-linear-to-br from-gray-50 to-green-50 min-h-screen">
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto w-full max-w-full min-w-0 px-3 sm:px-4 md:px-6 py-6 sm:py-8 overflow-x-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900">Admin Dashboard</h1>
-          <p className="text-gray-600 mt-2">Manage products, hero sections, and site content</p>
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">Admin Dashboard</h1>
+          <p className="text-sm sm:text-base text-gray-600 mt-1 sm:mt-2">Manage products, hero sections, and site content</p>
         </div>
 
         {/* Tabs */}
-        <div className="flex flex-wrap gap-2 mb-6 bg-white rounded-lg p-1 shadow-sm w-fit">
+        <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-4 sm:mb-6 bg-white rounded-lg p-1.5 sm:p-2 shadow-sm w-full min-w-0">
           <button
             onClick={() => setActiveTab('products')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-md font-medium transition-all ${
+            className={`flex items-center justify-center gap-1.5 sm:gap-2 px-3 py-2 sm:px-4 sm:py-2.5 rounded-md text-sm sm:text-base font-medium transition-all min-w-0 flex-1 sm:flex-initial ${
               activeTab === 'products'
                 ? 'bg-linear-to-r from-green-500 to-green-600 text-white shadow-md'
                 : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
-            <Package className="w-4 h-4" />
+            <Package className="w-4 h-4 shrink-0" />
             Products
           </button>
           <button
             onClick={() => setActiveTab('orders')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-md font-medium transition-all ${
+            className={`flex items-center justify-center gap-1.5 sm:gap-2 px-3 py-2 sm:px-4 sm:py-2.5 rounded-md text-sm sm:text-base font-medium transition-all min-w-0 flex-1 sm:flex-initial ${
               activeTab === 'orders'
                 ? 'bg-linear-to-r from-green-500 to-green-600 text-white shadow-md'
                 : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
-            <ShoppingBag className="w-4 h-4" />
+            <ShoppingBag className="w-4 h-4 shrink-0" />
             Orders
             {orders.filter(o => o.status === 'pending' && o.paymentStatus === 'paid').length > 0 && (
-              <span className="bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full">
+              <span className="bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full shrink-0">
                 {orders.filter(o => o.status === 'pending' && o.paymentStatus === 'paid').length}
               </span>
             )}
           </button>
           <button
             onClick={() => setActiveTab('hero')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-md font-medium transition-all ${
+            className={`flex items-center justify-center gap-1.5 sm:gap-2 px-3 py-2 sm:px-4 sm:py-2.5 rounded-md text-sm sm:text-base font-medium transition-all min-w-0 flex-1 sm:flex-initial ${
               activeTab === 'hero'
                 ? 'bg-linear-to-r from-green-500 to-green-600 text-white shadow-md'
                 : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
-            <Layers className="w-4 h-4" />
-            Hero Sections
+            <Layers className="w-4 h-4 shrink-0" />
+            Hero
           </button>
           <button
             onClick={() => setActiveTab('gallery')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-md font-medium transition-all ${
+            className={`flex items-center justify-center gap-1.5 sm:gap-2 px-3 py-2 sm:px-4 sm:py-2.5 rounded-md text-sm sm:text-base font-medium transition-all min-w-0 flex-1 sm:flex-initial ${
               activeTab === 'gallery'
                 ? 'bg-linear-to-r from-green-500 to-green-600 text-white shadow-md'
                 : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
-            <Images className="w-4 h-4" />
-            About Gallery
+            <Images className="w-4 h-4 shrink-0" />
+            Gallery
           </button>
         </div>
 
         {/* Products Tab */}
         {activeTab === 'products' && (
           <>
-            <div className="flex justify-between items-center mb-6">
-              <div></div>
+            <div className="flex flex-col sm:flex-row justify-end items-stretch sm:items-center gap-3 mb-4 sm:mb-6">
               <Button
                 onClick={() => {
                   if (showForm) resetForm()
                   else setShowForm(true)
                 }}
-                className="bg-linear-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
+                className="w-full sm:w-auto bg-linear-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
               >
-                <Plus className="w-4 h-4 mr-2" />
+                <Plus className="w-4 h-4 mr-2 shrink-0" />
                 {showForm ? 'Cancel' : 'Add New Product'}
               </Button>
             </div>
 
             {/* Search and Filter */}
-            <div className="mb-6 grid md:grid-cols-2 gap-4">
+            <div className="mb-4 sm:mb-6 grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 min-w-0">
               <Input
                 type="text"
-                placeholder="Search products by name or item code..."
+                placeholder="Search products..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="bg-white"
+                className="bg-white w-full min-w-0"
               />
               <select
-                className="w-full rounded-md border border-gray-300 px-3 py-2 bg-white"
+                className="w-full min-w-0 rounded-md border border-gray-300 px-3 py-2 bg-white text-sm sm:text-base h-9 sm:h-10"
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
               >
@@ -1139,29 +1138,30 @@ export default function AdminDashboard() {
 
             {/* Product Form */}
             {showForm && (
-              <Card className="mb-8 shadow-lg">
-                <CardHeader className="bg-linear-to-r from-green-50 to-green-100">
-                  <CardTitle className="flex items-center gap-2">
-                    {editingProduct ? <Pencil className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
+              <Card className="mb-6 sm:mb-8 shadow-lg overflow-hidden">
+                <CardHeader className="bg-linear-to-r from-green-50 to-green-100 p-4 sm:p-6">
+                  <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                    {editingProduct ? <Pencil className="w-5 h-5 shrink-0" /> : <Plus className="w-5 h-5 shrink-0" />}
                     {editingProduct ? 'Edit Product' : 'Create New Product'}
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="pt-6">
-                  <form onSubmit={handleSubmit} className="space-y-6">
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div>
-                        <Label>Product Name *</Label>
+                <CardContent className="pt-4 sm:pt-6 p-4 sm:p-6">
+                  <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 min-w-0">
+                      <div className="min-w-0">
+                        <Label className="text-sm sm:text-base">Product Name *</Label>
                         <Input
                           value={formData.name}
                           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                           required
                           placeholder="Enter product name"
+                          className="mt-1 w-full min-w-0"
                         />
                       </div>
-                      <div>
-                        <Label>Category *</Label>
+                      <div className="min-w-0">
+                        <Label className="text-sm sm:text-base">Category *</Label>
                         <select
-                          className="w-full rounded-md border border-gray-300 px-3 py-2"
+                          className="w-full min-w-0 rounded-md border border-gray-300 px-3 py-2 mt-1 text-sm sm:text-base h-9 sm:h-10"
                           value={formData.category}
                           onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                           required={formData.category !== '__other__' || !newCategoryName.trim()}
@@ -1174,7 +1174,7 @@ export default function AdminDashboard() {
                         </select>
                         {formData.category === '__other__' && (
                           <Input
-                            className="mt-2"
+                            className="mt-2 w-full min-w-0"
                             placeholder="Type new category name"
                             value={newCategoryName}
                             onChange={(e) => setNewCategoryName(e.target.value)}
@@ -1182,26 +1182,28 @@ export default function AdminDashboard() {
                           />
                         )}
                       </div>
-                      <div>
-                        <Label>Item Code *</Label>
+                      <div className="min-w-0">
+                        <Label className="text-sm sm:text-base">Item Code *</Label>
                         <Input
                           value={formData.itemCode}
                           onChange={(e) => setFormData({ ...formData, itemCode: e.target.value })}
                           required
                           placeholder="e.g., STNHM001"
                           disabled={!!editingProduct}
+                          className="mt-1 w-full min-w-0"
                         />
                       </div>
-                      <div>
-                        <Label>Weight</Label>
+                      <div className="min-w-0">
+                        <Label className="text-sm sm:text-base">Weight</Label>
                         <Input
                           value={formData.weight}
                           onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
                           placeholder="e.g., 250 gms"
+                          className="mt-1 w-full min-w-0"
                         />
                       </div>
-                      <div>
-                        <Label>MRP (₹) *</Label>
+                      <div className="min-w-0">
+                        <Label className="text-sm sm:text-base">MRP (₹) *</Label>
                         <Input
                           type="number"
                           step="0.01"
@@ -1210,10 +1212,11 @@ export default function AdminDashboard() {
                           onChange={(e) => setFormData({ ...formData, mrp: e.target.value })}
                           required
                           placeholder="0.00"
+                          className="mt-1 w-full min-w-0"
                         />
                       </div>
-                      <div>
-                        <Label>Sale Price (₹) *</Label>
+                      <div className="min-w-0">
+                        <Label className="text-sm sm:text-base">Sale Price (₹) *</Label>
                         <Input
                           type="number"
                           step="0.01"
@@ -1222,10 +1225,11 @@ export default function AdminDashboard() {
                           onChange={(e) => setFormData({ ...formData, salePrice: e.target.value })}
                           required
                           placeholder="0.00"
+                          className="mt-1 w-full min-w-0"
                         />
                       </div>
-                      <div>
-                        <Label>GST</Label>
+                      <div className="min-w-0">
+                        <Label className="text-sm sm:text-base">GST</Label>
                         <Input
                           type="number"
                           step="0.01"
@@ -1234,32 +1238,34 @@ export default function AdminDashboard() {
                           value={formData.gst}
                           onChange={(e) => setFormData({ ...formData, gst: e.target.value })}
                           placeholder="0.05"
+                          className="mt-1 w-full min-w-0"
                         />
                       </div>
-                      <div>
-                        <Label>HSN Code</Label>
+                      <div className="min-w-0">
+                        <Label className="text-sm sm:text-base">HSN Code</Label>
                         <Input
                           value={formData.hsnCode}
                           onChange={(e) => setFormData({ ...formData, hsnCode: e.target.value })}
                           placeholder="e.g., 1107"
+                          className="mt-1 w-full min-w-0"
                         />
                       </div>
                     </div>
-                    <div>
-                      <Label>Description</Label>
+                    <div className="min-w-0">
+                      <Label className="text-sm sm:text-base">Description</Label>
                       <textarea
-                        className="w-full rounded-md border border-gray-300 px-3 py-2"
+                        className="w-full min-w-0 rounded-md border border-gray-300 px-3 py-2 mt-1 text-sm sm:text-base min-h-[100px] sm:min-h-[120px]"
                         rows={4}
                         value={formData.description}
                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                         placeholder="Product description..."
                       />
                     </div>
-                    <div>
-                      <Label>Product Image</Label>
-                      <Input type="file" accept="image/*" onChange={handleImageChange} />
+                    <div className="min-w-0">
+                      <Label className="text-sm sm:text-base">Product Image</Label>
+                      <Input type="file" accept="image/*" onChange={handleImageChange} className="mt-1 w-full min-w-0" />
                       {(imagePreview || editingProduct?.image) && (
-                        <div className="mt-4 relative w-32 h-32">
+                        <div className="mt-4 relative w-24 h-24 sm:w-32 sm:h-32">
                           <Image
                             src={imagePreview || editingProduct?.image || ''}
                             alt="Preview"
@@ -1281,11 +1287,11 @@ export default function AdminDashboard() {
                       />
                       <Label htmlFor="inStock" className="cursor-pointer">In Stock</Label>
                     </div>
-                    <div className="flex gap-4">
-                      <Button type="submit" disabled={uploading} className="bg-linear-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600">
+                    <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2">
+                      <Button type="submit" disabled={uploading} className="w-full sm:w-auto bg-linear-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600">
                         {uploading ? 'Saving...' : editingProduct ? 'Update Product' : 'Create Product'}
                       </Button>
-                      <Button type="button" variant="outline" onClick={resetForm}>Cancel</Button>
+                      <Button type="button" variant="outline" onClick={resetForm} className="w-full sm:w-auto">Cancel</Button>
                     </div>
                   </form>
                 </CardContent>
@@ -1309,10 +1315,10 @@ export default function AdminDashboard() {
                     </Button>
                   </div>
                 ) : (
-                  <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 min-w-0">
                     {products.map((product) => (
-                      <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow bg-white">
-                        <div className="aspect-square bg-linear-to-br from-green-50 to-green-100 relative">
+                      <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow bg-white min-w-0">
+                        <div className="aspect-square bg-linear-to-br from-green-50 to-green-100 relative min-h-0">
                           {product.image ? (
                             <Image src={product.image} alt={product.name} fill className="object-cover" unoptimized />
                           ) : (
@@ -1360,20 +1366,20 @@ export default function AdminDashboard() {
         {activeTab === 'orders' && (
           <>
             {/* Orders Header & Actions */}
-            <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
-              <div className="flex items-center gap-4">
-                <h2 className="text-xl font-bold text-gray-800">Order Management</h2>
+            <div className="flex flex-col sm:flex-row flex-wrap justify-between items-stretch sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-6 min-w-0">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-4 min-w-0">
+                <h2 className="text-lg sm:text-xl font-bold text-gray-800">Order Management</h2>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => fetchOrders()}
-                  className="gap-2"
+                  className="gap-2 shrink-0"
                 >
-                  <RefreshCw className={`w-4 h-4 ${ordersLoading ? 'animate-spin' : ''}`} />
+                  <RefreshCw className={`w-4 h-4 shrink-0 ${ordersLoading ? 'animate-spin' : ''}`} />
                   Refresh
                 </Button>
               </div>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2 min-w-0">
                 {selectedOrders.size > 0 && (
                   <>
                     <Button
@@ -1475,10 +1481,10 @@ export default function AdminDashboard() {
 
             {/* Orders Summary Cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-              <Card className="bg-yellow-50 border-yellow-200">
-                <CardContent className="p-4">
-                  <p className="text-sm text-yellow-700">Pending</p>
-                  <p className="text-2xl font-bold text-yellow-800">
+              <Card className="bg-yellow-50 border-yellow-200 min-w-0">
+                <CardContent className="p-3 sm:p-4">
+                  <p className="text-xs sm:text-sm text-yellow-700">Pending</p>
+                  <p className="text-xl sm:text-2xl font-bold text-yellow-800">
                     {orders.filter(o => o.status === 'pending' && o.paymentStatus === 'paid').length}
                   </p>
                 </CardContent>
@@ -1491,18 +1497,18 @@ export default function AdminDashboard() {
                   </p>
                 </CardContent>
               </Card>
-              <Card className="bg-indigo-50 border-indigo-200">
-                <CardContent className="p-4">
-                  <p className="text-sm text-indigo-700">Shipped</p>
-                  <p className="text-2xl font-bold text-indigo-800">
+              <Card className="bg-indigo-50 border-indigo-200 min-w-0">
+                <CardContent className="p-3 sm:p-4">
+                  <p className="text-xs sm:text-sm text-indigo-700">Shipped</p>
+                  <p className="text-xl sm:text-2xl font-bold text-indigo-800">
                     {orders.filter(o => ['shipped', 'out_for_delivery'].includes(o.status)).length}
                   </p>
                 </CardContent>
               </Card>
-              <Card className="bg-green-50 border-green-200">
-                <CardContent className="p-4">
-                  <p className="text-sm text-green-700">Delivered</p>
-                  <p className="text-2xl font-bold text-green-800">
+              <Card className="bg-green-50 border-green-200 min-w-0">
+                <CardContent className="p-3 sm:p-4">
+                  <p className="text-xs sm:text-sm text-green-700">Delivered</p>
+                  <p className="text-xl sm:text-2xl font-bold text-green-800">
                     {orders.filter(o => o.status === 'delivered').length}
                   </p>
                 </CardContent>
@@ -1537,20 +1543,20 @@ export default function AdminDashboard() {
                             )}
                           </button>
                         </th>
-                        <th className="px-4 py-3 text-left font-semibold text-gray-600">Order</th>
-                        <th className="px-4 py-3 text-left font-semibold text-gray-600">Customer</th>
-                        <th className="px-4 py-3 text-left font-semibold text-gray-600">Items</th>
-                        <th className="px-4 py-3 text-left font-semibold text-gray-600">Amount</th>
-                        <th className="px-4 py-3 text-left font-semibold text-gray-600">Status</th>
-                        <th className="px-4 py-3 text-left font-semibold text-gray-600">Payment</th>
-                        <th className="px-4 py-3 text-left font-semibold text-gray-600">Date</th>
-                        <th className="px-4 py-3 text-left font-semibold text-gray-600">Actions</th>
+                        <th className="px-2 sm:px-4 py-2 sm:py-3 text-left font-semibold text-gray-600">Order</th>
+                        <th className="px-2 sm:px-4 py-2 sm:py-3 text-left font-semibold text-gray-600">Customer</th>
+                        <th className="px-2 sm:px-4 py-2 sm:py-3 text-left font-semibold text-gray-600">Items</th>
+                        <th className="px-2 sm:px-4 py-2 sm:py-3 text-left font-semibold text-gray-600">Amount</th>
+                        <th className="px-2 sm:px-4 py-2 sm:py-3 text-left font-semibold text-gray-600">Status</th>
+                        <th className="px-2 sm:px-4 py-2 sm:py-3 text-left font-semibold text-gray-600">Payment</th>
+                        <th className="px-2 sm:px-4 py-2 sm:py-3 text-left font-semibold text-gray-600">Date</th>
+                        <th className="px-2 sm:px-4 py-2 sm:py-3 text-left font-semibold text-gray-600">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y">
                       {orders.map((order) => (
                         <tr key={order.id} className="hover:bg-gray-50">
-                          <td className="px-4 py-3">
+                          <td className="px-2 sm:px-4 py-2 sm:py-3">
                             {order.paymentStatus === 'paid' && (
                               <button onClick={() => handleOrderSelect(order.id)}>
                                 {selectedOrders.has(order.id) ? (
@@ -1561,32 +1567,32 @@ export default function AdminDashboard() {
                               </button>
                             )}
                           </td>
-                          <td className="px-4 py-3">
-                            <p className="font-mono font-medium">#{order.id.slice(-8).toUpperCase()}</p>
+                          <td className="px-2 sm:px-4 py-2 sm:py-3">
+                            <p className="font-mono font-medium truncate max-w-[80px] sm:max-w-none">#{order.id.slice(-8).toUpperCase()}</p>
                           </td>
-                          <td className="px-4 py-3">
-                            <p className="font-medium">{order.user.name || 'N/A'}</p>
-                            <p className="text-xs text-gray-500">{order.user.email}</p>
+                          <td className="px-2 sm:px-4 py-2 sm:py-3">
+                            <p className="font-medium truncate max-w-[100px] sm:max-w-none">{order.user.name || 'N/A'}</p>
+                            <p className="text-xs text-gray-500 truncate max-w-[100px] sm:max-w-none">{order.user.email}</p>
                             {order.user.phoneNumber && (
                               <p className="text-xs text-gray-500">{order.user.phoneNumber}</p>
                             )}
                           </td>
-                          <td className="px-4 py-3">
-                            <p className="text-sm">{order.items.reduce((sum, i) => sum + i.quantity, 0)} items</p>
-                            <p className="text-xs text-gray-500 truncate max-w-[150px]">
+                          <td className="px-2 sm:px-4 py-2 sm:py-3">
+                            <p className="text-xs sm:text-sm">{order.items.reduce((sum, i) => sum + i.quantity, 0)} items</p>
+                            <p className="text-xs text-gray-500 truncate max-w-[120px] sm:max-w-[150px]">
                               {order.items.map(i => i.product.name).join(', ')}
                             </p>
                           </td>
-                          <td className="px-4 py-3">
-                            <p className="font-semibold">₹{order.totalAmount.toLocaleString('en-IN')}</p>
+                          <td className="px-2 sm:px-4 py-2 sm:py-3">
+                            <p className="font-semibold text-xs sm:text-sm">₹{order.totalAmount.toLocaleString('en-IN')}</p>
                           </td>
-                          <td className="px-4 py-3">
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
+                          <td className="px-2 sm:px-4 py-2 sm:py-3">
+                            <span className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium ${getStatusColor(order.status)}`}>
                               {ORDER_STATUSES.find(s => s.value === order.status)?.label || order.status}
                             </span>
                           </td>
-                          <td className="px-4 py-3">
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          <td className="px-2 sm:px-4 py-2 sm:py-3">
+                            <span className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium ${
                               order.paymentStatus === 'paid' ? 'bg-green-100 text-green-800' :
                               order.paymentStatus === 'pending' ? 'bg-yellow-100 text-yellow-800' :
                               'bg-red-100 text-red-800'
@@ -1594,12 +1600,12 @@ export default function AdminDashboard() {
                               {order.paymentStatus}
                             </span>
                           </td>
-                          <td className="px-4 py-3">
-                            <p className="text-sm">{new Date(order.createdAt).toLocaleDateString('en-IN')}</p>
-                            <p className="text-xs text-gray-500">{new Date(order.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</p>
+                          <td className="px-2 sm:px-4 py-2 sm:py-3">
+                            <p className="text-xs sm:text-sm">{new Date(order.createdAt).toLocaleDateString('en-IN')}</p>
+                            <p className="text-[10px] sm:text-xs text-gray-500">{new Date(order.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</p>
                           </td>
-                          <td className="px-4 py-3">
-                            <div className="flex gap-1">
+                          <td className="px-2 sm:px-4 py-2 sm:py-3">
+                            <div className="flex gap-1 flex-wrap">
                               <Button
                                 variant="outline"
                                 size="sm"
@@ -1673,11 +1679,11 @@ export default function AdminDashboard() {
                     </div>
 
                     {/* Status Update Form */}
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div>
-                        <Label>Order Status</Label>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 min-w-0">
+                      <div className="min-w-0">
+                        <Label className="text-sm sm:text-base">Order Status</Label>
                         <select
-                          className="w-full rounded-md border border-gray-300 px-3 py-2 mt-1"
+                          className="w-full min-w-0 rounded-md border border-gray-300 px-3 py-2 mt-1 h-9 sm:h-10 text-sm sm:text-base"
                           value={shippingFormData.status}
                           onChange={(e) => setShippingFormData({ ...shippingFormData, status: e.target.value })}
                         >
@@ -1737,14 +1743,14 @@ export default function AdminDashboard() {
 
             {/* Bulk Update Status Modal */}
             {showBulkStatusModal && (
-              <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                <div className="bg-white rounded-2xl w-full max-w-md p-6">
-                  <h3 className="text-xl font-bold mb-4">Update Status for {selectedOrders.size} Order(s)</h3>
-                  <div className="space-y-4">
-                    <div>
-                      <Label>New Status</Label>
+              <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3 sm:p-4 overflow-y-auto">
+                <div className="bg-white rounded-2xl w-full max-w-md p-4 sm:p-6 my-4 min-w-0 mx-2">
+                  <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">Update Status for {selectedOrders.size} Order(s)</h3>
+                  <div className="space-y-3 sm:space-y-4 min-w-0">
+                    <div className="min-w-0">
+                      <Label className="text-sm sm:text-base">New Status</Label>
                       <select
-                        className="w-full rounded-md border border-gray-300 px-3 py-2 mt-1"
+                        className="w-full min-w-0 rounded-md border border-gray-300 px-3 py-2 mt-1 h-9 sm:h-10 text-sm sm:text-base"
                         value={bulkStatus}
                         onChange={(e) => setBulkStatus(e.target.value)}
                       >
@@ -1755,9 +1761,9 @@ export default function AdminDashboard() {
                       </select>
                     </div>
                   </div>
-                  <div className="flex justify-end gap-3 mt-6">
-                    <Button variant="outline" onClick={() => { setShowBulkStatusModal(false); setBulkStatus('') }}>Cancel</Button>
-                    <Button onClick={handleBulkUpdateStatus} className="bg-green-600 hover:bg-green-700 text-white" disabled={!bulkStatus}>
+                  <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 mt-4 sm:mt-6">
+                    <Button variant="outline" onClick={() => { setShowBulkStatusModal(false); setBulkStatus('') }} className="w-full sm:w-auto">Cancel</Button>
+                    <Button onClick={handleBulkUpdateStatus} className="bg-green-600 hover:bg-green-700 text-white w-full sm:w-auto" disabled={!bulkStatus}>
                       Update
                     </Button>
                   </div>
@@ -1770,60 +1776,60 @@ export default function AdminDashboard() {
         {/* Gallery Tab */}
         {activeTab === 'gallery' && (
           <>
-            <div className="flex justify-between items-start mb-6">
-              <div>
-                <h2 className="text-xl font-bold text-gray-800 mb-1">About Page Gallery</h2>
-                <p className="text-gray-600 text-sm">Upload images and videos for Our Story page. Drag to reorder.</p>
+            <div className="flex flex-col sm:flex-row justify-between items-start gap-3 mb-4 sm:mb-6 min-w-0">
+              <div className="min-w-0">
+                <h2 className="text-lg sm:text-xl font-bold text-gray-800 mb-1">About Page Gallery</h2>
+                <p className="text-gray-600 text-xs sm:text-sm">Upload images and videos for Our Story page. Drag to reorder.</p>
               </div>
             </div>
 
             {/* Add Media Form */}
-            <Card className="mb-8 shadow-lg overflow-hidden">
-              <CardHeader className="bg-gradient-to-r from-emerald-50 to-teal-50 border-b">
-                <CardTitle className="flex items-center gap-2 text-gray-800">
-                  <Images className="w-5 h-5 text-emerald-600" />
+            <Card className="mb-6 sm:mb-8 shadow-lg overflow-hidden min-w-0">
+              <CardHeader className="bg-gradient-to-r from-emerald-50 to-teal-50 border-b p-4 sm:p-6">
+                <CardTitle className="flex items-center gap-2 text-gray-800 text-lg sm:text-xl">
+                  <Images className="w-5 h-5 shrink-0 text-emerald-600" />
                   Add Media
                 </CardTitle>
-                <p className="text-sm text-gray-600 mt-1">Images and videos shown on the Our Story page</p>
+                <p className="text-xs sm:text-sm text-gray-600 mt-1">Images and videos shown on the Our Story page</p>
               </CardHeader>
-              <CardContent className="pt-6">
-                <form onSubmit={addGalleryMedia} className="space-y-6">
+              <CardContent className="pt-4 sm:pt-6 p-4 sm:p-6">
+                <form onSubmit={addGalleryMedia} className="space-y-4 sm:space-y-6 min-w-0">
                   {/* Media type tabs */}
-                  <div>
-                    <Label className="text-base font-medium block mb-2">Media Type</Label>
-                    <div className="flex gap-2">
+                  <div className="min-w-0">
+                    <Label className="text-sm sm:text-base font-medium block mb-2">Media Type</Label>
+                    <div className="flex gap-2 min-w-0">
                       <button
                         type="button"
                         onClick={() => { setGalleryMediaType('image'); setGalleryMediaFile(null) }}
-                        className={`flex-1 py-3 px-4 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${
+                        className={`flex-1 min-w-0 py-2.5 sm:py-3 px-3 sm:px-4 rounded-lg text-sm sm:text-base font-medium transition-all flex items-center justify-center gap-1.5 sm:gap-2 touch-manipulation ${
                           galleryMediaType === 'image'
                             ? 'bg-emerald-600 text-white shadow-md'
                             : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                         }`}
                       >
-                        <ImageIcon className="w-5 h-5" />
+                        <ImageIcon className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
                         Image
                       </button>
                       <button
                         type="button"
                         onClick={() => { setGalleryMediaType('video'); setGalleryMediaFile(null) }}
-                        className={`flex-1 py-3 px-4 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${
+                        className={`flex-1 min-w-0 py-2.5 sm:py-3 px-3 sm:px-4 rounded-lg text-sm sm:text-base font-medium transition-all flex items-center justify-center gap-1.5 sm:gap-2 touch-manipulation ${
                           galleryMediaType === 'video'
                             ? 'bg-emerald-600 text-white shadow-md'
                             : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                         }`}
                       >
-                        <Video className="w-5 h-5" />
+                        <Video className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
                         Video
                       </button>
                     </div>
                   </div>
 
                   {/* File upload zone */}
-                  <div>
-                    <Label className="text-base font-medium block mb-2">Select File</Label>
-                    <label className="block">
-                      <div className={`border-2 border-dashed rounded-xl p-8 text-center transition-all cursor-pointer ${
+                  <div className="min-w-0">
+                    <Label className="text-sm sm:text-base font-medium block mb-2">Select File</Label>
+                    <label className="block min-w-0">
+                      <div className={`border-2 border-dashed rounded-xl p-4 sm:p-6 md:p-8 text-center transition-all cursor-pointer min-w-0 ${
                         galleryMediaFile
                           ? 'border-emerald-400 bg-emerald-50'
                           : 'border-gray-300 hover:border-emerald-300 hover:bg-gray-50'
@@ -1931,8 +1937,8 @@ export default function AdminDashboard() {
         {/* Hero Sections Tab */}
         {activeTab === 'hero' && (
           <>
-            <div className="flex justify-between items-center mb-6">
-              <p className="text-gray-600">
+            <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 mb-4 sm:mb-6 min-w-0">
+              <p className="text-gray-600 text-sm sm:text-base order-2 sm:order-1">
                 Manage hero carousel slides. Active slides will be shown on the homepage.
               </p>
               <Button
@@ -1940,31 +1946,31 @@ export default function AdminDashboard() {
                   if (showHeroForm) resetHeroForm()
                   else setShowHeroForm(true)
                 }}
-                className="bg-linear-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
+                className="w-full sm:w-auto order-1 sm:order-2 bg-linear-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
               >
-                <Plus className="w-4 h-4 mr-2" />
+                <Plus className="w-4 h-4 mr-2 shrink-0" />
                 {showHeroForm ? 'Cancel' : 'Add Hero Slide'}
               </Button>
             </div>
 
             {/* Hero Form - Simplified */}
             {showHeroForm && (
-              <Card className="mb-8 shadow-lg">
-                <CardHeader className="bg-linear-to-r from-green-50 to-green-100">
-                  <CardTitle className="flex items-center gap-2">
-                    {editingHero ? <Pencil className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
+              <Card className="mb-6 sm:mb-8 shadow-lg overflow-hidden min-w-0">
+                <CardHeader className="bg-linear-to-r from-green-50 to-green-100 p-4 sm:p-6">
+                  <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                    {editingHero ? <Pencil className="w-5 h-5 shrink-0" /> : <Plus className="w-5 h-5 shrink-0" />}
                     {editingHero ? 'Edit Hero Slide' : 'Create Hero Slide'}
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="pt-6">
-                  <form onSubmit={handleHeroSubmit} className="space-y-6">
+                <CardContent className="pt-4 sm:pt-6 p-4 sm:p-6">
+                  <form onSubmit={handleHeroSubmit} className="space-y-4 sm:space-y-6 min-w-0">
                     {/* Background Image - Required */}
-                    <div>
-                      <Label className="text-base font-semibold">Banner Image *</Label>
-                      <p className="text-sm text-gray-500 mb-2">Upload a high-quality banner image (recommended: 1920x600px or 16:5 ratio)</p>
-                      <Input type="file" accept="image/*" onChange={handleHeroImageChange} />
+                    <div className="min-w-0">
+                      <Label className="text-sm sm:text-base font-semibold">Banner Image *</Label>
+                      <p className="text-xs sm:text-sm text-gray-500 mb-2">Upload a high-quality banner image (recommended: 1920x600px or 16:5 ratio)</p>
+                      <Input type="file" accept="image/*" onChange={handleHeroImageChange} className="w-full min-w-0" />
                       {(heroImagePreview || editingHero?.image) && (
-                        <div className="mt-4 relative w-full max-w-2xl h-48">
+                        <div className="mt-4 relative w-full max-w-2xl h-36 sm:h-48 min-w-0">
                           <Image
                             src={heroImagePreview || editingHero?.image || ''}
                             alt="Preview"
@@ -1985,59 +1991,62 @@ export default function AdminDashboard() {
                     </div>
 
                     {/* Button Settings */}
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div>
-                        <Label>Button Text</Label>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 min-w-0">
+                      <div className="min-w-0">
+                        <Label className="text-sm sm:text-base">Button Text</Label>
                         <Input
                           value={heroFormData.buttonText}
                           onChange={(e) => setHeroFormData({ ...heroFormData, buttonText: e.target.value })}
                           placeholder="Shop Now"
+                          className="mt-1 w-full min-w-0"
                         />
                       </div>
-                      <div>
-                        <Label>Button Link *</Label>
+                      <div className="min-w-0">
+                        <Label className="text-sm sm:text-base">Button Link *</Label>
                         <Input
                           value={heroFormData.buttonLink}
                           onChange={(e) => setHeroFormData({ ...heroFormData, buttonLink: e.target.value })}
                           required
                           placeholder="/home/products or /home/collections/oils"
+                          className="mt-1 w-full min-w-0"
                         />
                         <p className="text-xs text-gray-500 mt-1">Where should the button go when clicked?</p>
                       </div>
                     </div>
 
                     {/* Display Order */}
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div>
-                        <Label>Display Order</Label>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 min-w-0">
+                      <div className="min-w-0">
+                        <Label className="text-sm sm:text-base">Display Order</Label>
                         <Input
                           type="number"
                           min="0"
                           value={heroFormData.order}
                           onChange={(e) => setHeroFormData({ ...heroFormData, order: parseInt(e.target.value) || 0 })}
                           placeholder="0"
+                          className="mt-1 w-full min-w-0"
                         />
                         <p className="text-xs text-gray-500 mt-1">Lower numbers appear first</p>
                       </div>
-                      <div className="flex items-end pb-2">
+                      <div className="flex items-end pb-2 min-w-0">
                         <div className="flex items-center gap-2">
                           <input
                             type="checkbox"
                             id="heroActive"
                             checked={heroFormData.isActive}
                             onChange={(e) => setHeroFormData({ ...heroFormData, isActive: e.target.checked })}
-                            className="h-4 w-4"
+                            className="h-4 w-4 shrink-0"
                           />
-                          <Label htmlFor="heroActive" className="cursor-pointer">Active (visible on homepage)</Label>
+                          <Label htmlFor="heroActive" className="cursor-pointer text-sm sm:text-base">Active (visible on homepage)</Label>
                         </div>
                       </div>
                     </div>
 
-                    <div className="flex gap-4 pt-4 border-t">
-                      <Button type="submit" disabled={heroLoading} className="bg-linear-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600">
+                    <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4 border-t">
+                      <Button type="submit" disabled={heroLoading} className="w-full sm:w-auto bg-linear-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600">
                         {heroLoading ? 'Saving...' : editingHero ? 'Update Slide' : 'Create Slide'}
                       </Button>
-                      <Button type="button" variant="outline" onClick={resetHeroForm}>Cancel</Button>
+                      <Button type="button" variant="outline" onClick={resetHeroForm} className="w-full sm:w-auto">Cancel</Button>
                     </div>
                   </form>
                 </CardContent>
@@ -2090,20 +2099,20 @@ export default function AdminDashboard() {
                         <p className="text-sm text-gray-600 mb-1">Button Text:</p>
                         <p className="text-sm font-medium text-gray-800">{hero.buttonText || 'Shop Now'}</p>
                       </div>
-                      <div className="flex gap-2 pt-3 border-t">
+                      <div className="flex flex-wrap gap-1.5 sm:gap-2 pt-3 border-t">
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => toggleHeroActive(hero)}
-                          className={`flex-1 ${hero.isActive ? 'text-orange-600 border-orange-200 hover:bg-orange-50' : 'text-green-600 border-green-200 hover:bg-green-50'}`}
+                          className={`flex-1 min-w-0 ${hero.isActive ? 'text-orange-600 border-orange-200 hover:bg-orange-50' : 'text-green-600 border-green-200 hover:bg-green-50'}`}
                         >
-                          {hero.isActive ? <><EyeOff className="w-4 h-4 mr-1" /> Hide</> : <><Eye className="w-4 h-4 mr-1" /> Show</>}
+                          {hero.isActive ? <><EyeOff className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 shrink-0" /> Hide</> : <><Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 shrink-0" /> Show</>}
                         </Button>
-                        <Button variant="outline" size="sm" onClick={() => handleEditHero(hero)} className="flex-1">
-                          <Pencil className="w-4 h-4 mr-1" /> Edit
+                        <Button variant="outline" size="sm" onClick={() => handleEditHero(hero)} className="flex-1 min-w-0">
+                          <Pencil className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 shrink-0" /> Edit
                         </Button>
-                        <Button variant="destructive" size="sm" onClick={() => handleDeleteHero(hero.id)}>
-                          <Trash2 className="w-4 h-4" />
+                        <Button variant="destructive" size="sm" onClick={() => handleDeleteHero(hero.id)} className="shrink-0">
+                          <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                         </Button>
                       </div>
                     </CardContent>

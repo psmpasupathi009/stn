@@ -103,11 +103,11 @@ export default function ProductDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50">
-      <div className="container mx-auto px-4 py-8 md:py-12">
-        <div className="grid md:grid-cols-2 gap-12">
+    <div className="min-h-screen bg-neutral-50 w-full min-w-0 overflow-x-hidden">
+      <div className="container mx-auto w-full max-w-full min-w-0 px-3 sm:px-4 md:px-6 py-6 sm:py-8 md:py-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 md:gap-12">
           {/* Product Images */}
-          <div>
+          <div className="min-w-0">
             <div className="aspect-square bg-white border border-neutral-200 rounded-2xl overflow-hidden mb-4 shadow-sm relative">
               {product.image ? (
                 <Image
@@ -135,9 +135,9 @@ export default function ProductDetailPage() {
           </div>
 
           {/* Product Info */}
-          <div>
-            <div className="mb-6">
-              <h1 className="text-2xl md:text-3xl font-bold text-neutral-900 mb-2">{product.name}</h1>
+          <div className="min-w-0">
+            <div className="mb-4 sm:mb-6">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-neutral-900 mb-2 leading-tight">{product.name}</h1>
               {product.rating && product.rating > 0 && (
                 <div className="flex items-center gap-2 mb-4">
                   <div className="flex items-center">
@@ -154,9 +154,9 @@ export default function ProductDetailPage() {
               )}
             </div>
 
-            <div className="mb-6">
-              <div className="flex items-center gap-4 mb-2">
-                <span className="text-3xl font-bold text-gray-900">
+            <div className="mb-4 sm:mb-6">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-4 mb-2">
+                <span className="text-2xl sm:text-3xl font-bold text-gray-900">
                   ₹{product.salePrice}
                 </span>
                 {product.mrp > product.salePrice && (
@@ -164,7 +164,7 @@ export default function ProductDetailPage() {
                     <span className="text-xl text-gray-500 line-through">
                       ₹{product.mrp}
                     </span>
-                    <span className="bg-black text-white text-sm px-3 py-1">
+                    <span className="bg-[var(--primary-green)] text-white text-xs sm:text-sm px-2 sm:px-3 py-1 rounded">
                       Sale
                     </span>
                   </>
@@ -198,7 +198,7 @@ export default function ProductDetailPage() {
             </div>
 
             {/* Value Propositions */}
-            <div className="grid grid-cols-4 gap-4 mb-6">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
               <div className="text-center">
                 <div className="text-2xl mb-2">💎</div>
                 <p className="text-xs text-gray-600">PREMIUM QUALITY</p>
@@ -217,11 +217,11 @@ export default function ProductDetailPage() {
               </div>
             </div>
 
-            <div className="flex gap-4 mb-6">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-4 sm:mb-6">
               <button
                 onClick={addToCart}
                 disabled={!product.inStock}
-                className="flex-1 border-2 border-amber-600 text-amber-700 py-3 px-6 rounded-xl font-semibold hover:bg-amber-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 min-w-0 border-2 border-[var(--primary-green)] text-[var(--primary-green)] py-2.5 sm:py-3 px-4 sm:px-6 rounded-xl font-semibold hover:bg-green-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
               >
                 Add to cart
               </button>
@@ -231,7 +231,7 @@ export default function ProductDetailPage() {
                   router.push('/home/cart')
                 }}
                 disabled={!product.inStock}
-                className="flex-1 bg-amber-600 text-white py-3 px-6 rounded-xl font-semibold hover:bg-amber-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 min-w-0 bg-[var(--primary-green)] text-white py-2.5 sm:py-3 px-4 sm:px-6 rounded-xl font-semibold hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
               >
                 Buy it now
               </button>

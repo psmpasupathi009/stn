@@ -2,11 +2,11 @@ import Link from 'next/link'
 
 export default function Footer() {
   return (
-    <footer className="bg-gray-900 text-white py-12 mt-20">
-      <div className="container mx-auto px-4">
-        <div className="grid md:grid-cols-4 gap-8 mb-8">
+    <footer className="bg-gray-900 text-white py-8 sm:py-10 md:py-12 mt-12 sm:mt-16 md:mt-20">
+      <div className="container mx-auto w-full max-w-full min-w-0 px-3 sm:px-4 md:px-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 mb-6 sm:mb-8">
           <div>
-            <h3 className="text-xl font-bold mb-4">Shop</h3>
+            <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">Shop</h3>
             <ul className="space-y-2 text-gray-400">
               <li>
                 <Link href="/home/products" className="hover:text-white">
@@ -33,7 +33,7 @@ export default function Footer() {
             </ul>
           </div>
           <div>
-            <h3 className="text-xl font-bold mb-4">Social</h3>
+            <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">Social</h3>
             <ul className="space-y-2 text-gray-400">
               <li>
                 <a href="#" className="hover:text-white">Facebook</a>
@@ -47,7 +47,7 @@ export default function Footer() {
             </ul>
           </div>
           <div>
-            <h3 className="text-xl font-bold mb-4">Contact Us</h3>
+            <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">Contact Us</h3>
             <p className="text-gray-400 mb-2">
               <strong>Email:</strong> info@stngoldenhealthyfoods.com
             </p>
@@ -59,7 +59,7 @@ export default function Footer() {
             </p>
           </div>
           <div>
-            <h3 className="text-xl font-bold mb-4">Payment methods</h3>
+            <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">Payment methods</h3>
             <div className="flex gap-2 flex-wrap">
               <div className="bg-white text-black px-3 py-2 rounded text-xs font-semibold">VISA</div>
               <div className="bg-white text-black px-3 py-2 rounded text-xs font-semibold">MASTERCARD</div>
@@ -67,12 +67,12 @@ export default function Footer() {
             </div>
           </div>
         </div>
-        <div className="border-t border-gray-800 pt-8">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-gray-400 text-sm">
+        <div className="border-t border-gray-800 pt-6 sm:pt-8">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
+            <p className="text-gray-400 text-xs sm:text-sm order-2 md:order-1">
               © 2026, STN Golden Healthy Foods
             </p>
-            <div className="flex gap-6 text-sm text-gray-400">
+            <div className="flex flex-wrap justify-center gap-3 sm:gap-6 text-xs sm:text-sm text-gray-400 order-1 md:order-2">
               <Link href="/privacy-policy" className="hover:text-white">Privacy policy</Link>
               <Link href="/refund-policy" className="hover:text-white">Refund policy</Link>
               <Link href="/terms-of-service" className="hover:text-white">Terms of service</Link>

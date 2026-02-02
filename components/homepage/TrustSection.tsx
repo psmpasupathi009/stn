@@ -5,7 +5,7 @@ import { Gem, Truck, Lock, MessageCircle, Globe } from 'lucide-react'
 export default function TrustSection() {
   return (
     <section className="py-12 sm:py-16 bg-linear-to-br from-gray-50 to-green-50">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto w-full max-w-full min-w-0 px-3 sm:px-4 md:px-6">
         <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-12 text-gray-900">
           Why Customers Trust Us
         </h2>

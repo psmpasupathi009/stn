@@ -63,8 +63,8 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-neutral-200">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16 md:h-17">
+      <div className="container mx-auto w-full max-w-full min-w-0 px-3 sm:px-4 md:px-6">
+        <div className="flex items-center justify-between h-14 sm:h-16 md:h-17">
           {/* Left: Menu / Close menu toggle (Rolls-Royce style) */}
           <div className="flex items-center gap-3">
             <button
