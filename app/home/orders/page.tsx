@@ -8,14 +8,12 @@ import { Button } from '@/components/ui/button'
 import { useAuth } from '@/lib/context'
 import { 
   Package, 
-  Clock, 
   CheckCircle2, 
   Truck, 
   MapPin,
   ChevronRight,
   ShoppingBag,
   Calendar,
-  CreditCard,
   Copy,
   ExternalLink
 } from 'lucide-react'

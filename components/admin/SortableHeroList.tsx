@@ -31,9 +31,6 @@ export interface HeroItem {
 
 function SortableHeroCard({
   hero,
-  onEdit,
-  onToggle,
-  onDelete,
 }: {
   hero: HeroItem
   onEdit: () => void

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, Suspense } from 'react'
+import { useEffect, useState, useCallback, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -56,27 +56,21 @@ function CheckoutContent() {
     pincode: '',
   })
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/home/login')
-      return
+  const fetchCart = useCallback(async () => {
+    try {
+      const res = await fetch('/api/cart', { credentials: 'include' })
+      if (res.ok) {
+        const data = await res.json()
+        setCartItems(data?.items || [])
+      }
+    } catch (error) {
+      console.error('Error fetching cart:', error)
+    } finally {
+      setLoading(false)
     }
+  }, [])
 
-    const productId = searchParams.get('productId')
-    const quantity = searchParams.get('quantity') || '1'
-    
-    if (productId) {
-      // Buy Now flow - fetch single product
-      setIsBuyNow(true)
-      fetchProduct(productId, parseInt(quantity))
-    } else {
-      // Normal checkout - fetch cart
-      setIsBuyNow(false)
-      fetchCart()
-    }
-  }, [isAuthenticated, router, searchParams])
-
-  const fetchProduct = async (productId: string, quantity: number) => {
+  const fetchProduct = useCallback(async (productId: string, quantity: number) => {
     try {
       const res = await fetch(`/api/products/${productId}`)
       if (res.ok) {
@@ -99,21 +93,27 @@ function CheckoutContent() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [router])
 
-  const fetchCart = async () => {
-    try {
-      const res = await fetch('/api/cart', { credentials: 'include' })
-      if (res.ok) {
-        const data = await res.json()
-        setCartItems(data?.items || [])
-      }
-    } catch (error) {
-      console.error('Error fetching cart:', error)
-    } finally {
-      setLoading(false)
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push('/home/login')
+      return
     }
-  }
+
+    const productId = searchParams.get('productId')
+    const quantity = searchParams.get('quantity') || '1'
+    
+    if (productId) {
+      // Buy Now flow - fetch single product
+      setIsBuyNow(true)
+      fetchProduct(productId, parseInt(quantity))
+    } else {
+      // Normal checkout - fetch cart
+      setIsBuyNow(false)
+      fetchCart()
+    }
+  }, [isAuthenticated, router, searchParams, fetchProduct, fetchCart])
 
   // Get items for display (either buyNow product or cart items)
   const getOrderItems = () => {

@@ -63,10 +63,6 @@ export default function HeroSection() {
   }, [])
 
   useEffect(() => {
-    setCurrentSlide((prev) => Math.min(prev, Math.max(0, heroCount - 1)))
-  }, [heroCount])
-
-  useEffect(() => {
     if (heroCount <= 1 || !isPlaying) return
     const id = setInterval(() => setCurrentSlide((prev) => (prev + 1) % heroCount), 5000)
     return () => clearInterval(id)
