@@ -12,6 +12,7 @@ import { PasswordInput } from '@/components/ui/password-input'
 import { ResendOTP } from '@/components/ui/resend-otp'
 import { InputOTP } from '@/components/ui/input-otp'
 import Link from 'next/link'
+import Image from 'next/image'
 
 type Step = 'email' | 'otp' | 'password'
 
@@ -241,7 +242,7 @@ function SignupForm() {
           href="/"
           className="flex min-w-0 max-w-full items-center justify-center gap-2 self-center font-semibold text-gray-900 transition-colors hover:text-green-800 text-sm sm:text-base md:text-lg"
         >
-          <img src="/STN LOGO.png" alt="STN" className="h-7 w-7 shrink-0 rounded-md sm:h-8 sm:w-8 md:h-9 md:w-9" />
+          <Image src="/STN LOGO.png" alt="STN" width={36} height={36} className="h-7 w-7 shrink-0 rounded-md sm:h-8 sm:w-8 md:h-9 md:w-9" />
           <span className="truncate">STN Golden Healthy Foods</span>
         </Link>
         <div className="w-full min-w-0">

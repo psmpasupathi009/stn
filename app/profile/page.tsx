@@ -16,7 +16,7 @@ export default function ProfilePage() {
     if (!isAuthenticated) {
       router.push('/login')
     }
-  }, [isAuthenticated])
+  }, [isAuthenticated, router])
 
   if (!isAuthenticated || !user) {
     return null

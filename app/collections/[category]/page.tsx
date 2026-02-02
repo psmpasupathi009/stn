@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useAuth } from '@/lib/context'
 import { categoryMapping } from '@/components/CategoryMarquee'
 import { toast } from 'sonner'
@@ -68,6 +69,7 @@ export default function CategoryPage() {
 
   useEffect(() => {
     fetchProducts()
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetch when category slug changes only
   }, [categorySlug])
 
   const fetchProducts = async () => {
@@ -148,12 +150,14 @@ export default function CategoryPage() {
             {products.map((product) => (
               <div key={product.id} className="group">
                 <Link href={`/products/${product.id}`}>
-                  <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden mb-4 group-hover:opacity-90 transition-opacity">
+                  <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden mb-4 group-hover:opacity-90 transition-opacity relative">
                     {product.image ? (
-                      <img
+                      <Image
                         src={product.image}
                         alt={product.name}
-                        className="w-full h-full object-cover"
+                        fill
+                        className="object-cover"
+                        unoptimized
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-gray-400 text-4xl">

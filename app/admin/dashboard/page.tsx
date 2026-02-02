@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -123,7 +124,8 @@ export default function AdminDashboard() {
     fetchProducts()
     fetchCategories()
     fetchHeroSections()
-  }, [isAuthenticated, user])
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- run once when auth is ready; fetch fns are stable in intent
+  }, [isAuthenticated, user, router])
 
   // Products functions
   const fetchProducts = async () => {
@@ -180,6 +182,7 @@ export default function AdminDashboard() {
     if (isAuthenticated && user?.role?.toUpperCase() === 'ADMIN') {
       fetchProducts()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchProducts when category/search change only
   }, [selectedCategory, searchQuery])
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -708,11 +711,14 @@ export default function AdminDashboard() {
                       <Label>Product Image</Label>
                       <Input type="file" accept="image/*" onChange={handleImageChange} />
                       {(imagePreview || editingProduct?.image) && (
-                        <div className="mt-4">
-                          <img
-                            src={imagePreview || editingProduct?.image}
+                        <div className="mt-4 relative w-32 h-32">
+                          <Image
+                            src={imagePreview || editingProduct?.image || ''}
                             alt="Preview"
-                            className="w-32 h-32 object-cover rounded-lg border shadow-sm"
+                            width={128}
+                            height={128}
+                            className="object-cover rounded-lg border shadow-sm"
+                            unoptimized
                           />
                         </div>
                       )}
@@ -760,7 +766,7 @@ export default function AdminDashboard() {
                       <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow bg-white">
                         <div className="aspect-square bg-linear-to-br from-green-50 to-green-100 relative">
                           {product.image ? (
-                            <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+                            <Image src={product.image} alt={product.name} fill className="object-cover" unoptimized />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center">
                               <ImageIcon className="w-12 h-12 text-green-200" />
@@ -838,11 +844,13 @@ export default function AdminDashboard() {
                       <p className="text-sm text-gray-500 mb-2">Upload a high-quality banner image (recommended: 1920x600px or 16:5 ratio)</p>
                       <Input type="file" accept="image/*" onChange={handleHeroImageChange} />
                       {(heroImagePreview || editingHero?.image) && (
-                        <div className="mt-4">
-                          <img
-                            src={heroImagePreview || editingHero?.image}
+                        <div className="mt-4 relative w-full max-w-2xl h-48">
+                          <Image
+                            src={heroImagePreview || editingHero?.image || ''}
                             alt="Preview"
-                            className="w-full max-w-2xl h-48 object-cover rounded-lg border shadow-sm"
+                            fill
+                            className="object-cover rounded-lg border shadow-sm"
+                            unoptimized
                           />
                         </div>
                       )}
@@ -933,7 +941,7 @@ export default function AdminDashboard() {
                     {/* Image Preview */}
                     <div className="relative w-full h-40 bg-linear-to-br from-amber-100 to-orange-100">
                       {hero.image ? (
-                        <img src={hero.image} alt="Hero slide" className="w-full h-full object-cover" />
+                        <Image src={hero.image} alt="Hero slide" fill className="object-cover" unoptimized />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
                           <ImageIcon className="w-12 h-12 text-green-300" />

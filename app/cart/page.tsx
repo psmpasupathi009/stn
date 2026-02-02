@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/lib/context'
 import Script from 'next/script'
@@ -37,7 +38,7 @@ export default function CartPage() {
       return
     }
     fetchCart()
-  }, [isAuthenticated])
+  }, [isAuthenticated, router])
 
   const fetchCart = async () => {
     try {
@@ -207,9 +208,9 @@ export default function CartPage() {
               {cart.items.map((item) => (
                 <div key={item.id} className="bg-white border border-neutral-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow">
                   <div className="flex gap-5">
-                    <div className="w-24 h-24 bg-neutral-100 rounded-lg overflow-hidden shrink-0">
+                    <div className="relative w-24 h-24 bg-neutral-100 rounded-lg overflow-hidden shrink-0">
                       {item.product.image ? (
-                        <img src={item.product.image} alt={item.product.name} className="w-full h-full object-cover" />
+                        <Image src={item.product.image} alt={item.product.name} fill className="object-cover" unoptimized />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-neutral-400 text-2xl">🛢️</div>
                       )}

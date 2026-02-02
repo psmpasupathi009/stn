@@ -1,30 +1,16 @@
 'use client'
 
-import { useEffect, useState, useCallback, Suspense } from 'react'
+import { useEffect, useState, useCallback, Suspense, useMemo } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet'
-import {
-  SidebarProvider,
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupLabel,
-  SidebarGroupContent,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-  SidebarTrigger,
-  SidebarInset,
-  useSidebar,
-} from '@/components/ui/sidebar'
+import Image from 'next/image'
 import { useAuth } from '@/lib/context'
 import { toast } from 'sonner'
-import { Search, Package, ShoppingCart, Star } from 'lucide-react'
+import { Search, Package, ShoppingCart, Star, LayoutGrid } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 // --- Types ---
@@ -47,27 +33,28 @@ const PLACEHOLDER_IMAGE = (
   </div>
 )
 
-const SKELETON_COUNT = 6
-const GRID_CLASS =
-  'grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3 sm:gap-4 md:gap-5 lg:gap-6 min-w-0'
-
 // --- Product card ---
 function ProductCard({
   product,
   onAddToCart,
+  className,
 }: {
   product: Product
   onAddToCart: (id: string) => void
+  className?: string
 }) {
   return (
-    <Card className="group overflow-hidden border-gray-200 bg-white shadow-sm transition-all duration-200 hover:shadow-md hover:border-green-200 min-w-0 w-full">
+    <Card className={cn('group overflow-hidden border-gray-200 bg-white shadow-sm transition-all duration-200 hover:shadow-md hover:border-green-200 rounded-2xl', className)}>
       <Link href={`/products/${product.id}`} className="block min-w-0">
         <div className="aspect-square overflow-hidden bg-gray-50 relative w-full">
           {product.image ? (
-            <img
+            <Image
               src={product.image}
               alt={product.name}
-              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+              fill
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              className="object-cover transition-transform duration-300 group-hover:scale-105"
+              unoptimized
             />
           ) : (
             PLACEHOLDER_IMAGE
@@ -125,103 +112,57 @@ function ProductCard({
   )
 }
 
-// --- Sidebar category list (used inside Shadcn Sidebar + Sheet on mobile) ---
-function SidebarCategoryNav({
-  categories,
-  selectedCategory,
-  onSelectCategory,
-  onSelectAndClose,
-}: {
-  categories: string[]
-  selectedCategory: string
-  onSelectCategory: (category: string) => void
-  onSelectAndClose?: (category: string) => void
-}) {
-  const handleClick = useCallback(
-    (category: string) => {
-      onSelectCategory(category)
-      onSelectAndClose?.(category)
-    },
-    [onSelectCategory, onSelectAndClose]
-  )
-
-  return (
-    <>
-      <SidebarGroup>
-        <SidebarGroupLabel>Categories</SidebarGroupLabel>
-        <SidebarGroupContent>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                isActive={selectedCategory === ''}
-                onClick={() => handleClick('')}
-              >
-                All Products
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            {categories.map((category) => (
-              <SidebarMenuItem key={category}>
-                <SidebarMenuButton
-                  isActive={selectedCategory === category}
-                  onClick={() => handleClick(category)}
-                  className="line-clamp-2 text-left"
-                >
-                  {category}
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
-        </SidebarGroupContent>
-      </SidebarGroup>
-    </>
-  )
-}
-
-// --- Inner content (uses useSidebar for mobile sheet) ---
+// --- Products page: sidebar filter + single grid ---
 function ProductsPageContent() {
   const searchParams = useSearchParams()
   const categoryFromUrl = searchParams.get('category') ?? ''
-  const [products, setProducts] = useState<Product[]>([])
+  const [allProducts, setAllProducts] = useState<Product[]>([])
   const [categories, setCategories] = useState<string[]>([])
-  const [selectedCategory, setSelectedCategory] = useState(categoryFromUrl)
-  const [searchQuery, setSearchQuery] = useState('')
   const [loading, setLoading] = useState(true)
-  const { openMobile, setOpenMobile } = useSidebar()
+  const [searchQuery, setSearchQuery] = useState('')
   const { isAuthenticated } = useAuth()
 
-  // When user arrives from marquee (or link) with ?category=..., show that category
-  useEffect(() => {
-    setSelectedCategory(categoryFromUrl)
-  }, [categoryFromUrl])
-
+  // Fetch categories and all products
   useEffect(() => {
     let cancelled = false
-    fetch('/api/categories', { credentials: 'include' })
-      .then((res) => res.json())
-      .then((data) => {
-        if (cancelled || !Array.isArray(data)) return
-        const names = data
-          .map((c: { category: string }) => c.category)
-          .filter(Boolean)
+    Promise.all([
+      fetch('/api/categories', { credentials: 'include' }).then((r) => r.json()),
+      fetch('/api/products', { credentials: 'include' }).then((r) => r.json()),
+    ])
+      .then(([catData, prodData]) => {
+        if (cancelled) return
+        const names = Array.isArray(catData)
+          ? catData.map((c: { category: string }) => c.category).filter(Boolean)
+          : []
         setCategories(names)
+        setAllProducts(Array.isArray(prodData) ? prodData : [])
       })
       .catch(() => {})
-    return () => {
-      cancelled = true
-    }
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
+    return () => { cancelled = true }
   }, [])
 
-  useEffect(() => {
-    setLoading(true)
-    const params = new URLSearchParams()
-    if (selectedCategory) params.set('category', selectedCategory)
-    if (searchQuery.trim()) params.set('search', searchQuery.trim())
-    fetch(`/api/products?${params}`)
-      .then((res) => res.json())
-      .then((data) => setProducts(Array.isArray(data) ? data : []))
-      .catch(() => setProducts([]))
-      .finally(() => setLoading(false))
-  }, [selectedCategory, searchQuery])
+  // Filter products by sidebar category + search (single list for grid)
+  const displayedProducts = useMemo(() => {
+    let list = allProducts
+    if (categoryFromUrl.trim()) {
+      const catLower = categoryFromUrl.toLowerCase()
+      list = list.filter((p) =>
+        (p.category?.trim() || '').toLowerCase().includes(catLower)
+      )
+    }
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase()
+      list = list.filter(
+        (p) =>
+          p.name?.toLowerCase().includes(q) ||
+          (p.itemCode?.toLowerCase() || '').includes(q)
+      )
+    }
+    return list
+  }, [allProducts, categoryFromUrl, searchQuery])
 
   const addToCart = useCallback(
     async (productId: string) => {
@@ -250,111 +191,154 @@ function ProductsPageContent() {
     [isAuthenticated]
   )
 
-  const closeMobileSidebar = useCallback(() => setOpenMobile(false), [setOpenMobile])
-
-  const sidebarNav = (
-    <SidebarCategoryNav
-      categories={categories}
-      selectedCategory={selectedCategory}
-      onSelectCategory={setSelectedCategory}
-      onSelectAndClose={closeMobileSidebar}
-    />
-  )
-
-  return (
-    <>
-      {/* Mobile: Sheet with sidebar content (opened by SidebarTrigger in header) */}
-      <Sheet open={openMobile} onOpenChange={setOpenMobile}>
-        <SheetContent
-          side="left"
-          className="w-[85vw] max-w-[320px] p-0 flex flex-col"
-        >
-          <SheetTitle className="sr-only">Categories</SheetTitle>
-          <div className="flex flex-col h-full overflow-hidden">
-            <div className="p-4 border-b border-sidebar-border">
-              <h2 className="font-semibold text-sidebar-foreground">
-                Categories
-              </h2>
-            </div>
-            <div className="flex-1 overflow-auto p-2">
-              <SidebarCategoryNav
-                categories={categories}
-                selectedCategory={selectedCategory}
-                onSelectCategory={setSelectedCategory}
-                onSelectAndClose={closeMobileSidebar}
-              />
+  if (loading) {
+    return (
+      <div className="container mx-auto px-3 sm:px-4 md:px-6 py-6 md:py-8">
+        <div className="flex gap-6 lg:gap-8">
+          <aside className="hidden lg:block w-56 shrink-0 space-y-2 pr-6 border-r border-gray-200">
+            <div className="h-6 w-24 bg-gray-200 rounded animate-pulse" />
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="h-9 bg-gray-100 rounded animate-pulse" />
+            ))}
+          </aside>
+          <div className="flex-1 min-w-0">
+            <div className="h-8 w-32 bg-gray-200 rounded animate-pulse mb-4" />
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <div key={i} className="rounded-2xl border border-gray-200 overflow-hidden">
+                  <div className="aspect-square bg-gray-100 animate-pulse" />
+                  <div className="p-4 space-y-2">
+                    <div className="h-4 bg-gray-100 rounded w-3/4 animate-pulse" />
+                    <div className="h-4 bg-gray-100 rounded w-1/2 animate-pulse" />
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
-        </SheetContent>
-      </Sheet>
+        </div>
+      </div>
+    )
+  }
 
-      {/* Desktop: Shadcn Sidebar */}
-      <Sidebar side="left" className="sticky top-20 self-start rounded-xl border border-sidebar-border shadow-sm overflow-hidden max-h-[calc(100vh-5rem)]">
-        <SidebarContent>{sidebarNav}</SidebarContent>
-      </Sidebar>
+  return (
+    <div className="flex flex-col w-full min-w-0 overflow-x-hidden">
+      <div className="container mx-auto w-full max-w-screen-2xl px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8">
+        <div className="flex gap-6 lg:gap-8">
+          {/* Sidebar: category filter (selected view) */}
+          <aside className="hidden lg:flex lg:flex-col lg:w-56 lg:shrink-0 border-r border-gray-200 pr-6">
+            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+              <LayoutGrid className="w-4 h-4" />
+              Categories
+            </h2>
+            <nav className="flex flex-col gap-0.5">
+              <Link
+                href="/products"
+                className={cn(
+                  'px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+                  !categoryFromUrl
+                    ? 'bg-gray-900 text-white'
+                    : 'text-gray-700 hover:bg-gray-100'
+                )}
+              >
+                All products
+              </Link>
+              {categories.map((cat) => {
+                const isActive =
+                  categoryFromUrl &&
+                  (cat?.trim() || '').toLowerCase() === categoryFromUrl.toLowerCase()
+                return (
+                  <Link
+                    key={cat}
+                    href={`/products?category=${encodeURIComponent(cat?.trim() || '')}`}
+                    className={cn(
+                      'px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+                      isActive ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-gray-100'
+                    )}
+                  >
+                    {cat}
+                  </Link>
+                )
+              })}
+            </nav>
+          </aside>
 
-      <SidebarInset>
-        <div className="flex flex-col w-full min-w-0 overflow-x-hidden">
-          <div className="container mx-auto w-full max-w-screen-2xl px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8 box-border">
-            {/* Header: trigger (mobile) + title + search */}
-            <div className="flex flex-col gap-4 mb-4 sm:mb-6 min-w-0">
-              <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-                <SidebarTrigger />
-                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 truncate min-w-0 flex-1">
-                  All Products
-                </h1>
-                <div className="relative flex-1 min-w-0 max-w-md">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none shrink-0" />
-                  <Input
-                    type="text"
-                    placeholder="Search..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-9 bg-white border-gray-200 w-full min-w-0 max-w-full"
-                  />
-                </div>
+          {/* Main: search + product grid */}
+          <div className="flex-1 min-w-0">
+            <div className="flex flex-col gap-4 mb-6 md:mb-8 min-w-0">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">
+                Products
+                {categoryFromUrl && (
+                  <span className="text-gray-500 font-normal ml-2">
+                    · {categoryFromUrl}
+                  </span>
+                )}
+              </h1>
+              {/* Mobile category filter (sidebar hidden on small screens) */}
+              <div className="flex flex-wrap gap-2 lg:hidden">
+                <Link
+                  href="/products"
+                  className={cn(
+                    'px-3 py-1.5 rounded-full text-sm font-medium transition-colors border',
+                    !categoryFromUrl
+                      ? 'bg-gray-900 text-white border-gray-900'
+                      : 'bg-white text-gray-700 border-gray-200 hover:border-gray-300'
+                  )}
+                >
+                  All
+                </Link>
+                {categories.map((cat) => {
+                  const isActive =
+                    categoryFromUrl &&
+                    (cat?.trim() || '').toLowerCase() === categoryFromUrl.toLowerCase()
+                  return (
+                    <Link
+                      key={cat}
+                      href={`/products?category=${encodeURIComponent(cat?.trim() || '')}`}
+                      className={cn(
+                        'px-3 py-1.5 rounded-full text-sm font-medium transition-colors border',
+                        isActive
+                          ? 'bg-gray-900 text-white border-gray-900'
+                          : 'bg-white text-gray-700 border-gray-200 hover:border-gray-300'
+                      )}
+                    >
+                      {cat}
+                    </Link>
+                  )
+                })}
+              </div>
+              <div className="relative max-w-md">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                <Input
+                  type="text"
+                  placeholder="Search products..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9 bg-white border-gray-200 w-full"
+                />
               </div>
             </div>
 
-            {/* Product grid */}
-            {loading ? (
-              <div className={cn(GRID_CLASS)}>
-                {Array.from({ length: SKELETON_COUNT }, (_, i) => (
-                  <Card key={i} className="overflow-hidden border-gray-200">
-                    <div className="aspect-square bg-gray-100 animate-pulse" />
-                    <CardContent className="p-4 space-y-2">
-                      <div className="h-4 bg-gray-100 rounded animate-pulse" />
-                      <div className="h-4 w-1/2 bg-gray-100 rounded animate-pulse" />
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : products.length === 0 ? (
-              <div className="rounded-xl border border-gray-200 bg-white p-6 sm:p-8 md:p-12 text-center min-w-0">
+            {displayedProducts.length === 0 ? (
+              <div className="rounded-xl border border-gray-200 bg-white p-8 md:p-12 text-center">
                 <Package className="w-12 h-12 text-gray-300 mx-auto mb-4" />
                 <p className="text-gray-600 font-medium">No products found</p>
-                <p className="text-sm text-gray-500 mt-1">
-                  Try a different search or category.
-                </p>
               </div>
             ) : (
-              <div
-                className={cn(GRID_CLASS, 'transition-opacity duration-200')}
-                role="list"
-              >
-                {products.map((product) => (
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
+                {displayedProducts.map((product) => (
                   <ProductCard
                     key={product.id}
                     product={product}
                     onAddToCart={addToCart}
+                    className="w-full"
                   />
                 ))}
               </div>
             )}
           </div>
         </div>
-      </SidebarInset>
-    </>
+      </div>
+    </div>
   )
 }
 
@@ -367,15 +351,13 @@ function ProductsPageFallback() {
   )
 }
 
-// --- Page: wrap with SidebarProvider + Suspense for useSearchParams ---
+// --- Page: wrap with Suspense for useSearchParams ---
 export default function ProductsPage() {
   return (
     <div className="min-h-screen bg-gray-50 w-full min-w-0 overflow-x-hidden">
-      <SidebarProvider className="flex gap-4 lg:gap-6 xl:gap-8 min-w-0 w-full overflow-hidden">
-        <Suspense fallback={<ProductsPageFallback />}>
-          <ProductsPageContent />
-        </Suspense>
-      </SidebarProvider>
+      <Suspense fallback={<ProductsPageFallback />}>
+        <ProductsPageContent />
+      </Suspense>
     </div>
   )
 }

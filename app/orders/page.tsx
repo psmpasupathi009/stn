@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useAuth } from '@/lib/context'
 
@@ -37,7 +38,7 @@ export default function OrdersPage() {
       return
     }
     fetchOrders()
-  }, [isAuthenticated])
+  }, [isAuthenticated, router])
 
   const fetchOrders = async () => {
     try {
@@ -99,12 +100,14 @@ export default function OrdersPage() {
                 <div className="space-y-4">
                   {order.items.map((item) => (
                     <div key={item.id} className="flex gap-4">
-                      <div className="w-16 h-16 bg-gray-200 rounded overflow-hidden shrink-0">
+                      <div className="relative w-16 h-16 bg-gray-200 rounded overflow-hidden shrink-0">
                         {item.product.image ? (
-                          <img
+                          <Image
                             src={item.product.image}
                             alt={item.product.name}
-                            className="w-full h-full object-cover"
+                            fill
+                            className="object-cover"
+                            unoptimized
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">

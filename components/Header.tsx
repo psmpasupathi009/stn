@@ -7,10 +7,16 @@ import {
   User,
   ShoppingCart,
   Menu,
-  ChevronDown,
-  LogOut,
   LayoutDashboard,
+  X,
 } from 'lucide-react'
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetClose,
+} from '@/components/ui/sheet'
 
 const ICON_SIZE = 22
 const NAV_LINKS = [
@@ -21,10 +27,9 @@ const NAV_LINKS = [
 ]
 
 export default function Header() {
-  const { user, logout, isAuthenticated } = useAuth()
+  const { user, isAuthenticated } = useAuth()
   const [cartCount, setCartCount] = useState(0)
-  const [showMobileMenu, setShowMobileMenu] = useState(false)
-  const [showShopDropdown, setShowShopDropdown] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
 
   const refreshCartCount = useCallback(() => {
     if (!isAuthenticated) return
@@ -60,38 +65,65 @@ export default function Header() {
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-neutral-200">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16 md:h-17">
-          {/* Left: Menu icon with dropdown */}
+          {/* Left: Menu / Close menu toggle (Rolls-Royce style) */}
           <div className="flex items-center gap-3">
-            <div
-              className="relative"
-              onMouseEnter={() => setShowShopDropdown(true)}
-              onMouseLeave={() => setShowShopDropdown(false)}
+            <button
+              type="button"
+              onClick={() => setMenuOpen(!menuOpen)}
+              className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-neutral-700 hover:text-neutral-900 rounded-md hover:bg-neutral-50 transition-colors uppercase tracking-wide"
+              aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={menuOpen}
             >
-              <button
-                type="button"
-                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-neutral-700 hover:text-neutral-900 rounded-md hover:bg-neutral-50 transition-colors"
-                aria-label="Menu"
-              >
-                <Menu size={20} strokeWidth={2} />
-                <span className="hidden sm:inline">Menu</span>
-                <ChevronDown
-                  className={`w-4 h-4 transition-transform ${showShopDropdown ? 'rotate-180' : ''}`}
-                />
-              </button>
-              {showShopDropdown && (
-                <div className="absolute top-full left-0 mt-1 w-48 bg-white border border-neutral-200 rounded-xl shadow-lg py-2 z-50">
+              {menuOpen ? (
+                <>
+                  <X size={20} strokeWidth={2} />
+                  <span className="hidden sm:inline">Close menu</span>
+                </>
+              ) : (
+                <>
+                  <Menu size={20} strokeWidth={2} />
+                  <span className="hidden sm:inline">Menu</span>
+                </>
+              )}
+            </button>
+
+            <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
+              <SheetContent side="left" className="w-[280px] sm:w-[340px] p-0 flex flex-col bg-neutral-50 border-neutral-200 shadow-2xl">
+                <SheetHeader className="p-4 border-b border-neutral-200 flex flex-row items-center justify-between space-y-0">
+                  <SheetTitle className="text-base font-semibold uppercase tracking-wide" style={{ color: '#3CB31A' }}>
+                    Menu
+                  </SheetTitle>
+                  <SheetClose asChild>
+                    <button
+                      type="button"
+                      className="p-2 rounded-full hover:bg-neutral-200 transition-colors"
+                      aria-label="Close menu"
+                    >
+                      <X size={20} strokeWidth={2} />
+                    </button>
+                  </SheetClose>
+                </SheetHeader>
+                <nav className="flex flex-col py-4 flex-1 overflow-y-auto">
+                  <Link
+                    href="/products"
+                    className="px-5 py-3.5 text-sm font-medium text-neutral-800 hover:bg-neutral-100 hover:text-neutral-900 transition-colors border-b border-neutral-100 uppercase tracking-wide"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    Shop All
+                  </Link>
                   {NAV_LINKS.map((link) => (
                     <Link
                       key={link.href}
                       href={link.href}
-                      className="block px-4 py-2.5 text-sm text-neutral-700 hover:bg-neutral-50 hover:text-neutral-900 transition-colors"
+                      className="px-5 py-3.5 text-sm font-medium text-neutral-800 hover:bg-neutral-100 hover:text-neutral-900 transition-colors border-b border-neutral-100 uppercase tracking-wide"
+                      onClick={() => setMenuOpen(false)}
                     >
                       {link.label}
                     </Link>
                   ))}
-                </div>
-              )}
-            </div>
+                </nav>
+              </SheetContent>
+            </Sheet>
           </div>
 
           {/* Center: Company Name */}
@@ -100,7 +132,8 @@ export default function Header() {
             className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center"
           >
             <h1 className="text-lg sm:text-xl md:text-2xl font-bold" style={{ color: '#3CB31A' }}>
-              STN Golden Healthy Foods
+              <span className="sm:hidden">STN</span>
+              <span className="hidden sm:inline">STN Golden Healthy Foods</span>
             </h1>
           </Link>
 
@@ -157,62 +190,6 @@ export default function Header() {
             </Link>
           </div>
         </div>
-
-        {/* Mobile menu */}
-        {showMobileMenu && (
-          <div className="lg:hidden border-t border-neutral-200 py-4">
-            <nav className="flex flex-col gap-0.5">
-              <Link
-                href="/products"
-                className="px-3 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-50 rounded-lg"
-                onClick={() => setShowMobileMenu(false)}
-              >
-                Shop All
-              </Link>
-              {NAV_LINKS.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="px-3 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-50 rounded-lg"
-                  onClick={() => setShowMobileMenu(false)}
-                >
-                  {link.label}
-                </Link>
-              ))}
-              {isAuthenticated && (
-                <>
-                  <Link
-                    href="/profile"
-                    className="px-3 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-50 rounded-lg flex items-center gap-2"
-                    onClick={() => setShowMobileMenu(false)}
-                  >
-                    <User size={18} /> Profile
-                  </Link>
-                  {user?.role?.toUpperCase() === 'ADMIN' && (
-                    <Link
-                      href="/admin/dashboard"
-                      className="px-3 py-2.5 text-sm font-medium hover:bg-green-50 rounded-lg flex items-center gap-2"
-                      style={{ color: '#3CB31A' }}
-                      onClick={() => setShowMobileMenu(false)}
-                    >
-                      <LayoutDashboard size={18} /> Admin Dashboard
-                    </Link>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      logout()
-                      setShowMobileMenu(false)
-                    }}
-                    className="px-3 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-50 rounded-lg flex items-center gap-2 text-left w-full"
-                  >
-                    <LogOut size={18} /> Logout
-                  </button>
-                </>
-              )}
-            </nav>
-          </div>
-        )}
       </div>
     </header>
   )

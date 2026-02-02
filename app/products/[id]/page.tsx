@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/lib/context'
 import { toast } from 'sonner'
@@ -36,6 +37,7 @@ export default function ProductDetailPage() {
     if (params.id) {
       fetchProduct()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetch when product id changes only
   }, [params.id])
 
   const fetchProduct = async () => {
@@ -106,12 +108,14 @@ export default function ProductDetailPage() {
         <div className="grid md:grid-cols-2 gap-12">
           {/* Product Images */}
           <div>
-            <div className="aspect-square bg-white border border-neutral-200 rounded-2xl overflow-hidden mb-4 shadow-sm">
+            <div className="aspect-square bg-white border border-neutral-200 rounded-2xl overflow-hidden mb-4 shadow-sm relative">
               {product.image ? (
-                <img
+                <Image
                   src={product.image}
                   alt={product.name}
-                  className="w-full h-full object-cover"
+                  fill
+                  className="object-cover"
+                  unoptimized
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-gray-400 text-6xl">
@@ -122,8 +126,8 @@ export default function ProductDetailPage() {
             {product.images && product.images.length > 0 && (
               <div className="grid grid-cols-4 gap-2">
                 {product.images.map((img, idx) => (
-                  <div key={idx} className="aspect-square bg-gray-100 rounded overflow-hidden cursor-pointer hover:opacity-75 transition-opacity">
-                    <img src={img} alt={`${product.name} ${idx + 1}`} className="w-full h-full object-cover" />
+                  <div key={idx} className="aspect-square bg-gray-100 rounded overflow-hidden cursor-pointer hover:opacity-75 transition-opacity relative">
+                    <Image src={img} alt={`${product.name} ${idx + 1}`} fill className="object-cover" unoptimized />
                   </div>
                 ))}
               </div>
