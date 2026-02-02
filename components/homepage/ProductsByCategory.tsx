@@ -88,31 +88,13 @@ export default function ProductsByCategory() {
     }
   }
 
-  const buyNow = async (productId: string) => {
+  const buyNow = (productId: string) => {
     if (!isAuthenticated) {
       router.push('/home/login')
       return
     }
-
-    try {
-      const res = await fetch('/api/cart', {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ productId, quantity: 1 }),
-      })
-
-      if (res.ok) {
-        window.dispatchEvent(new CustomEvent('cart-updated'))
-        router.push('/home/checkout')
-      } else {
-        const data = await res.json().catch(() => ({}))
-        toast.error(data.error || 'Failed to proceed')
-      }
-    } catch (error) {
-      console.error('Error buying now:', error)
-      toast.error('Failed to proceed')
-    }
+    // Direct to checkout with product ID for instant buy
+    router.push(`/home/checkout?productId=${productId}&quantity=1`)
   }
 
   return (

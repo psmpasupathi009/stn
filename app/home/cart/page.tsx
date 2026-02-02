@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/lib/context'
-import Script from 'next/script'
 import { toast } from 'sonner'
 
 interface CartItem {
@@ -30,7 +29,6 @@ export default function CartPage() {
   const router = useRouter()
   const [cart, setCart] = useState<Cart | null>(null)
   const [loading, setLoading] = useState(true)
-  const [processing, setProcessing] = useState(false)
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -93,79 +91,9 @@ export default function CartPage() {
     return cart.items.reduce((sum, item) => sum + item.product.salePrice * item.quantity, 0)
   }
 
-  const handleCheckout = async () => {
+  const handleCheckout = () => {
     if (!cart || cart.items.length === 0) return
-
-    setProcessing(true)
-    try {
-      const res = await fetch('/api/orders', {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          items: cart.items.map(item => ({
-            productId: item.product.id,
-            quantity: item.quantity,
-            price: item.product.salePrice,
-          })),
-          shippingAddress: 'Address will be collected during checkout',
-        }),
-      })
-
-      const data = await res.json()
-
-      if (res.ok) {
-        // Initialize Razorpay
-        const options = {
-          key: data.key,
-          amount: data.order.totalAmount * 100,
-          currency: 'INR',
-          name: 'STN Products',
-          description: 'Order Payment',
-          order_id: data.razorpayOrderId,
-          handler: async function (response: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }) {
-            // Verify payment
-            const verifyRes = await fetch('/api/payments/verify', {
-              method: 'POST',
-              credentials: 'include',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
-                orderId: data.order.id,
-              }),
-            })
-
-            if (verifyRes.ok) {
-              window.dispatchEvent(new CustomEvent('cart-updated'))
-              toast.success('Payment successful!')
-              router.push('/home/orders')
-            } else {
-              toast.error('Payment verification failed')
-            }
-          },
-          prefill: {
-            email: '',
-            contact: '',
-          },
-          theme: {
-            color: '#3CB31A',
-          },
-        }
-
-        const RazorpayConstructor = (window as unknown as { Razorpay: new (opts: unknown) => { open: () => void } }).Razorpay
-        const razorpay = new RazorpayConstructor(options)
-        razorpay.open()
-      } else {
-        toast.error(data?.error || 'Failed to create order')
-      }
-    } catch (error) {
-      console.error('Error during checkout:', error)
-      toast.error('Error processing checkout')
-    } finally {
-      setProcessing(false)
-    }
+    router.push('/home/checkout')
   }
 
   if (loading) {
@@ -198,9 +126,7 @@ export default function CartPage() {
   }
 
   return (
-    <>
-      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
-      <div className="min-h-screen bg-neutral-50">
+    <div className="min-h-screen bg-neutral-50">
         <div className="container mx-auto px-4 py-8 md:py-12">
           <h1 className="text-2xl md:text-3xl font-bold text-neutral-900 mb-8">Shopping Cart</h1>
           <div className="grid md:grid-cols-3 gap-8">
@@ -268,15 +194,13 @@ export default function CartPage() {
                 <Button
                   className="w-full bg-green-600 hover:bg-green-700 text-white py-6 rounded-xl font-semibold"
                   onClick={handleCheckout}
-                  disabled={processing}
                 >
-                  {processing ? 'Processing...' : 'Proceed to Checkout'}
+                  Proceed to Checkout
                 </Button>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </>
   )
 }
