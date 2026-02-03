@@ -143,7 +143,7 @@ function ProductsPageContent() {
 
   if (loading) {
     return (
-      <div className="container mx-auto w-full min-w-0 px-4 sm:px-5 md:px-6 lg:px-8 max-w-7xl py-6 sm:py-8 md:py-10">
+      <div className="container mx-auto w-full min-w-0 px-3 sm:px-4 md:px-6 max-w-7xl py-6 sm:py-8 md:py-10">
         <div className="h-7 sm:h-8 w-40 sm:w-48 bg-gray-200 rounded-lg animate-pulse mb-4 sm:mb-6" />
         <div className="flex flex-wrap gap-2 sm:gap-3 mb-4 sm:mb-6">
           <div className="h-9 sm:h-10 w-full sm:w-64 bg-gray-100 rounded-lg animate-pulse" />
@@ -166,7 +166,7 @@ function ProductsPageContent() {
 
   return (
     <div className="flex flex-col w-full min-w-0 overflow-x-hidden">
-      <div className="container mx-auto w-full min-w-0 px-4 sm:px-5 md:px-6 lg:px-8 py-5 sm:py-6 md:py-8 lg:py-10 max-w-7xl">
+      <div className="container mx-auto w-full min-w-0 px-3 sm:px-4 md:px-6 py-5 sm:py-6 md:py-8 lg:py-10 max-w-7xl">
         {/* Page title - responsive typography */}
         <div className="mb-4 sm:mb-5 md:mb-6 lg:mb-8">
           <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 tracking-tight">

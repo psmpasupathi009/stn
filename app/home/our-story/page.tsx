@@ -39,8 +39,8 @@ export default function OurStoryPage() {
   }, [viewItem])
 
   return (
-    <div className="bg-white min-h-screen">
-      <div className="container mx-auto w-full min-w-0 px-3 sm:px-4 md:px-6 py-10 sm:py-16 md:py-24 max-w-5xl">
+    <div className="bg-white min-h-screen w-full min-w-0 overflow-x-hidden">
+      <div className="container mx-auto w-full min-w-0 px-3 sm:px-4 md:px-6 py-10 sm:py-16 md:py-24 max-w-7xl">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-12 text-center">
             Our Story

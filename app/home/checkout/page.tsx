@@ -284,8 +284,8 @@ function CheckoutContent() {
   return (
     <>
       <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
-      <div className="min-h-screen bg-gray-50">
-        <div className="container mx-auto w-full min-w-0 px-3 sm:px-4 md:px-6 py-6 md:py-10 max-w-5xl">
+      <div className="min-h-screen bg-gray-50 w-full min-w-0 overflow-x-hidden">
+        <div className="container mx-auto w-full min-w-0 px-3 sm:px-4 md:px-6 py-6 md:py-10 max-w-7xl">
           {/* Header */}
           <div className="flex items-center gap-4 mb-8">
             <Link href={isBuyNow ? '/home/products' : '/home/cart'} className="text-gray-600 hover:text-gray-900">

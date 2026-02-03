@@ -114,7 +114,7 @@ export default function ProductsByCategory() {
 
   return (
     <section className="py-14 sm:py-16 md:py-24 bg-gradient-to-b from-white via-gray-50/50 to-emerald-50/30">
-      <div className="container mx-auto w-full min-w-0 px-4 sm:px-5 md:px-6 lg:px-8 max-w-7xl">
+      <div className="container mx-auto w-full min-w-0 px-3 sm:px-4 md:px-6 max-w-7xl">
         <div className="text-center mb-12 sm:mb-16">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3 tracking-tight">
             Our Products

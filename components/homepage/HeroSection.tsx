@@ -90,7 +90,7 @@ export default function HeroSection() {
 
   return (
     <section className="w-full bg-white py-4 sm:py-5 md:py-6">
-      <div className="container mx-auto px-4 w-full min-w-0 max-w-7xl">
+      <div className="container mx-auto w-full min-w-0 px-3 sm:px-4 md:px-6 max-w-7xl">
         <div
           className="relative w-full overflow-hidden"
           style={{ height: 'calc(100vh - 220px)', minHeight: '400px', maxHeight: '650px' }}
