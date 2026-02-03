@@ -954,7 +954,7 @@ export default function AdminDashboard() {
       // Header
       doc.setFontSize(20)
       doc.setFont('helvetica', 'bold')
-      doc.text('STN Products', margin, y)
+      doc.text('STN PRODUCTS', margin, y)
       y += 6
       doc.setFontSize(10)
       doc.setFont('helvetica', 'normal')

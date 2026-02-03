@@ -1,4 +1,4 @@
-# STN Products E-Commerce Website
+# STN PRODUCTS E-Commerce Website
 
 A full-featured e-commerce website built with Next.js, React, TypeScript, MongoDB, and Prisma.
 

@@ -14,7 +14,7 @@ export default function Footer() {
           <div className="sm:col-span-2 lg:col-span-5">
             <Link href="/home" className="inline-block focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0f1419] rounded">
               <span className="text-xl sm:text-2xl font-bold tracking-tight text-[#3CB31A]">
-                STN Golden Healthy Foods
+                STN GOLDEN HEALTHY FOODS
               </span>
             </Link>
             <p className="mt-4 text-sm text-zinc-400 leading-relaxed max-w-sm">
@@ -113,7 +113,7 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="mt-12 sm:mt-14 pt-8 border-t border-white/10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <p className="text-xs text-zinc-500">
-            © {currentYear} STN Golden Healthy Foods. All rights reserved.
+            © {currentYear} STN GOLDEN HEALTHY FOODS. All rights reserved.
           </p>
           <nav className="flex flex-wrap items-center justify-center sm:justify-end gap-x-6 gap-y-1 text-xs text-zinc-500">
             <Link href="/home/contact" className="hover:text-white transition-colors">

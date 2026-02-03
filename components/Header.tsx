@@ -133,7 +133,7 @@ export default function Header() {
           >
             <h1 className="text-lg sm:text-xl md:text-2xl font-bold" style={{ color: '#3CB31A' }}>
               <span className="sm:hidden">STN</span>
-              <span className="hidden sm:inline">STN Golden Healthy Foods</span>
+              <span className="hidden sm:inline">STN GOLDEN HEALTHY FOODS</span>
             </h1>
           </Link>
 

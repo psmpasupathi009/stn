@@ -80,14 +80,14 @@ export async function sendOTP(email: string, otp: string): Promise<SendResult> {
   }
 
   const mailOptions = {
-    from: `"STN Golden Healthy Foods" <${FROM()}>`,
+    from: `"STN GOLDEN HEALTHY FOODS" <${FROM()}>`,
     to,
-    subject: 'OTP for Login Verification - STN Golden Healthy Foods',
+    subject: 'OTP for Login Verification - STN GOLDEN HEALTHY FOODS',
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
         <div style="background-color: #f9fafb; border-radius: 8px; padding: 30px; text-align: center;">
           <h2 style="color: #1f2937; margin-bottom: 20px;">OTP Verification</h2>
-          <p style="color: #4b5563; font-size: 16px; margin-bottom: 20px;">Your OTP for login to STN Golden Healthy Foods is:</p>
+          <p style="color: #4b5563; font-size: 16px; margin-bottom: 20px;">Your OTP for login to STN GOLDEN HEALTHY FOODS is:</p>
           <div style="background-color: #ffffff; border: 2px solid #3CB31A; border-radius: 8px; padding: 20px; margin: 20px 0;">
             <strong style="font-size: 32px; color: #3CB31A; letter-spacing: 4px;">${otp}</strong>
           </div>
@@ -96,7 +96,7 @@ export async function sendOTP(email: string, otp: string): Promise<SendResult> {
         </div>
       </div>
     `,
-    text: `Your OTP for login to STN Golden Healthy Foods is: ${otp}. This OTP will expire in 10 minutes.`,
+    text: `Your OTP for login to STN GOLDEN HEALTHY FOODS is: ${otp}. This OTP will expire in 10 minutes.`,
   }
 
   try {
@@ -125,9 +125,9 @@ export async function sendPasswordReset(email: string, resetToken: string): Prom
   }
 
   const mailOptions = {
-    from: `"STN Golden Healthy Foods" <${FROM()}>`,
+    from: `"STN GOLDEN HEALTHY FOODS" <${FROM()}>`,
     to,
-    subject: 'Password Reset Request - STN Golden Healthy Foods',
+    subject: 'Password Reset Request - STN GOLDEN HEALTHY FOODS',
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
         <div style="background-color: #f9fafb; border-radius: 8px; padding: 30px;">

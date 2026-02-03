@@ -85,9 +85,9 @@ async function testEmail() {
 
     // Send test email
     const result = await transporter.sendMail({
-      from: `"STN Golden Healthy Foods" <${fromEmail}>`,
+      from: `"STN GOLDEN HEALTHY FOODS" <${fromEmail}>`,
       to: testEmail,
-      subject: 'Test Email - STN Golden Healthy Foods',
+      subject: 'Test Email - STN GOLDEN HEALTHY FOODS',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
           <h2 style="color: #1f2937;">✅ Email Configuration Test</h2>
@@ -95,7 +95,7 @@ async function testEmail() {
             If you received this email, your email configuration is working correctly!
           </p>
           <p style="color: #6b7280; font-size: 14px; margin-top: 20px;">
-            This is a test email from STN Golden Healthy Foods.
+            This is a test email from STN GOLDEN HEALTHY FOODS.
           </p>
         </div>
       `,

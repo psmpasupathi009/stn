@@ -19,8 +19,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "STN Golden Healthy Foods - Traditional Oils & Spices",
-  description: "Authentic traditional oils, spices, and healthy products from STN Golden Healthy Foods",
+  title: "STN GOLDEN HEALTHY FOODS - Traditional Oils & Spices",
+  description: "Authentic traditional oils, spices, and healthy products from STN GOLDEN HEALTHY FOODS",
 };
 
 export const viewport = {

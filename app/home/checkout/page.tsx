@@ -201,7 +201,7 @@ function CheckoutContent() {
           key: data.key,
           amount: Math.round(totalAmount * 100),
           currency: 'INR',
-          name: 'STN Products',
+          name: 'STN PRODUCTS',
           description: isBuyNow ? 'Buy Now Order' : 'Cart Order',
           order_id: data.razorpayOrderId,
           handler: async function (response: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }) {

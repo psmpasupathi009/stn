@@ -12,12 +12,12 @@ export default function LoginPage() {
         >
           <Image
             src="/STN LOGO.png"
-            alt="STN Golden Healthy Foods"
+            alt="STN GOLDEN HEALTHY FOODS"
             width={36}
             height={36}
             className="h-7 w-7 shrink-0 rounded-md sm:h-8 sm:w-8 md:h-9 md:w-9"
           />
-          <span className="truncate">STN Golden Healthy Foods</span>
+          <span className="truncate">STN GOLDEN HEALTHY FOODS</span>
         </Link>
         <div className="w-full min-w-0 rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:p-5 md:p-6 lg:p-8">
           <LoginForm />
