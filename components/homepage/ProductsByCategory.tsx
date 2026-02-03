@@ -54,10 +54,25 @@ export default function ProductsByCategory() {
       map.get(key)!.push(p)
     })
     return categories
-      .map((cat) => ({
-        category: cat,
-        products: (map.get(cat) || []).slice(0, RECENT_PER_CATEGORY),
-      }))
+      .map((cat) => {
+        const list = map.get(cat) || []
+        const sorted = [...list].sort((a, b) => {
+          const aRating = a.rating ?? 0
+          const bRating = b.rating ?? 0
+          const aHasRating = aRating > 0
+          const bHasRating = bRating > 0
+          if (aHasRating && bHasRating) return bRating - aRating
+          if (aHasRating && !bHasRating) return -1
+          if (!aHasRating && bHasRating) return 1
+          const aDate = a.createdAt || a.updatedAt || ''
+          const bDate = b.createdAt || b.updatedAt || ''
+          return bDate.localeCompare(aDate)
+        })
+        return {
+          category: cat,
+          products: sorted.slice(0, RECENT_PER_CATEGORY),
+        }
+      })
       .filter(({ products }) => products.length > 0)
   }, [allProducts, categories])
 
@@ -98,10 +113,10 @@ export default function ProductsByCategory() {
   }
 
   return (
-    <section className="py-12 sm:py-16 md:py-20 bg-gradient-to-b from-white to-gray-50">
-        <div className="container mx-auto w-full min-w-0 px-3 sm:px-4 md:px-6 max-w-7xl">
-        <div className="text-center mb-10 sm:mb-14">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3">
+    <section className="py-14 sm:py-16 md:py-24 bg-gradient-to-b from-white via-gray-50/50 to-emerald-50/30">
+      <div className="container mx-auto w-full min-w-0 px-4 sm:px-5 md:px-6 lg:px-8 max-w-7xl">
+        <div className="text-center mb-12 sm:mb-16">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3 tracking-tight">
             Our Products
           </h2>
           <p className="text-base sm:text-lg text-gray-600 max-w-xl mx-auto">
@@ -110,32 +125,32 @@ export default function ProductsByCategory() {
         </div>
 
         {loading ? (
-          <div className="flex justify-center py-16">
-            <div className="w-12 h-12 border-4 border-green-500 border-t-transparent rounded-full animate-spin" />
+          <div className="flex justify-center py-20">
+            <div className="w-12 h-12 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
           </div>
         ) : productsByCategory.length === 0 ? (
-          <div className="text-center py-16 text-gray-500">No products yet.</div>
+          <div className="text-center py-20 text-gray-500">No products yet.</div>
         ) : (
-          <div className="space-y-12 md:space-y-16">
+          <div className="space-y-14 md:space-y-20">
             {productsByCategory.map(({ category, products: categoryProducts }) => (
               <div key={category}>
-                <div className="flex flex-wrap items-center justify-between gap-3 mb-6 pb-3 border-b border-gray-200">
-                  <h3 className="text-xl sm:text-2xl font-bold text-gray-800">
+                <div className="flex flex-wrap items-center justify-between gap-3 mb-6 pb-4 border-b border-gray-200/80">
+                  <h3 className="text-xl sm:text-2xl font-bold text-gray-800 tracking-tight">
                     {category}
                   </h3>
                   <Link
                     href={`/home/products?category=${encodeURIComponent(category)}`}
-                    className="inline-flex items-center gap-1.5 text-sm font-semibold text-green-600 hover:text-green-700 transition-colors group"
+                    className="inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-600 hover:text-emerald-700 transition-colors group"
                   >
                     View All
                     <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </Link>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6 min-w-0">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 md:gap-6 min-w-0">
                   {categoryProducts.map((product) => (
-                    <ProductCard 
-                      key={product.id} 
-                      product={product} 
+                    <ProductCard
+                      key={product.id}
+                      product={product}
                       onAddToCart={addToCart}
                       onBuyNow={buyNow}
                     />
@@ -146,10 +161,10 @@ export default function ProductsByCategory() {
           </div>
         )}
 
-        <div className="text-center mt-14">
-          <Link 
-            href="/home/products" 
-            className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold px-8 py-3 rounded-lg transition-colors shadow-md hover:shadow-lg"
+        <div className="text-center mt-16">
+          <Link
+            href="/home/products"
+            className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white font-semibold px-8 py-3.5 rounded-xl transition-all shadow-lg shadow-emerald-900/20 hover:shadow-xl hover:shadow-emerald-900/25 hover:-translate-y-0.5"
           >
             Browse All Products
             <ChevronRight className="w-5 h-5" />

@@ -91,6 +91,22 @@ a, button {
   overflow: hidden;
 }
 
+/* Scrollable reviews area - visible scrollbar so users scroll to see all */
+.reviews-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+.reviews-scroll::-webkit-scrollbar-track {
+  background: hsl(220 13% 96%);
+  border-radius: 4px;
+}
+.reviews-scroll::-webkit-scrollbar-thumb {
+  background: hsl(220 13% 75%);
+  border-radius: 4px;
+}
+.reviews-scroll::-webkit-scrollbar-thumb:hover {
+  background: hsl(220 13% 65%);
+}
+
 @keyframes caret-blink {
   0%, 70%, 100% {
     opacity: 1;

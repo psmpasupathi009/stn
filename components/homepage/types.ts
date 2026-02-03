@@ -8,6 +8,8 @@ export interface Product {
   itemCode: string
   rating?: number
   reviewCount?: number
+  createdAt?: string
+  updatedAt?: string
 }
 
 export interface HeroSlide {
