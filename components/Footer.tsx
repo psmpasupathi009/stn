@@ -7,12 +7,12 @@ export default function Footer() {
   const currentYear = new Date().getFullYear()
 
   return (
-    <footer className="bg-[var(--primary-green)] border-t border-[var(--primary-green)] text-white w-full min-w-0 overflow-x-hidden">
+    <footer className="bg-[#2a8f14] border-t border-[#2a8f14] text-white w-full min-w-0 overflow-x-hidden">
       <div className="container mx-auto w-full min-w-0 px-3 sm:px-4 md:px-6 max-w-7xl py-12 sm:py-14 md:py-16">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-10 sm:gap-12 lg:gap-16">
           {/* Brand — takes more space on lg */}
           <div className="sm:col-span-2 lg:col-span-5">
-            <Link href="/home" className="inline-block focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--primary-green)] rounded">
+            <Link href="/home" className="inline-block focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#2a8f14] rounded">
               <span className="text-xl sm:text-2xl font-bold tracking-tight text-white">
                 STN GOLDEN HEALTHY FOODS
               </span>
@@ -20,30 +20,30 @@ export default function Footer() {
             <p className="mt-4 text-sm text-white/90 leading-relaxed max-w-sm">
               Traditional cold-pressed oils, spices, and healthy products from Kovilpatti — quality you can trust.
             </p>
-            {/* Social inline under brand on all screens */}
+            {/* Social inline under brand on all screens — original brand colors, rounded bg, high visibility */}
             <div className="mt-6 flex items-center gap-3">
               <span className="text-xs font-medium uppercase tracking-wider text-white/80">Follow</span>
               <div className="flex gap-2">
                 <a
                   href="#"
                   aria-label="Facebook"
-                  className="w-9 h-9 rounded-lg bg-white/15 flex items-center justify-center text-white hover:bg-white/25 transition-colors"
+                  className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-[#1877F2] hover:opacity-90 transition-opacity shadow-sm"
                 >
-                  <Facebook className="w-4 h-4" />
+                  <Facebook className="w-5 h-5" />
                 </a>
                 <a
                   href="#"
                   aria-label="Instagram"
-                  className="w-9 h-9 rounded-lg bg-white/15 flex items-center justify-center text-white hover:bg-white/25 transition-colors"
+                  className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-[#E4405F] hover:opacity-90 transition-opacity shadow-sm"
                 >
-                  <Instagram className="w-4 h-4" />
+                  <Instagram className="w-5 h-5" />
                 </a>
                 <a
                   href="#"
                   aria-label="YouTube"
-                  className="w-9 h-9 rounded-lg bg-white/15 flex items-center justify-center text-white hover:bg-white/25 transition-colors"
+                  className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-[#FF0000] hover:opacity-90 transition-opacity shadow-sm"
                 >
-                  <Youtube className="w-4 h-4" />
+                  <Youtube className="w-5 h-5" />
                 </a>
               </div>
             </div>
@@ -81,8 +81,8 @@ export default function Footer() {
                   href="mailto:info@stngoldenhealthyfoods.com"
                   className="flex items-start gap-3 text-sm text-white/90 hover:text-white transition-colors group"
                 >
-                  <span className="w-8 h-8 rounded-lg bg-white/15 flex items-center justify-center shrink-0 group-hover:bg-white/25">
-                    <Mail className="w-4 h-4 text-white" />
+                  <span className="w-9 h-9 rounded-full bg-white flex items-center justify-center shrink-0 group-hover:opacity-90 transition-opacity shadow-sm">
+                    <Mail className="w-4 h-4 text-[#2a8f14]" />
                   </span>
                   <span className="break-all pt-0.5">info@stngoldenhealthyfoods.com</span>
                 </a>
@@ -92,15 +92,15 @@ export default function Footer() {
                   href="tel:+919942590202"
                   className="flex items-start gap-3 text-sm text-white/90 hover:text-white transition-colors group"
                 >
-                  <span className="w-8 h-8 rounded-lg bg-white/15 flex items-center justify-center shrink-0 group-hover:bg-white/25">
-                    <Phone className="w-4 h-4 text-white" />
+                  <span className="w-9 h-9 rounded-full bg-white flex items-center justify-center shrink-0 group-hover:opacity-90 transition-opacity shadow-sm">
+                    <Phone className="w-4 h-4 text-[#2a8f14]" />
                   </span>
                   <span className="pt-0.5">+91 99425 90202</span>
                 </a>
               </li>
               <li className="flex items-start gap-3 text-sm text-white/90">
-                <span className="w-8 h-8 rounded-lg bg-white/15 flex items-center justify-center shrink-0">
-                  <MapPin className="w-4 h-4 text-white" />
+                <span className="w-9 h-9 rounded-full bg-white flex items-center justify-center shrink-0">
+                  <MapPin className="w-4 h-4 text-[#2a8f14]" />
                 </span>
                 <span className="pt-0.5">
                   46/1, Kongu Nagar, Opp. Power House, Pollachi Main Road, Dharapuram, Tiruppur – 638 656

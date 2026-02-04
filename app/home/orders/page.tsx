@@ -87,13 +87,13 @@ function OrderStatusTracker({ status }: { status: string }) {
               <div
                 className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center border-2 transition-all ${
                   isCompleted
-                    ? 'bg-neutral-600 border-neutral-600 text-white'
+                    ? 'bg-[#3CB31A] border-[#3CB31A] text-white'
                     : 'bg-white border-gray-300 text-gray-400'
-                } ${isCurrent ? 'ring-4 ring-neutral-200' : ''}`}
+                } ${isCurrent ? 'ring-4 ring-[#3CB31A]/30' : ''}`}
               >
                 <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
-              <p className={`text-xs mt-2 text-center ${isCompleted ? 'text-neutral-700 font-medium' : 'text-gray-400'}`}>
+              <p className={`text-xs mt-2 text-center ${isCompleted ? 'text-[#3CB31A] font-medium' : 'text-gray-400'}`}>
                 {step.label}
               </p>
             </div>
@@ -103,7 +103,7 @@ function OrderStatusTracker({ status }: { status: string }) {
       {/* Progress Line */}
       <div className="absolute top-4 sm:top-5 left-0 right-0 h-0.5 bg-gray-200 -z-10 mx-4 sm:mx-5">
         <div
-          className="h-full bg-green-500 transition-all duration-500"
+          className="h-full bg-[#3CB31A] transition-all duration-500"
           style={{ width: `${(currentIndex / (ORDER_STEPS.length - 1)) * 100}%` }}
         />
       </div>
@@ -150,7 +150,7 @@ function OrderCard({ order }: { order: Order }) {
             <p className="text-2xl font-bold text-gray-900">₹{order.totalAmount.toLocaleString('en-IN')}</p>
             <div className="flex items-center gap-2 mt-1">
               <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                order.paymentStatus === 'paid' ? 'bg-neutral-100 text-neutral-800' :
+                order.paymentStatus === 'paid' ? 'bg-[#3CB31A]/15 text-[#3CB31A]' :
                 order.paymentStatus === 'pending' ? 'bg-yellow-100 text-yellow-700' :
                 'bg-red-100 text-red-700'
               }`}>
@@ -229,7 +229,7 @@ function OrderCard({ order }: { order: Order }) {
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <Link href={`/home/products/${item.product.id}`} className="font-medium hover:text-green-600 line-clamp-1">
+                  <Link href={`/home/products/${item.product.id}`} className="font-medium hover:text-[#3CB31A] line-clamp-1">
                     {item.product.name}
                   </Link>
                   <p className="text-sm text-gray-500">
@@ -353,7 +353,7 @@ export default function OrdersPage() {
               onClick={() => setFilter(tab.value)}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 filter === tab.value
-                  ? 'bg-neutral-700 text-white'
+                  ? 'bg-[#3CB31A] text-white hover:opacity-90'
                   : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
               }`}
             >
@@ -381,7 +381,7 @@ export default function OrdersPage() {
             </p>
             <Button
               onClick={() => router.push('/home/products')}
-              className="bg-green-600 hover:bg-green-700 text-white"
+              className="bg-[#3CB31A] hover:opacity-90 text-white"
             >
               Start Shopping
             </Button>
@@ -398,7 +398,7 @@ export default function OrdersPage() {
         <div className="mt-8 text-center">
           <Link
             href="/home/track-order"
-            className="inline-flex items-center gap-2 text-neutral-700 hover:text-neutral-900 font-medium"
+            className="inline-flex items-center gap-2 text-gray-600 hover:text-[#3CB31A] font-medium"
           >
             Track order with Order ID
             <ExternalLink className="w-4 h-4" />

@@ -4,7 +4,6 @@ import "./globals.css";
 import { AuthProvider } from "@/lib/context";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import WhatsAppButton from "@/components/WhatsAppButton";
 import ScrollToTop from "@/components/ScrollToTop";
 import { Toaster } from "sonner";
 
@@ -41,12 +40,11 @@ export default function RootLayout({
         <AuthProvider>
           <Toaster position="top-center" richColors closeButton />
           <Header />
-          <main className="min-h-screen min-w-0 overflow-x-hidden">
+          <main className="min-h-screen min-w-0 overflow-x-hidden pt-14 sm:pt-16 md:pt-[4.25rem]">
             {children}
           </main>
           <Footer />
           <ScrollToTop />
-          <WhatsAppButton />
         </AuthProvider>
       </body>
     </html>

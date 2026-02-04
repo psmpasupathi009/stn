@@ -1,11 +1,11 @@
 'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
 import { useAuth } from '@/lib/context'
 import { useState, useEffect, useCallback } from 'react'
 import {
   User,
+  ShoppingBasket,
   ShoppingCart,
   Menu,
   LayoutDashboard,
@@ -63,7 +63,7 @@ export default function Header() {
     'p-2.5 rounded-full text-white hover:bg-white/20 transition-colors focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-[var(--primary-green)]'
 
   return (
-    <header className="sticky top-0 z-50 bg-[var(--primary-green)] border-b border-[var(--primary-green)] shadow-sm">
+    <header className="fixed top-0 left-0 right-0 z-50 w-full bg-[var(--primary-green)] border-b border-white/10 shadow-md">
       <div className="container mx-auto w-full min-w-0 px-3 sm:px-4 md:px-6 max-w-7xl">
         <div className="flex items-center justify-between h-14 sm:h-16 md:h-17">
           {/* Left: Menu / Close menu toggle */}
@@ -105,6 +105,15 @@ export default function Header() {
                   </SheetClose>
                 </SheetHeader>
                 <nav className="flex flex-col py-4 flex-1 overflow-y-auto">
+                  {!isAuthenticated && (
+                    <Link
+                      href="/home/login"
+                      className="px-5 py-3.5 text-sm font-medium text-neutral-800 hover:bg-neutral-100 hover:text-neutral-900 transition-colors border-b border-neutral-100 uppercase tracking-wide"
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      Login
+                    </Link>
+                  )}
                   <Link
                     href="/home/products"
                     className="px-5 py-3.5 text-sm font-medium text-neutral-800 hover:bg-neutral-100 hover:text-neutral-900 transition-colors border-b border-neutral-100 uppercase tracking-wide"
@@ -122,70 +131,82 @@ export default function Header() {
                       {link.label}
                     </Link>
                   ))}
+                  {user?.role?.toUpperCase() === 'ADMIN' && (
+                    <Link
+                      href="/admin/dashboard"
+                      className="px-5 py-3.5 text-sm font-medium text-neutral-800 hover:bg-neutral-100 hover:text-neutral-900 transition-colors border-b border-neutral-100 uppercase tracking-wide"
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      Admin Dashboard
+                    </Link>
+                  )}
                 </nav>
               </SheetContent>
             </Sheet>
           </div>
 
-          {/* Center: Logo + Company Name */}
+          {/* Center: Company Name only */}
           <Link
             href="/"
-            className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center gap-2"
+            className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center"
+            title="STN GOLDEN HEALTHY FOODS"
           >
-            <Image
-              src="/STN LOGO.png"
-              alt="STN GOLDEN HEALTHY FOODS"
-              width={40}
-              height={40}
-              className="h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10 object-contain shrink-0"
-            />
             <h1 className="text-base sm:text-lg md:text-xl font-bold text-white whitespace-nowrap">
               <span className="sm:hidden">STN</span>
               <span className="hidden sm:inline">STN GOLDEN HEALTHY FOODS</span>
             </h1>
           </Link>
 
-          {/* Right: Profile, Cart */}
+          {/* Right: Profile, Admin, My Orders (bag), Cart */}
           <div className="flex items-center gap-1">
             {isAuthenticated ? (
-              <div className="relative flex items-center">
-                <Link
-                  href="/home/profile"
-                  className={iconButtonClass}
-                  aria-label="Profile"
-                >
-                  <User size={ICON_SIZE} strokeWidth={2} />
-                  {user?.role?.toUpperCase() === 'ADMIN' && (
-                    <span
-                      className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white bg-white"
-                      title="Admin"
-                    />
-                  )}
-                </Link>
+              <Link
+                href="/home/profile"
+                className={`${iconButtonClass} relative`}
+                aria-label="Profile"
+                title="Profile"
+              >
+                <User size={ICON_SIZE} strokeWidth={2} />
                 {user?.role?.toUpperCase() === 'ADMIN' && (
-                  <Link
-                    href="/admin/dashboard"
-                    className="hidden sm:flex ml-0.5 p-2 rounded-full hover:bg-white/20 text-white"
-                    aria-label="Admin dashboard"
-                  >
-                    <LayoutDashboard size={ICON_SIZE} strokeWidth={2} />
-                  </Link>
+                  <span
+                    className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white bg-white"
+                    aria-hidden
+                  />
                 )}
-              </div>
+              </Link>
             ) : (
               <Link
                 href="/home/login"
                 className={iconButtonClass}
                 aria-label="Log in"
+                title="Log in"
               >
                 <User size={ICON_SIZE} strokeWidth={2} />
               </Link>
             )}
-
+            {user?.role?.toUpperCase() === 'ADMIN' && (
+              <Link
+                href="/admin/dashboard"
+                className="hidden sm:flex ml-0.5 p-2 rounded-full hover:bg-white/20 text-white"
+                aria-label="Admin Dashboard"
+                title="Admin Dashboard"
+              >
+                <LayoutDashboard size={ICON_SIZE} strokeWidth={2} />
+              </Link>
+            )}
+            <Link
+              href="/home/orders"
+              className={iconButtonClass}
+              aria-label="My Orders"
+              title="My Orders"
+            >
+              <ShoppingBasket size={ICON_SIZE} strokeWidth={2} />
+            </Link>
             <Link
               href="/home/cart"
               className={`${iconButtonClass} relative`}
-              aria-label={`Cart${displayCartCount > 0 ? `, ${displayCartCount} items` : ''}`}
+              aria-label={displayCartCount > 0 ? `Cart (${displayCartCount} items)` : 'Cart'}
+              title="Cart"
             >
               <ShoppingCart size={ICON_SIZE} strokeWidth={2} />
               {displayCartCount > 0 && (
