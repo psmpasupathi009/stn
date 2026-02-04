@@ -140,7 +140,7 @@ export default function ProductsByCategory() {
                   </h3>
                   <Link
                     href={`/home/products?category=${encodeURIComponent(category)}`}
-                    className="inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-600 hover:text-emerald-700 transition-colors group"
+                    className="inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--primary-green)] hover:opacity-90 transition-colors group"
                   >
                     View All
                     <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />

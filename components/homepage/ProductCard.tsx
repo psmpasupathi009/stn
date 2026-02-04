@@ -120,7 +120,7 @@ export default function ProductCard({ product, onAddToCart, onBuyNow, className 
             }}
             className="flex-1 min-w-0 bg-white border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-gray-800 text-xs sm:text-sm font-semibold py-2.5 sm:py-3 rounded-xl flex items-center justify-center transition-all touch-manipulation shrink-0"
           >
-            <ShoppingCart className="w-4 h-4" />
+            <ShoppingCart className="w-4 h-4 text-[var(--primary-green)]" />
           </button>
         </div>
       </div>

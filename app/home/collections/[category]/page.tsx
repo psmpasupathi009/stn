@@ -140,7 +140,7 @@ export default function CategoryPage() {
           <div className="text-center py-12">
             <p className="text-gray-600 mb-4">No products found in this category.</p>
             <Link href="/home/products">
-              <button className="bg-black text-white px-6 py-2 rounded hover:bg-gray-800">
+              <button className="bg-[var(--primary-green)] text-white px-6 py-2 rounded hover:opacity-90">
                 View All Products
               </button>
             </Link>

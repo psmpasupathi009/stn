@@ -137,7 +137,7 @@ export default function HeroSection() {
                 )}
                 <div className="absolute bottom-6 sm:bottom-8 md:bottom-10 lg:bottom-12 left-0 right-0 flex justify-center z-20 px-2">
                   <Link href={getHeroButtonHref(slide.buttonLink)} className="touch-manipulation">
-                    <button type="button" className="bg-[var(--primary-green)] hover:opacity-90 text-white px-5 sm:px-6 md:px-8 py-2.5 sm:py-3 md:py-3.5 text-sm sm:text-base font-medium shadow-lg hover:shadow-xl transition-all duration-200 rounded-md min-h-[44px]">
+                    <button type="button" className="bg-[var(--primary-green)] hover:opacity-90 text-white px-5 sm:px-6 md:px-8 py-2.5 sm:py-3 md:py-3.5 text-sm sm:text-base font-medium shadow-lg hover:shadow-xl transition-all duration-200 rounded-xl min-h-[44px]">
                       {slide.buttonText || 'Shop Now'}
                     </button>
                   </Link>

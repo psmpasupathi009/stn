@@ -116,13 +116,13 @@ export default function Footer() {
             © {currentYear} STN GOLDEN HEALTHY FOODS. All rights reserved.
           </p>
           <nav className="flex flex-wrap items-center justify-center sm:justify-end gap-x-6 gap-y-1 text-xs text-white/80">
-            <Link href="/home/contact" className="hover:text-white transition-colors">
+            <Link href="/home/privacy" className="hover:text-white transition-colors">
               Privacy
             </Link>
-            <Link href="/home/contact" className="hover:text-white transition-colors">
+            <Link href="/home/terms" className="hover:text-white transition-colors">
               Terms
             </Link>
-            <Link href="/home/contact" className="hover:text-white transition-colors">
+            <Link href="/home/shipping-returns" className="hover:text-white transition-colors">
               Shipping & returns
             </Link>
           </nav>
