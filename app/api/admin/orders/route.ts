@@ -111,13 +111,34 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { orderId, status, paymentStatus, trackingNumber, courierName, expectedDelivery, adminNotes } = body
+    const { orderId, status, paymentStatus, trackingNumber, courierName, expectedDelivery, adminNotes, refundAction, refundAdminNotes, refundRejectionReason } = body
 
     if (!orderId) {
       return NextResponse.json({ error: 'Order ID is required' }, { status: 400 })
     }
 
     const updateData: Record<string, unknown> = {}
+
+    // Refund workflow (compliance-friendly: approve → then mark refunded after processing)
+    if (refundAction === 'approve') {
+      updateData.refundStatus = 'approved'
+      updateData.refundProcessedAt = new Date()
+      if (refundAdminNotes !== undefined) updateData.refundAdminNotes = String(refundAdminNotes).slice(0, 2000)
+    } else if (refundAction === 'reject') {
+      const rejectionReason = (refundRejectionReason ?? '').trim().slice(0, 500)
+      if (!rejectionReason) {
+        return NextResponse.json({ error: 'Rejection reason is required (customer will see this).' }, { status: 400 })
+      }
+      updateData.refundStatus = 'rejected'
+      updateData.refundRejectionReason = rejectionReason
+      updateData.refundProcessedAt = new Date()
+      if (refundAdminNotes !== undefined) updateData.refundAdminNotes = String(refundAdminNotes).slice(0, 2000)
+    } else if (refundAction === 'markRefunded') {
+      updateData.refundStatus = 'refunded'
+      updateData.paymentStatus = 'refunded'
+      updateData.refundProcessedAt = new Date()
+      if (refundAdminNotes !== undefined) updateData.refundAdminNotes = String(refundAdminNotes).slice(0, 2000)
+    }
     
     if (status) {
       updateData.status = status
@@ -130,6 +151,10 @@ export async function PUT(request: NextRequest) {
       // Set deliveredAt when status changes to delivered
       if (status === 'delivered') {
         updateData.deliveredAt = new Date()
+      }
+
+      if (status === 'cancelled') {
+        updateData.cancelledAt = new Date()
       }
     }
     

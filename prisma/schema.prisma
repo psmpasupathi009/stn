@@ -117,9 +117,17 @@ model Order {
   shippedAt        DateTime?   // When order was shipped
   expectedDelivery DateTime?   // Expected delivery date
   deliveredAt      DateTime?   // Actual delivery date
+  cancelledAt      DateTime?   // When order was cancelled (audit/compliance)
   adminNotes       String?     // Internal notes for admin
   refundRequested  Boolean     @default(false)
   refundRequestedAt DateTime?  // When customer requested refund
+  refundReason     String?    // defective, wrong_item, damaged_in_transit, changed_mind, quality_issue, other
+  refundReasonOther String?    // Free text when reason is "other"
+  refundComment    String?    // Optional customer comment
+  refundStatus     String?    // requested, approved, rejected, refunded
+  refundProcessedAt DateTime? // When admin processed (approved/rejected/refunded)
+  refundAdminNotes String?    // Internal admin notes
+  refundRejectionReason String? // Shown to customer when rejected
   createdAt        DateTime    @default(now())
   updatedAt        DateTime    @updatedAt
 }

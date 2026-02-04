@@ -48,6 +48,12 @@ interface Order {
   deliveredAt?: string
   refundRequested?: boolean
   refundRequestedAt?: string
+  refundReason?: string
+  refundReasonOther?: string
+  refundComment?: string
+  refundStatus?: string
+  refundProcessedAt?: string
+  refundRejectionReason?: string
   items: OrderItem[]
   createdAt: string
 }
@@ -117,12 +123,23 @@ function OrderStatusTracker({ status }: { status: string }) {
 
 const CANCELLABLE_STATUSES = ['pending', 'confirmed']
 
+const REFUND_REASONS = [
+  { value: 'defective', label: 'Defective or damaged product' },
+  { value: 'wrong_item', label: 'Wrong item received' },
+  { value: 'damaged_in_transit', label: 'Damaged in transit' },
+  { value: 'quality_issue', label: 'Quality not as expected' },
+  { value: 'changed_mind', label: 'No longer needed / Changed mind' },
+  { value: 'other', label: 'Other (please specify below)' },
+]
+
 function OrderCard({ order, refreshOrders }: { order: Order; refreshOrders: () => void }) {
   const [isExpanded, setIsExpanded] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [showRefundModal, setShowRefundModal] = useState(false)
+  const [refundForm, setRefundForm] = useState({ reason: '', reasonOther: '', comment: '' })
+  const [showCancelModal, setShowCancelModal] = useState(false)
 
-  const handleCancel = async () => {
-    if (!confirm('Are you sure you want to cancel this order? This cannot be undone.')) return
+  const handleCancelConfirm = async () => {
     setLoading(true)
     try {
       const res = await fetch(`/api/orders/${order.id}`, {
@@ -133,7 +150,8 @@ function OrderCard({ order, refreshOrders }: { order: Order; refreshOrders: () =
       })
       const data = await res.json().catch(() => ({}))
       if (res.ok) {
-        toast.success('Order cancelled.')
+        toast.success('Order cancelled. If you had paid, you can request a refund below.')
+        setShowCancelModal(false)
         refreshOrders()
       } else {
         toast.error(data.error || 'Failed to cancel order')
@@ -145,19 +163,38 @@ function OrderCard({ order, refreshOrders }: { order: Order; refreshOrders: () =
     }
   }
 
-  const handleRequestRefund = async () => {
-    if (!confirm('Request a refund for this order? Our team will process it and contact you.')) return
+  const openRefundModal = () => {
+    setRefundForm({ reason: '', reasonOther: '', comment: '' })
+    setShowRefundModal(true)
+  }
+
+  const handleRequestRefundSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!refundForm.reason) {
+      toast.error('Please select a reason for refund.')
+      return
+    }
+    if (refundForm.reason === 'other' && !refundForm.reasonOther.trim()) {
+      toast.error('Please provide details for "Other".')
+      return
+    }
     setLoading(true)
     try {
       const res = await fetch(`/api/orders/${order.id}`, {
         method: 'PATCH',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'requestRefund' }),
+        body: JSON.stringify({
+          action: 'requestRefund',
+          reason: refundForm.reason,
+          reasonOther: refundForm.reason === 'other' ? refundForm.reasonOther.trim() : undefined,
+          comment: refundForm.comment.trim() || undefined,
+        }),
       })
       const data = await res.json().catch(() => ({}))
       if (res.ok) {
-        toast.success('Refund requested. We will process it shortly.')
+        toast.success('Refund requested. We will review and get back to you within 5–7 business days.')
+        setShowRefundModal(false)
         refreshOrders()
       } else {
         toast.error(data.error || 'Failed to request refund')
@@ -227,7 +264,7 @@ function OrderCard({ order, refreshOrders }: { order: Order; refreshOrders: () =
               {CANCELLABLE_STATUSES.includes(order.status) && (
                 <button
                   type="button"
-                  onClick={handleCancel}
+                  onClick={() => setShowCancelModal(true)}
                   disabled={loading}
                   className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-xl border border-red-200 transition-colors disabled:opacity-50"
                 >
@@ -238,7 +275,7 @@ function OrderCard({ order, refreshOrders }: { order: Order; refreshOrders: () =
               {order.status === 'delivered' && !order.refundRequested && (
                 <button
                   type="button"
-                  onClick={handleRequestRefund}
+                  onClick={openRefundModal}
                   disabled={loading}
                   className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-[#3CB31A] bg-[#3CB31A]/10 hover:bg-[#3CB31A]/20 rounded-xl border border-[#3CB31A]/30 transition-colors disabled:opacity-50"
                 >
@@ -247,10 +284,22 @@ function OrderCard({ order, refreshOrders }: { order: Order; refreshOrders: () =
                 </button>
               )}
               {order.refundRequested && (
-                <span className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-amber-700 bg-amber-50 rounded-xl border border-amber-200">
-                  <RotateCcw className="w-4 h-4" />
-                  Refund requested
-                </span>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className={`inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-xl border ${
+                    order.refundStatus === 'refunded' ? 'text-green-700 bg-green-50 border-green-200' :
+                    order.refundStatus === 'rejected' ? 'text-red-700 bg-red-50 border-red-200' :
+                    order.refundStatus === 'approved' ? 'text-blue-700 bg-blue-50 border-blue-200' :
+                    'text-amber-700 bg-amber-50 border-amber-200'
+                  }`}>
+                    <RotateCcw className="w-4 h-4" />
+                    {order.refundStatus === 'refunded' ? 'Refunded' :
+                     order.refundStatus === 'rejected' ? 'Refund declined' :
+                     order.refundStatus === 'approved' ? 'Refund approved' : 'Refund under review'}
+                  </span>
+                  {order.refundStatus === 'rejected' && order.refundRejectionReason && (
+                    <p className="text-xs text-red-600 mt-1 w-full">Reason: {order.refundRejectionReason}</p>
+                  )}
+                </div>
               )}
             </div>
           )}
@@ -258,7 +307,7 @@ function OrderCard({ order, refreshOrders }: { order: Order; refreshOrders: () =
             <div className="mt-4">
               <button
                 type="button"
-                onClick={handleRequestRefund}
+                onClick={openRefundModal}
                 disabled={loading}
                 className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-[#3CB31A] bg-[#3CB31A]/10 hover:bg-[#3CB31A]/20 rounded-xl border border-[#3CB31A]/30 transition-colors disabled:opacity-50"
               >
@@ -268,11 +317,21 @@ function OrderCard({ order, refreshOrders }: { order: Order; refreshOrders: () =
             </div>
           )}
           {order.status === 'cancelled' && order.refundRequested && (
-            <div className="mt-4">
-              <span className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-amber-700 bg-amber-50 rounded-xl border border-amber-200">
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+              <span className={`inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-xl border ${
+                order.refundStatus === 'refunded' ? 'text-green-700 bg-green-50 border-green-200' :
+                order.refundStatus === 'rejected' ? 'text-red-700 bg-red-50 border-red-200' :
+                order.refundStatus === 'approved' ? 'text-blue-700 bg-blue-50 border-blue-200' :
+                'text-amber-700 bg-amber-50 border-amber-200'
+              }`}>
                 <RotateCcw className="w-4 h-4" />
-                Refund requested
+                {order.refundStatus === 'refunded' ? 'Refunded' :
+                 order.refundStatus === 'rejected' ? 'Refund declined' :
+                 order.refundStatus === 'approved' ? 'Refund approved' : 'Refund under review'}
               </span>
+              {order.refundStatus === 'rejected' && order.refundRejectionReason && (
+                <p className="text-xs text-red-600 mt-1 w-full">Reason: {order.refundRejectionReason}</p>
+              )}
             </div>
           )}
 
@@ -385,6 +444,98 @@ function OrderCard({ order, refreshOrders }: { order: Order; refreshOrders: () =
             <div className="flex justify-between font-bold text-lg pt-2 border-t">
               <span>Total</span>
               <span>₹{order.totalAmount.toLocaleString('en-IN')}</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Refund Request Modal (reason required, compliance-friendly) */}
+      {showRefundModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <div className="p-4 sm:p-6 border-b">
+              <h3 className="text-lg font-bold text-gray-900">Request refund</h3>
+              <p className="text-sm text-gray-600 mt-1">Order #{order.id.slice(-8).toUpperCase()} · ₹{order.totalAmount.toLocaleString('en-IN')}</p>
+            </div>
+            <form onSubmit={handleRequestRefundSubmit} className="p-4 sm:p-6 space-y-4">
+              <p className="text-sm text-gray-600">Please select a reason for your refund request. We will review it within 5–7 business days, per our refund policy.</p>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Reason for refund <span className="text-red-500">*</span></label>
+                <select
+                  required
+                  value={refundForm.reason}
+                  onChange={(e) => setRefundForm({ ...refundForm, reason: e.target.value })}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                >
+                  <option value="">Select reason...</option>
+                  {REFUND_REASONS.map((r) => (
+                    <option key={r.value} value={r.value}>{r.label}</option>
+                  ))}
+                </select>
+              </div>
+              {refundForm.reason === 'other' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Please specify <span className="text-red-500">*</span></label>
+                  <textarea
+                    required
+                    value={refundForm.reasonOther}
+                    onChange={(e) => setRefundForm({ ...refundForm, reasonOther: e.target.value })}
+                    placeholder="Describe your reason..."
+                    rows={3}
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                    maxLength={500}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">{refundForm.reasonOther.length}/500</p>
+                </div>
+              )}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Additional details (optional)</label>
+                <textarea
+                  value={refundForm.comment}
+                  onChange={(e) => setRefundForm({ ...refundForm, comment: e.target.value })}
+                  placeholder="Any other information that may help us..."
+                  rows={2}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                  maxLength={1000}
+                />
+                <p className="text-xs text-gray-500 mt-1">{refundForm.comment.length}/1000</p>
+              </div>
+              <div className="flex gap-3 pt-2">
+                <Button type="button" variant="outline" className="flex-1" onClick={() => setShowRefundModal(false)} disabled={loading}>
+                  Cancel
+                </Button>
+                <Button type="submit" className="flex-1 bg-[#3CB31A] hover:opacity-90 text-white" disabled={loading}>
+                  {loading ? 'Submitting...' : 'Submit request'}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Cancel order confirmation modal (compliance: clear policy + confirm) */}
+      {showCancelModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
+            <h3 className="text-lg font-bold text-gray-900 mb-2">Cancel order?</h3>
+            <p className="text-sm text-gray-600 mb-2">
+              Order #{order.id.slice(-8).toUpperCase()} · ₹{order.totalAmount.toLocaleString('en-IN')}
+            </p>
+            <p className="text-sm text-gray-600 mb-4">
+              You can cancel your order only while it is <strong>Pending</strong> or <strong>Confirmed</strong>. This action cannot be undone. Once we start processing or ship your order, cancellation is not possible (see our Terms and Shipping &amp; Returns policy).
+            </p>
+            {order.paymentStatus === 'paid' && (
+              <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
+                If you have already paid, you can request a refund from this page after cancellation. Refunds are processed as per our refund policy.
+              </p>
+            )}
+            <div className="flex gap-3">
+              <Button type="button" variant="outline" className="flex-1" onClick={() => setShowCancelModal(false)} disabled={loading}>
+                Keep order
+              </Button>
+              <Button type="button" className="flex-1 bg-red-600 hover:bg-red-700 text-white" onClick={handleCancelConfirm} disabled={loading}>
+                {loading ? 'Cancelling...' : 'Yes, cancel order'}
+              </Button>
             </div>
           </div>
         </div>

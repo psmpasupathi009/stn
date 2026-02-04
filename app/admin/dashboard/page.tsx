@@ -32,6 +32,7 @@ import {
   Video,
   ChevronUp,
   ChevronDown,
+  RotateCcw,
 } from 'lucide-react'
 import SortableGalleryList from '@/components/admin/SortableGalleryList'
 
@@ -94,6 +95,13 @@ interface Order {
   adminNotes?: string
   refundRequested?: boolean
   refundRequestedAt?: string
+  refundReason?: string
+  refundReasonOther?: string
+  refundComment?: string
+  refundStatus?: string
+  refundProcessedAt?: string
+  refundAdminNotes?: string
+  refundRejectionReason?: string
   createdAt: string
   updatedAt: string
   user: {
@@ -208,6 +216,11 @@ export default function AdminDashboard() {
     expectedDelivery: '',
     adminNotes: '',
   })
+  const [refundModalOrder, setRefundModalOrder] = useState<Order | null>(null)
+  const [refundModalAction, setRefundModalAction] = useState<'approve' | 'reject' | 'markRefunded'>('approve')
+  const [refundRejectionReason, setRefundRejectionReason] = useState('')
+  const [refundAdminNotesInput, setRefundAdminNotesInput] = useState('')
+  const [refundActionLoading, setRefundActionLoading] = useState(false)
 
   // Gallery state
   const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([])
@@ -1091,6 +1104,61 @@ export default function AdminDashboard() {
     })
   }
 
+  const openRefundModal = (order: Order, action: 'approve' | 'reject' | 'markRefunded') => {
+    setRefundModalOrder(order)
+    setRefundModalAction(action)
+    setRefundRejectionReason('')
+    setRefundAdminNotesInput('')
+  }
+
+  const handleRefundActionSubmit = async () => {
+    if (!refundModalOrder) return
+    if (refundModalAction === 'reject' && !refundRejectionReason.trim()) {
+      toast.error('Rejection reason is required (customer will see this message).')
+      return
+    }
+    setRefundActionLoading(true)
+    try {
+      const res = await fetch('/api/admin/orders', {
+        method: 'PUT',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orderId: refundModalOrder.id,
+          refundAction: refundModalAction,
+          refundRejectionReason: refundModalAction === 'reject' ? refundRejectionReason.trim() : undefined,
+          refundAdminNotes: refundAdminNotesInput.trim() || undefined,
+        }),
+      })
+      if (res.ok) {
+        toast.success(
+          refundModalAction === 'approve' ? 'Refund approved. You can mark as refunded after processing payment.' :
+          refundModalAction === 'reject' ? 'Refund request declined. Customer will see your reason.' :
+          'Order marked as refunded.'
+        )
+        setRefundModalOrder(null)
+        fetchOrders()
+      } else {
+        const data = await res.json().catch(() => ({}))
+        toast.error(data.error || 'Failed to update refund status')
+      }
+    } catch (error) {
+      console.error('Refund action error:', error)
+      toast.error('Failed to update refund status')
+    } finally {
+      setRefundActionLoading(false)
+    }
+  }
+
+  const REFUND_REASON_LABELS: Record<string, string> = {
+    defective: 'Defective or damaged product',
+    wrong_item: 'Wrong item received',
+    damaged_in_transit: 'Damaged in transit',
+    quality_issue: 'Quality not as expected',
+    changed_mind: 'No longer needed / Changed mind',
+    other: 'Other',
+  }
+
   if (!isAuthenticated || user?.role?.toUpperCase() !== 'ADMIN') {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -1559,6 +1627,90 @@ export default function AdminDashboard() {
               </div>
             </div>
 
+            {/* Refund requests (compliance: reason + status + admin response) */}
+            {orders.filter(o => o.refundRequested && o.paymentStatus !== 'refunded').length > 0 && (
+              <Card className="mb-6 border-amber-200 bg-amber-50/30">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <RotateCcw className="w-4 h-4 text-amber-700" />
+                    Refund requests
+                  </CardTitle>
+                  <p className="text-sm text-gray-600">Review and approve, reject, or mark as refunded. Rejection reason is shown to the customer.</p>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-amber-200/60">
+                          <th className="text-left py-2 px-2">Order</th>
+                          <th className="text-left py-2 px-2">Customer</th>
+                          <th className="text-left py-2 px-2">Amount</th>
+                          <th className="text-left py-2 px-2">Reason</th>
+                          <th className="text-left py-2 px-2">Requested</th>
+                          <th className="text-left py-2 px-2">Status</th>
+                          <th className="text-left py-2 px-2">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {orders
+                          .filter(o => o.refundRequested && o.paymentStatus !== 'refunded')
+                          .map((order) => (
+                            <tr key={order.id} className="border-b border-amber-100">
+                              <td className="py-2 px-2 font-mono">#{order.id.slice(-8).toUpperCase()}</td>
+                              <td className="py-2 px-2">
+                                <p className="font-medium">{order.user.name || '—'}</p>
+                                <p className="text-xs text-gray-500">{order.user.email}</p>
+                              </td>
+                              <td className="py-2 px-2 font-semibold">₹{order.totalAmount.toLocaleString('en-IN')}</td>
+                              <td className="py-2 px-2 max-w-[160px]">
+                                <span className="text-gray-700">{REFUND_REASON_LABELS[order.refundReason || ''] || order.refundReason || '—'}</span>
+                                {order.refundReason === 'other' && order.refundReasonOther && (
+                                  <p className="text-xs text-gray-500 truncate" title={order.refundReasonOther}>{order.refundReasonOther}</p>
+                                )}
+                                {order.refundComment && (
+                                  <p className="text-xs text-gray-500 truncate mt-0.5" title={order.refundComment}>{order.refundComment}</p>
+                                )}
+                              </td>
+                              <td className="py-2 px-2 text-gray-600">
+                                {order.refundRequestedAt ? new Date(order.refundRequestedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}
+                              </td>
+                              <td className="py-2 px-2">
+                                <span className={`px-1.5 py-0.5 rounded text-xs font-medium ${
+                                  order.refundStatus === 'approved' ? 'bg-blue-100 text-blue-800' :
+                                  order.refundStatus === 'rejected' ? 'bg-red-100 text-red-800' :
+                                  'bg-amber-100 text-amber-800'
+                                }`}>
+                                  {order.refundStatus === 'approved' ? 'Approved' : order.refundStatus === 'rejected' ? 'Rejected' : 'Under review'}
+                                </span>
+                              </td>
+                              <td className="py-2 px-2">
+                                <div className="flex flex-wrap gap-1">
+                                  {order.refundStatus !== 'approved' && order.refundStatus !== 'rejected' && (
+                                    <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => openRefundModal(order, 'approve')}>
+                                      Approve
+                                    </Button>
+                                  )}
+                                  {order.refundStatus !== 'rejected' && (
+                                    <Button size="sm" variant="outline" className="h-7 text-xs text-red-600 border-red-200" onClick={() => openRefundModal(order, 'reject')}>
+                                      Reject
+                                    </Button>
+                                  )}
+                                  {(order.refundStatus === 'approved' || order.refundStatus === 'requested') && (
+                                    <Button size="sm" className="h-7 text-xs bg-[#3CB31A] hover:opacity-90 text-white" onClick={() => openRefundModal(order, 'markRefunded')}>
+                                      Mark refunded
+                                    </Button>
+                                  )}
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Filters */}
             <div className="bg-white rounded-xl p-4 shadow-sm mb-6">
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
@@ -1599,6 +1751,7 @@ export default function AdminDashboard() {
                     <option value="paid">Paid</option>
                     <option value="pending">Pending</option>
                     <option value="failed">Failed</option>
+                    <option value="refunded">Refunded</option>
                   </select>
                 </div>
                 <div>
@@ -1904,6 +2057,51 @@ export default function AdminDashboard() {
                     <Button variant="outline" onClick={() => setEditingOrder(null)}>Cancel</Button>
                     <Button onClick={handleUpdateOrder} className="bg-[#3CB31A] hover:opacity-90 text-white">
                       Save Changes
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Refund action modal (approve / reject / mark refunded) */}
+            {refundModalOrder && (
+              <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-xl">
+                  <h3 className="text-lg font-bold mb-2">
+                    {refundModalAction === 'approve' && 'Approve refund request'}
+                    {refundModalAction === 'reject' && 'Decline refund request'}
+                    {refundModalAction === 'markRefunded' && 'Mark as refunded'}
+                  </h3>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Order #{refundModalOrder.id.slice(-8).toUpperCase()} · {refundModalOrder.user.email} · ₹{refundModalOrder.totalAmount.toLocaleString('en-IN')}
+                  </p>
+                  {refundModalAction === 'reject' && (
+                    <div className="mb-4">
+                      <Label className="text-sm font-medium">Reason to show customer (required)</Label>
+                      <textarea
+                        className="w-full mt-1 rounded-md border border-gray-300 px-3 py-2 text-sm min-h-[80px]"
+                        placeholder="e.g. Return window has expired; product was used."
+                        value={refundRejectionReason}
+                        onChange={(e) => setRefundRejectionReason(e.target.value)}
+                        maxLength={500}
+                      />
+                      <p className="text-xs text-gray-500 mt-1">This message will be visible to the customer.</p>
+                    </div>
+                  )}
+                  <div className="mb-4">
+                    <Label className="text-sm font-medium">Internal notes (optional)</Label>
+                    <textarea
+                      className="w-full mt-1 rounded-md border border-gray-300 px-3 py-2 text-sm min-h-[60px]"
+                      placeholder="For your records only"
+                      value={refundAdminNotesInput}
+                      onChange={(e) => setRefundAdminNotesInput(e.target.value)}
+                      maxLength={2000}
+                    />
+                  </div>
+                  <div className="flex gap-3 justify-end">
+                    <Button variant="outline" onClick={() => setRefundModalOrder(null)} disabled={refundActionLoading}>Cancel</Button>
+                    <Button onClick={handleRefundActionSubmit} disabled={refundActionLoading || (refundModalAction === 'reject' && !refundRejectionReason.trim())} className="bg-[#3CB31A] hover:opacity-90 text-white">
+                      {refundActionLoading ? 'Processing...' : refundModalAction === 'reject' ? 'Decline refund' : refundModalAction === 'approve' ? 'Approve' : 'Mark as refunded'}
                     </Button>
                   </div>
                 </div>

@@ -21,6 +21,13 @@ export default function ShippingReturnsPage() {
             </p>
 
             <section>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 mt-8">Cancellation</h2>
+              <p className="mb-3">
+                You may cancel an order from the <strong>My Orders</strong> page while it is in <strong>Pending</strong> or <strong>Confirmed</strong> state only. After we start processing or ship the order, cancellation is not available. If you had paid for a cancelled order, you can submit a refund request from My Orders; refunds are subject to our Returns &amp; Refunds policy below.
+              </p>
+            </section>
+
+            <section>
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 mt-8">Shipping</h2>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Delivery areas</h3>
               <p className="mb-3">

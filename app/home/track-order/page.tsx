@@ -100,7 +100,16 @@ function TimelineTracker({ order }: { order: TrackedOrder }) {
           <Package className="w-8 h-8 text-red-500" />
         </div>
         <h3 className="text-xl font-bold text-red-700 mb-2">Order Cancelled</h3>
-        <p className="text-red-600">This order has been cancelled.</p>
+        <p className="text-red-600 mb-4">This order has been cancelled.</p>
+        {order.paymentStatus === 'paid' && (
+          <p className="text-sm text-gray-700 mb-3">If you had paid for this order, you can request a refund from My Orders.</p>
+          <Link href="/home/orders">
+            <Button className="bg-[var(--primary-green)] hover:opacity-90 text-white gap-2">
+              Go to My Orders
+              <ArrowRight className="w-4 h-4" />
+            </Button>
+          </Link>
+        )}
       </div>
     )
   }
