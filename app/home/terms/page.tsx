@@ -36,7 +36,7 @@ export default function TermsPage() {
                 <li>You represent that all information provided is accurate and that you are authorised to use the payment method.</li>
                 <li>We reserve the right to refuse or cancel orders (e.g. pricing errors, stock unavailability, or suspected fraud).</li>
                 <li>Prices are as displayed at the time of order; we may correct obvious errors and will notify you of any significant change.</li>
-                <li>You may cancel your order from <strong>My Orders</strong> only when it is in <strong>Pending</strong> or <strong>Confirmed</strong> state. Once we have started processing or shipped the order, cancellation is not possible. Cancellation cannot be undone. For cancelled paid orders, our Refund policy (see Shipping &amp; Returns) applies.</li>
+                <li>You may cancel your order from <strong>My Orders</strong> <strong>anytime before we start processing or ship</strong> (i.e. only when the order is in <strong>Pending</strong> or <strong>Confirmed</strong> state). Once we have started processing or shipped the order, cancellation is not possible. Cancellation cannot be undone. For cancelled paid orders, our Refund policy (see Shipping &amp; Returns) applies.</li>
               </ul>
             </section>
 

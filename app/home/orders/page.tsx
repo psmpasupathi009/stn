@@ -262,15 +262,18 @@ function OrderCard({ order, refreshOrders }: { order: Order; refreshOrders: () =
           {order.paymentStatus === 'paid' && order.status !== 'cancelled' && (
             <div className="mt-4 flex flex-wrap gap-2">
               {CANCELLABLE_STATUSES.includes(order.status) && (
-                <button
-                  type="button"
-                  onClick={() => setShowCancelModal(true)}
-                  disabled={loading}
-                  className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-xl border border-red-200 transition-colors disabled:opacity-50"
-                >
-                  <XCircle className="w-4 h-4" />
-                  Cancel order
-                </button>
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowCancelModal(true)}
+                    disabled={loading}
+                    className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-xl border border-red-200 transition-colors disabled:opacity-50"
+                  >
+                    <XCircle className="w-4 h-4" />
+                    Cancel order
+                  </button>
+                  <span className="text-xs text-gray-500">(Allowed only while Pending or Confirmed — before we process or ship)</span>
+                </div>
               )}
               {order.status === 'delivered' && !order.refundRequested && (
                 <button
@@ -521,8 +524,11 @@ function OrderCard({ order, refreshOrders }: { order: Order; refreshOrders: () =
             <p className="text-sm text-gray-600 mb-2">
               Order #{order.id.slice(-8).toUpperCase()} · ₹{order.totalAmount.toLocaleString('en-IN')}
             </p>
+            <p className="text-sm font-medium text-gray-800 mb-2">
+              When can you cancel? You can cancel <strong>anytime before we start processing or ship</strong> your order (i.e. while it is Pending or Confirmed). After that, cancellation is not possible.
+            </p>
             <p className="text-sm text-gray-600 mb-4">
-              You can cancel your order only while it is <strong>Pending</strong> or <strong>Confirmed</strong>. This action cannot be undone. Once we start processing or ship your order, cancellation is not possible (see our Terms and Shipping &amp; Returns policy).
+              This action cannot be undone. See our <strong>Terms</strong> and <strong>Shipping &amp; Returns</strong> for full policy.
             </p>
             {order.paymentStatus === 'paid' && (
               <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
