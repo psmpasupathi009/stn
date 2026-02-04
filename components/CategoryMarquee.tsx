@@ -11,7 +11,6 @@ import {
   FlaskConical,
   Candy,
   Leaf,
-  Package,
 } from 'lucide-react'
 
 // Map category slugs to actual category names (for backward compatibility)
@@ -79,14 +78,6 @@ const categories = [
     name: 'Essential Millets',
     icon: Leaf,
     slug: 'essential-millets',
-    color: ICON_BG_GREEN,
-  },
-  {
-    name: 'Shop All',
-    icon: Package,
-    slug: 'all',
-    href: '/home/products',
-    dashed: true,
     color: ICON_BG_GREEN,
   },
 ]
