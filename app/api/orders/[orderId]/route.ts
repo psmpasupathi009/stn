@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSessionFromRequest } from '@/lib/session'
 
-// Cancel order (customer) - only pending or confirmed
+// Cancel order (customer) - only before shipped (pending, confirmed, processing). Compliant: no cancel after dispatch.
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ orderId: string }> }
@@ -36,10 +36,10 @@ export async function PATCH(
           { status: 400 }
         )
       }
-      const cancellable = ['pending', 'confirmed'].includes(order.status)
+      const cancellable = ['pending', 'confirmed', 'processing'].includes(order.status)
       if (!cancellable) {
         return NextResponse.json(
-          { error: 'Order can only be cancelled when it is pending or confirmed. Once we start processing or ship, cancellation is not possible.' },
+          { error: 'Order can only be cancelled before it is shipped. Once we have shipped your order, cancellation is not possible.' },
           { status: 400 }
         )
       }

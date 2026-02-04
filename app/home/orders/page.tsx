@@ -121,7 +121,8 @@ function OrderStatusTracker({ status }: { status: string }) {
   )
 }
 
-const CANCELLABLE_STATUSES = ['pending', 'confirmed']
+// Compliant: allow cancel only before order is shipped (pending, confirmed, processing = pre-shipment)
+const CANCELLABLE_STATUSES = ['pending', 'confirmed', 'processing']
 
 const REFUND_REASONS = [
   { value: 'defective', label: 'Defective or damaged product' },
@@ -253,28 +254,32 @@ function OrderCard({ order, refreshOrders }: { order: Order; refreshOrders: () =
         </div>
       </div>
 
-      {/* Order Status Tracker */}
-      {order.paymentStatus === 'paid' && (
-        <div className="p-4 sm:p-6 bg-gray-50">
-          <OrderStatusTracker status={order.status} />
-          
-          {/* Cancel / Request Refund */}
-          {order.paymentStatus === 'paid' && order.status !== 'cancelled' && (
-            <div className="mt-4 flex flex-wrap gap-2">
-              {CANCELLABLE_STATUSES.includes(order.status) && (
-                <div className="flex flex-wrap items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setShowCancelModal(true)}
-                    disabled={loading}
-                    className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-xl border border-red-200 transition-colors disabled:opacity-50"
-                  >
-                    <XCircle className="w-4 h-4" />
-                    Cancel order
-                  </button>
-                  <span className="text-xs text-gray-500">(Allowed only while Pending or Confirmed — before we process or ship)</span>
-                </div>
-              )}
+      {/* Order Status Tracker + Cancel / Refund */}
+      <div className="p-4 sm:p-6 bg-gray-50">
+        <OrderStatusTracker status={order.status} />
+        {order.paymentStatus === 'paid' && order.status === 'processing' && (
+          <p className="mt-2 text-sm text-gray-600">Order placed and processing. You can cancel before we ship.</p>
+        )}
+        
+        {/* Cancel: only before shipped (pending, confirmed, processing) */}
+        {order.status !== 'cancelled' && CANCELLABLE_STATUSES.includes(order.status) && (
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setShowCancelModal(true)}
+              disabled={loading}
+              className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-xl border border-red-200 transition-colors disabled:opacity-50"
+            >
+              <XCircle className="w-4 h-4" />
+              Cancel order
+            </button>
+            <span className="text-xs text-gray-500">(Allowed only before we ship your order)</span>
+          </div>
+        )}
+        
+        {/* Request Refund / Refund status: only for paid orders */}
+        {order.paymentStatus === 'paid' && order.status !== 'cancelled' && (
+          <div className="mt-4 flex flex-wrap gap-2">
               {order.status === 'delivered' && !order.refundRequested && (
                 <button
                   type="button"
@@ -304,9 +309,9 @@ function OrderCard({ order, refreshOrders }: { order: Order; refreshOrders: () =
                   )}
                 </div>
               )}
-            </div>
-          )}
-          {order.paymentStatus === 'paid' && order.status === 'cancelled' && !order.refundRequested && (
+          </div>
+        )}
+        {order.paymentStatus === 'paid' && order.status === 'cancelled' && !order.refundRequested && (
             <div className="mt-4">
               <button
                 type="button"
@@ -367,7 +372,6 @@ function OrderCard({ order, refreshOrders }: { order: Order; refreshOrders: () =
             </div>
           )}
         </div>
-      )}
 
       {/* Toggle Items */}
       <button
@@ -525,7 +529,7 @@ function OrderCard({ order, refreshOrders }: { order: Order; refreshOrders: () =
               Order #{order.id.slice(-8).toUpperCase()} · ₹{order.totalAmount.toLocaleString('en-IN')}
             </p>
             <p className="text-sm font-medium text-gray-800 mb-2">
-              When can you cancel? You can cancel <strong>anytime before we start processing or ship</strong> your order (i.e. while it is Pending or Confirmed). After that, cancellation is not possible.
+              When can you cancel? You can cancel <strong>anytime before we ship</strong> your order (while it is Pending, Confirmed, or Processing). Once we have shipped your order, cancellation is not possible, as per standard practice and consumer policy.
             </p>
             <p className="text-sm text-gray-600 mb-4">
               This action cannot be undone. See our <strong>Terms</strong> and <strong>Shipping &amp; Returns</strong> for full policy.

@@ -220,10 +220,11 @@ function CheckoutContent() {
 
             if (verifyRes.ok) {
               window.dispatchEvent(new CustomEvent('cart-updated'))
-              toast.success('Payment successful! Order placed.')
+              toast.success('Payment successful! Order placed & processing. You can cancel before we ship.')
               router.push('/home/orders')
             } else {
-              toast.error('Payment verification failed')
+              const errData = await verifyRes.json().catch(() => ({}))
+              toast.error(errData?.error || 'Payment verification failed')
             }
           },
           prefill: {

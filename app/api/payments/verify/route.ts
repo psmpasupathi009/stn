@@ -38,6 +38,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Order not found' }, { status: 404 })
     }
 
+    // Order placed + processing: customer sees "Order Placed" & "Processing". Cancel allowed until we ship.
     await prisma.order.update({
       where: { id: orderId },
       data: {
@@ -47,7 +48,7 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    return NextResponse.json({ success: true, message: 'Payment verified' })
+    return NextResponse.json({ success: true, message: 'Payment verified', order: { status: 'processing', paymentStatus: 'paid' } })
   } catch (error: unknown) {
     console.error('Verify payment error:', error)
     return NextResponse.json(
