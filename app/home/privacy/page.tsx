@@ -28,6 +28,7 @@ export default function PrivacyPage() {
                 <li>Name, email address, phone number, and shipping address when you create an account or place an order</li>
                 <li>Order history, payment-related information (processed securely by our payment partners), and preferences</li>
                 <li>Communications you send to us (e.g. via contact form or email)</li>
+                <li>Session and necessary cookies to keep you logged in and to run checkout; these are essential for the service</li>
               </ul>
             </section>
 
@@ -53,19 +54,19 @@ export default function PrivacyPage() {
             <section>
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 mt-8">4. Data Security</h2>
               <p className="leading-relaxed">
-                We implement reasonable technical and organisational measures to protect your personal data against
-                unauthorised access, alteration, or destruction. Payment details are handled by secure, compliant payment gateways.
+                We implement reasonable security practices and procedures in line with applicable Indian law (including the Information Technology Act, 2000 and rules thereunder) to protect your personal data against unauthorised access, alteration, or destruction. Payment details are handled by secure, compliant payment gateways. Your data may be stored and processed in India.
               </p>
             </section>
 
             <section>
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 mt-8">5. Your Rights</h2>
-              <p className="mb-3">You may request access to, correction of, or deletion of your personal data. To do so, contact us at:</p>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 mt-8">5. Your Rights &amp; Grievance</h2>
+              <p className="mb-3">You may request access to, correction of, or deletion of your personal data. For any privacy-related grievance or complaint, contact us at:</p>
               <p className="font-medium">
                 <a href="mailto:info@stngoldenhealthyfoods.com" className="text-[var(--primary-green)] hover:underline">
                   info@stngoldenhealthyfoods.com
                 </a>
               </p>
+              <p className="mt-2 text-sm text-gray-600">We will respond to your request in line with applicable law.</p>
             </section>
 
             <section>

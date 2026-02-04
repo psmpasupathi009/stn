@@ -305,6 +305,12 @@ function SignupForm() {
                   autoComplete="tel"
                 />
               </div>
+              <p className="text-xs text-gray-500">
+                By creating an account you agree to our{' '}
+                <Link href="/home/terms" className="text-[var(--primary-green)] hover:underline">Terms of Service</Link>
+                {' '}and{' '}
+                <Link href="/home/privacy" className="text-[var(--primary-green)] hover:underline">Privacy Policy</Link>.
+              </p>
               <Button
                 type="submit"
                 className="w-full h-9 text-sm"

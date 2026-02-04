@@ -449,7 +449,13 @@ function CheckoutContent() {
                   <p className="text-xs text-gray-500 mt-1">Inclusive of all taxes</p>
                 </div>
 
-                {/* Pay Button */}
+                {/* Legal: by placing order user agrees to terms and refund policy */}
+                <p className="text-xs text-gray-500 mb-3">
+                  By placing the order you agree to our{' '}
+                  <Link href="/home/terms" className="text-[var(--primary-green)] hover:underline">Terms</Link>
+                  {' '}and{' '}
+                  <Link href="/home/shipping-returns" className="text-[var(--primary-green)] hover:underline">Shipping &amp; Returns</Link> (including refund policy).
+                </p>
                 <Button
                   className="w-full bg-[var(--primary-green)] hover:opacity-90 text-white py-6 rounded-xl font-semibold text-base"
                   onClick={handlePayment}
