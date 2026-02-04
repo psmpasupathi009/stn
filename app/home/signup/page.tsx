@@ -231,43 +231,40 @@ function SignupForm() {
   const isPasswordValid = formData.password.length >= 6
 
   return (
-    <div className="flex min-h-svh w-full min-w-0 flex-col items-center justify-center overflow-x-hidden bg-white px-4 py-6 sm:px-6 sm:py-8 md:px-8 md:py-10 lg:px-10 lg:py-12">
-      <div className="flex w-full min-w-0 max-w-full flex-col gap-4 sm:max-w-sm md:max-w-md sm:gap-5 md:gap-6">
+    <div className="flex min-h-svh w-full min-w-0 flex-col items-center justify-center overflow-x-hidden bg-white px-3 py-4 sm:px-4 sm:py-6">
+      <div className="flex w-full min-w-0 max-w-full flex-col gap-3 sm:max-w-sm">
         <Link
           href="/home"
-          className="flex min-w-0 max-w-full items-center justify-center gap-2 self-center font-semibold text-gray-900 transition-colors hover:text-neutral-700 text-sm sm:text-base md:text-lg"
+          className="flex min-w-0 max-w-full items-center justify-center gap-2 self-center font-semibold text-gray-900 hover:text-neutral-700 text-sm"
         >
-          <Image src="/STN LOGO.png" alt="STN" width={36} height={36} className="h-7 w-7 shrink-0 rounded-md sm:h-8 sm:w-8 md:h-9 md:w-9" />
+          <Image src="/STN LOGO.png" alt="STN" width={32} height={32} className="h-7 w-7 shrink-0 rounded-md" />
           <span className="truncate">STN GOLDEN HEALTHY FOODS</span>
         </Link>
-        <div className="w-full min-w-0">
-        <Card className="rounded-xl">
-        <CardHeader className="space-y-1 p-4 sm:p-6">
-          <CardTitle className="text-xl sm:text-2xl font-bold text-center">
-            Create Account
-          </CardTitle>
-          <CardDescription className="text-center">
-            {step === 'email' && 'Enter your details to get started'}
-            {step === 'otp' && 'Verify your email with OTP'}
-            {step === 'password' && 'Create your password'}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4 p-4 sm:p-6 pt-0">
+        <div className="w-full min-w-0 rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:p-5">
+          <div className="space-y-1 mb-4">
+            <h1 className="text-lg font-bold text-center text-gray-900">Create Account</h1>
+            <p className="text-xs text-center text-gray-500">
+              {step === 'email' && 'Enter your details to get started'}
+              {step === 'otp' && 'Verify your email with OTP'}
+              {step === 'password' && 'Create your password'}
+            </p>
+          </div>
+          <div className="space-y-3">
           {error && (
-            <Alert variant="destructive">
+            <Alert variant="destructive" className="py-2 text-sm">
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
           {success && (
-            <Alert className="border-neutral-200 bg-neutral-50 text-neutral-800">
+            <Alert className="border-gray-200 bg-white text-gray-700 py-2 text-sm">
               <AlertDescription>{success}</AlertDescription>
             </Alert>
           )}
 
           {step === 'email' && (
-            <form onSubmit={handleSignup} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email Address *</Label>
+            <form onSubmit={handleSignup} className="space-y-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="email" className="text-sm">Email Address *</Label>
                 <Input
                   id="email"
                   type="email"
@@ -275,13 +272,13 @@ function SignupForm() {
                   onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                   required
                   placeholder="your.email@example.com"
-                  className="mt-1"
+                  className="mt-0.5 h-9 text-sm"
                   autoComplete="email"
                   autoFocus
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="name">Full Name *</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="name" className="text-sm">Full Name *</Label>
                 <Input
                   id="name"
                   type="text"
@@ -289,33 +286,33 @@ function SignupForm() {
                   onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                   required
                   placeholder="Enter your full name"
-                  className="mt-1"
+                  className="mt-0.5 h-9 text-sm"
                   autoComplete="name"
                 />
                 {formData.name && formData.name.trim().length < 2 && (
                   <p className="text-xs text-red-500">Name must be at least 2 characters</p>
                 )}
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="phoneNumber">Phone Number</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="phoneNumber" className="text-sm">Phone Number</Label>
                 <Input
                   id="phoneNumber"
                   type="tel"
                   value={formData.phoneNumber}
                   onChange={(e) => setFormData(prev => ({ ...prev, phoneNumber: e.target.value }))}
-                  placeholder="Enter your phone number (optional)"
-                  className="mt-1"
+                  placeholder="Optional"
+                  className="mt-0.5 h-9 text-sm"
                   autoComplete="tel"
                 />
               </div>
               <Button
                 type="submit"
-                className="w-full"
+                className="w-full h-9 text-sm"
                 disabled={loading || !formData.email.trim() || formData.name.trim().length < 2}
               >
                 {loading ? 'Sending OTP...' : 'Continue'}
               </Button>
-              <p className="text-sm text-center text-gray-600">
+              <p className="text-xs text-center text-gray-500">
                 Already have an account?{' '}
                 <Link href="/home/login" className="text-neutral-700 hover:underline font-medium">
                   Sign in
@@ -325,43 +322,33 @@ function SignupForm() {
           )}
 
           {step === 'otp' && (
-            <form onSubmit={handleVerifyOTP} className="space-y-4">
-              <div className="space-y-2">
-                <Label>Enter 6-Digit OTP</Label>
+            <form onSubmit={handleVerifyOTP} className="space-y-3">
+              <div className="space-y-1.5">
+                <Label className="text-sm">Enter 6-Digit OTP</Label>
                 <InputOTP
                   maxLength={6}
                   value={otp}
                   onChange={setOtp}
-                  className="mt-1 justify-center"
+                  className="mt-0.5 justify-center"
                 />
                 <p className="text-xs text-gray-500 text-center break-all">
-                  OTP sent to {formData.email}
+                  Sent to {formData.email}
                 </p>
-                <ResendOTP onResend={handleResendOTP} className="mt-1" />
+                <ResendOTP onResend={handleResendOTP} className="mt-0.5" />
               </div>
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={loading || otp.length !== 6}
-              >
+              <Button type="submit" className="w-full h-9 text-sm" disabled={loading || otp.length !== 6}>
                 {loading ? 'Verifying...' : 'Verify OTP'}
               </Button>
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full"
-                onClick={handleBack}
-                disabled={loading}
-              >
+              <Button type="button" variant="outline" className="w-full h-9 text-sm" onClick={handleBack} disabled={loading}>
                 Back
               </Button>
             </form>
           )}
 
           {step === 'password' && (
-            <form onSubmit={handleCreateAccount} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="password">Password *</Label>
+            <form onSubmit={handleCreateAccount} className="space-y-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="password" className="text-sm">Password *</Label>
                 <PasswordInput
                   id="password"
                   value={formData.password}
@@ -407,8 +394,7 @@ function SignupForm() {
               </Button>
             </form>
           )}
-        </CardContent>
-      </Card>
+          </div>
         </div>
       </div>
     </div>

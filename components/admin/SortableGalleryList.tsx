@@ -28,7 +28,7 @@ export interface GalleryItem {
   order: number
 }
 
-function SortableItem({
+function SortableRow({
   item,
   onDelete,
 }: {
@@ -50,56 +50,52 @@ function SortableItem({
   }
 
   return (
-    <div
+    <tr
       ref={setNodeRef}
       style={style}
-      className={`flex items-center gap-4 p-4 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow ${
-        isDragging ? 'opacity-60 shadow-lg z-10 ring-2 ring-emerald-200' : ''
-      }`}
+      className={`border-b border-gray-200 hover:bg-gray-50 ${isDragging ? 'opacity-60 bg-white shadow-lg z-10' : ''}`}
     >
-      <button
-        {...attributes}
-        {...listeners}
-        className="cursor-grab active:cursor-grabbing p-2.5 rounded-lg text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 transition-colors shrink-0"
-        aria-label="Drag to reorder"
-      >
-        <GripVertical className="w-5 h-5" />
-      </button>
-      <div className="w-20 h-20 rounded-xl overflow-hidden bg-gray-100 shrink-0 flex items-center justify-center">
-        {item.type === 'video' ? (
-          <Video className="w-10 h-10 text-emerald-500" />
-        ) : item.url ? (
-          <Image
-            src={item.url}
-            alt={item.caption || 'Gallery'}
-            width={80}
-            height={80}
-            className="object-cover w-full h-full"
-            unoptimized
-          />
-        ) : (
-          <ImageIcon className="w-10 h-10 text-gray-400" />
-        )}
-      </div>
-      <div className="flex-1 min-w-0">
-        <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
-          item.type === 'video' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'
-        }`}>
+      <td className="py-2 px-3 w-12">
+        <button
+          {...attributes}
+          {...listeners}
+          className="cursor-grab active:cursor-grabbing p-2 rounded text-gray-400 hover:text-neutral-600 hover:bg-gray-100"
+          aria-label="Drag to reorder"
+        >
+          <GripVertical className="w-4 h-4" />
+        </button>
+      </td>
+      <td className="py-2 px-3">
+        <div className="relative w-14 h-14 rounded-lg overflow-hidden bg-gray-100 shrink-0">
+          {item.type === 'video' ? (
+            <div className="w-full h-full flex items-center justify-center">
+              <Video className="w-7 h-7 text-amber-500" />
+            </div>
+          ) : item.url ? (
+            <Image src={item.url} alt={item.caption || 'Gallery'} fill className="object-cover" unoptimized sizes="56px" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <ImageIcon className="w-7 h-7 text-gray-400" />
+            </div>
+          )}
+        </div>
+      </td>
+      <td className="py-2 px-3">
+        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${item.type === 'video' ? 'bg-amber-100 text-amber-800' : 'bg-neutral-100 text-neutral-800'}`}>
           {item.type}
         </span>
-        {item.caption && (
-          <p className="text-sm text-gray-600 truncate mt-2">{item.caption}</p>
-        )}
-        {!item.caption && <p className="text-sm text-gray-400 mt-2 italic">No caption</p>}
-      </div>
-      <button
-        onClick={() => onDelete(item.id)}
-        className="p-2.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors shrink-0"
-        aria-label="Delete"
-      >
-        <Trash2 className="w-5 h-5" />
-      </button>
-    </div>
+      </td>
+      <td className="py-2 px-3 text-gray-600 max-w-[200px] truncate">{item.caption || '—'}</td>
+      <td className="py-2 px-3 text-right">
+        <button
+          onClick={() => onDelete(item.id)}
+          className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+          aria-label="Delete"
+        >
+          <Trash2 className="w-4 h-4" />
+        </button>
+      </td>
+    </tr>
   )
 }
 
@@ -139,10 +135,23 @@ export default function SortableGalleryList({
         items={items.map((i) => i.id)}
         strategy={verticalListSortingStrategy}
       >
-        <div className="space-y-2">
-          {items.map((item) => (
-            <SortableItem key={item.id} item={item} onDelete={onDelete} />
-          ))}
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[500px] text-left text-sm">
+            <thead className="bg-gray-50 border-b border-gray-200">
+              <tr>
+                <th className="py-3 px-3 font-semibold text-gray-700 w-12"><span className="sr-only">Reorder</span></th>
+                <th className="py-3 px-3 font-semibold text-gray-700">Preview</th>
+                <th className="py-3 px-3 font-semibold text-gray-700">Type</th>
+                <th className="py-3 px-3 font-semibold text-gray-700">Caption</th>
+                <th className="py-3 px-3 font-semibold text-gray-700 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {items.map((item) => (
+                <SortableRow key={item.id} item={item} onDelete={onDelete} />
+              ))}
+            </tbody>
+          </table>
         </div>
       </SortableContext>
     </DndContext>

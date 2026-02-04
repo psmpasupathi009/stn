@@ -10,10 +10,11 @@ function InputOTPSlot({ char, hasFakeCaret, isActive, placeholderChar, className
       data-slot
       data-active={isActive}
       className={cn(
-        'relative flex h-12 w-10 sm:h-14 sm:w-12 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-white text-base font-mono font-semibold tabular-nums transition-colors',
+        'relative flex h-10 w-8 min-w-[2rem] sm:h-12 sm:w-10 sm:min-w-[2.5rem] md:h-14 md:min-w-12 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-white text-base sm:text-lg font-mono font-semibold tabular-nums transition-colors',
         'group-hover:border-gray-400',
-        'group-focus-within:border-gray-950 group-focus-within:ring-2 group-focus-within:ring-gray-950 group-focus-within:ring-offset-2',
-        'data-[active=true]:border-gray-950 data-[active=true]:ring-2 data-[active=true]:ring-gray-950 data-[active=true]:ring-offset-2',
+        'group-focus-within:border-gray-950 group-focus-within:ring-2 group-focus-within:ring-gray-950 group-focus-within:ring-offset-1',
+        'data-[active=true]:border-gray-950 data-[active=true]:ring-2 data-[active=true]:ring-gray-950 data-[active=true]:ring-offset-1',
+        'outline-none',
         className
       )}
       {...props}
@@ -23,7 +24,7 @@ function InputOTPSlot({ char, hasFakeCaret, isActive, placeholderChar, className
       </div>
       {hasFakeCaret && (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-          <div className="h-6 w-px animate-caret-blink bg-gray-950" />
+          <div className="h-5 w-px animate-caret-blink bg-gray-950 sm:h-6" />
         </div>
       )}
     </div>
@@ -35,10 +36,10 @@ function InputOTPSeparator({ ...props }: React.ComponentProps<'div'>) {
     <div
       data-separator
       role="separator"
-      className="flex h-12 w-4 sm:w-5 shrink-0 items-center justify-center sm:h-14"
+      className="flex h-10 w-1.5 sm:h-12 sm:w-4 md:h-14 shrink-0 items-center justify-center"
       {...props}
     >
-      <div className="h-1 w-2 rounded-full bg-gray-300" />
+      <div className="h-0.5 w-1.5 rounded-full bg-gray-300 sm:h-1 sm:w-2" />
     </div>
   )
 }
@@ -50,7 +51,8 @@ const InputOTP = React.forwardRef<
   <OTPInput
     ref={ref}
     containerClassName={cn(
-      'group flex items-center justify-center gap-1 has-[:disabled]:opacity-50',
+      'group flex items-center justify-center gap-x-1.5 sm:gap-x-2 has-[:disabled]:opacity-50 max-w-full overflow-x-auto',
+      'min-w-0 px-0.5',
       containerClassName
     )}
     className={cn('contents', className)}

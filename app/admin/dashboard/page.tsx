@@ -30,9 +30,10 @@ import {
   X,
   Images,
   Video,
+  ChevronUp,
+  ChevronDown,
 } from 'lucide-react'
 import SortableGalleryList from '@/components/admin/SortableGalleryList'
-import SortableHeroGrid from '@/components/admin/SortableHeroGrid'
 
 interface Product {
   id: string
@@ -659,6 +660,14 @@ export default function AdminDashboard() {
     }
   }
 
+  const moveHero = (index: number, direction: 'up' | 'down') => {
+    const newIndex = direction === 'up' ? index - 1 : index + 1
+    if (newIndex < 0 || newIndex >= heroSections.length) return
+    const reordered = [...heroSections]
+    ;[reordered[index], reordered[newIndex]] = [reordered[newIndex], reordered[index]]
+    reorderHeroSections(reordered)
+  }
+
   const resetHeroForm = () => {
     setShowHeroForm(false)
     setEditingHero(null)
@@ -1102,7 +1111,7 @@ export default function AdminDashboard() {
             onClick={() => setActiveTab('products')}
             className={`flex items-center justify-center gap-1.5 sm:gap-2 px-3 py-2 sm:px-4 sm:py-2.5 rounded-md text-sm sm:text-base font-medium transition-all min-w-0 flex-1 sm:flex-initial ${
               activeTab === 'products'
-                ? 'bg-neutral-700 text-white shadow-md'
+                ? 'bg-[#3CB31A] text-white shadow-md hover:opacity-90'
                 : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
@@ -1113,7 +1122,7 @@ export default function AdminDashboard() {
             onClick={() => setActiveTab('orders')}
             className={`flex items-center justify-center gap-1.5 sm:gap-2 px-3 py-2 sm:px-4 sm:py-2.5 rounded-md text-sm sm:text-base font-medium transition-all min-w-0 flex-1 sm:flex-initial ${
               activeTab === 'orders'
-                ? 'bg-neutral-700 text-white shadow-md'
+                ? 'bg-[#3CB31A] text-white shadow-md hover:opacity-90'
                 : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
@@ -1129,7 +1138,7 @@ export default function AdminDashboard() {
             onClick={() => setActiveTab('hero')}
             className={`flex items-center justify-center gap-1.5 sm:gap-2 px-3 py-2 sm:px-4 sm:py-2.5 rounded-md text-sm sm:text-base font-medium transition-all min-w-0 flex-1 sm:flex-initial ${
               activeTab === 'hero'
-                ? 'bg-neutral-700 text-white shadow-md'
+                ? 'bg-[#3CB31A] text-white shadow-md hover:opacity-90'
                 : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
@@ -1140,7 +1149,7 @@ export default function AdminDashboard() {
             onClick={() => setActiveTab('gallery')}
             className={`flex items-center justify-center gap-1.5 sm:gap-2 px-3 py-2 sm:px-4 sm:py-2.5 rounded-md text-sm sm:text-base font-medium transition-all min-w-0 flex-1 sm:flex-initial ${
               activeTab === 'gallery'
-                ? 'bg-neutral-700 text-white shadow-md'
+                ? 'bg-[#3CB31A] text-white shadow-md hover:opacity-90'
                 : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
@@ -1158,7 +1167,7 @@ export default function AdminDashboard() {
                   if (showForm) resetForm()
                   else setShowForm(true)
                 }}
-                className="w-full sm:w-auto bg-linear-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
+                className="w-full sm:w-auto bg-[#3CB31A] hover:opacity-90 text-white"
               >
                 <Plus className="w-4 h-4 mr-2 shrink-0" />
                 {showForm ? 'Cancel' : 'Add New Product'}
@@ -1369,7 +1378,7 @@ export default function AdminDashboard() {
                       <p className="text-xs text-gray-500">Uncheck to set product as Out of Stock (status shown on product page)</p>
                     </div>
                     <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2">
-                      <Button type="submit" disabled={uploading} className="w-full sm:w-auto bg-linear-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600">
+                      <Button type="submit" disabled={uploading} className="w-full sm:w-auto bg-[#3CB31A] hover:opacity-90 text-white">
                         {uploading ? 'Saving...' : editingProduct ? 'Update Product' : 'Create Product'}
                       </Button>
                       <Button type="button" variant="outline" onClick={resetForm} className="w-full sm:w-auto">Cancel</Button>
@@ -1391,14 +1400,14 @@ export default function AdminDashboard() {
                   <div className="text-center py-12 bg-white rounded-lg shadow-sm">
                     <Package className="w-12 h-12 mx-auto text-gray-300 mb-4" />
                     <p className="text-gray-600 mb-4">No products found</p>
-                    <Button onClick={() => setShowForm(true)} className="bg-linear-to-r from-amber-500 to-orange-500">
+                    <Button onClick={() => setShowForm(true)} className="bg-[#3CB31A] hover:opacity-90 text-white">
                       Add Your First Product
                     </Button>
                   </div>
                 ) : (
-                  <>
+                  <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden min-w-0">
                     {products.length > 0 && (
-                      <div className="flex items-center gap-2 mb-4">
+                      <div className="flex items-center gap-2 p-3 border-b border-gray-200">
                         <button
                           type="button"
                           onClick={selectAllProducts}
@@ -1413,60 +1422,87 @@ export default function AdminDashboard() {
                         </button>
                       </div>
                     )}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 min-w-0">
-                    {products.map((product) => (
-                      <Card key={product.id} className={`overflow-hidden hover:shadow-lg transition-shadow bg-white min-w-0 ${selectedProducts.has(product.id) ? 'ring-2 ring-[#3CB31A]' : ''}`}>
-                        <div className="aspect-square bg-neutral-100 relative min-h-0">
-                          <button
-                            type="button"
-                            onClick={() => toggleProductSelection(product.id)}
-                            className="absolute top-2 left-2 z-10 w-8 h-8 rounded-md bg-white/90 shadow flex items-center justify-center hover:bg-white border border-neutral-200"
-                            aria-label={selectedProducts.has(product.id) ? 'Deselect product' : 'Select product'}
-                          >
-                            {selectedProducts.has(product.id) ? (
-                              <CheckSquare className="w-4 h-4 text-[#3CB31A]" />
-                            ) : (
-                              <Square className="w-4 h-4 text-neutral-400" />
-                            )}
-                          </button>
-                          {product.image ? (
-                            <Image src={product.image} alt={product.name} fill className="object-cover" unoptimized />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center">
-                              <ImageIcon className="w-12 h-12 text-neutral-300" />
-                            </div>
-                          )}
-                          {!product.inStock && (
-                            <div className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
-                              Out of Stock
-                            </div>
-                          )}
-                        </div>
-                        <CardContent className="p-4">
-                          <h3 className="font-semibold text-lg mb-1 line-clamp-2">{product.name}</h3>
-                          <p className="text-xs text-gray-500 mb-2">{product.itemCode}</p>
-                          <p className="text-sm text-gray-600 mb-2 line-clamp-1">{product.category}</p>
-                          <div className="flex items-center justify-between mb-3">
-                            <div>
-                              <p className="text-lg font-bold text-green-600">₹{product.salePrice}</p>
-                              {product.mrp > product.salePrice && (
-                                <p className="text-xs text-gray-500 line-through">₹{product.mrp}</p>
-                              )}
-                            </div>
-                          </div>
-                          <div className="flex gap-2">
-                            <Button variant="outline" size="sm" className="flex-1" onClick={() => handleEdit(product)}>
-                              <Pencil className="w-3 h-3 mr-1" /> Edit
-                            </Button>
-                            <Button variant="destructive" size="sm" className="flex-1" onClick={() => handleDelete(product.id)}>
-                              <Trash2 className="w-3 h-3 mr-1" /> Delete
-                            </Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
+                    <div className="overflow-x-auto">
+                      <table className="w-full min-w-[640px] text-left text-sm">
+                        <thead className="bg-gray-50 border-b border-gray-200">
+                          <tr>
+                            <th className="w-10 py-3 px-3">
+                              <span className="sr-only">Select</span>
+                            </th>
+                            <th className="py-3 px-3 font-semibold text-gray-700">Image</th>
+                            <th className="py-3 px-3 font-semibold text-gray-700">Name</th>
+                            <th className="py-3 px-3 font-semibold text-gray-700">Item Code</th>
+                            <th className="py-3 px-3 font-semibold text-gray-700">Category</th>
+                            <th className="py-3 px-3 font-semibold text-gray-700">Price</th>
+                            <th className="py-3 px-3 font-semibold text-gray-700">Stock</th>
+                            <th className="py-3 px-3 font-semibold text-gray-700 text-right">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-200">
+                          {products.map((product) => (
+                            <tr
+                              key={product.id}
+                              className={`hover:bg-gray-50 ${selectedProducts.has(product.id) ? 'bg-[#3CB31A]/5' : ''}`}
+                            >
+                              <td className="py-2 px-3">
+                                <button
+                                  type="button"
+                                  onClick={() => toggleProductSelection(product.id)}
+                                  className="p-1.5 rounded hover:bg-gray-200"
+                                  aria-label={selectedProducts.has(product.id) ? 'Deselect' : 'Select'}
+                                >
+                                  {selectedProducts.has(product.id) ? (
+                                    <CheckSquare className="w-4 h-4 text-[#3CB31A]" />
+                                  ) : (
+                                    <Square className="w-4 h-4 text-gray-400" />
+                                  )}
+                                </button>
+                              </td>
+                              <td className="py-2 px-3">
+                                <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-gray-100 shrink-0">
+                                  {product.image ? (
+                                    <Image src={product.image} alt={product.name} fill className="object-cover" unoptimized sizes="48px" />
+                                  ) : (
+                                    <div className="w-full h-full flex items-center justify-center">
+                                      <ImageIcon className="w-6 h-6 text-gray-300" />
+                                    </div>
+                                  )}
+                                </div>
+                              </td>
+                              <td className="py-2 px-3 font-medium text-gray-900 max-w-[200px]">
+                                <span className="line-clamp-2">{product.name}</span>
+                              </td>
+                              <td className="py-2 px-3 text-gray-600">{product.itemCode}</td>
+                              <td className="py-2 px-3 text-gray-600 max-w-[140px]">
+                                <span className="line-clamp-1">{product.category}</span>
+                              </td>
+                              <td className="py-2 px-3">
+                                <span className="font-semibold text-gray-900">₹{product.salePrice}</span>
+                                {product.mrp > product.salePrice && (
+                                  <span className="ml-1 text-xs text-gray-400 line-through">₹{product.mrp}</span>
+                                )}
+                              </td>
+                              <td className="py-2 px-3">
+                                <span className={`inline-block text-xs font-medium px-2 py-0.5 rounded ${product.inStock ? 'bg-[#3CB31A]/15 text-[#3CB31A]' : 'bg-red-100 text-red-700'}`}>
+                                  {product.inStock ? 'In Stock' : 'Out of Stock'}
+                                </span>
+                              </td>
+                              <td className="py-2 px-3 text-right">
+                                <div className="flex items-center justify-end gap-1">
+                                  <Button variant="outline" size="sm" onClick={() => handleEdit(product)}>
+                                    <Pencil className="w-3.5 h-3.5" />
+                                  </Button>
+                                  <Button variant="destructive" size="sm" onClick={() => handleDelete(product.id)}>
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </Button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
                     </div>
-                  </>
+                  </div>
                 )}
               </>
             )}
@@ -1495,21 +1531,20 @@ export default function AdminDashboard() {
                   <>
                     <Button
                       onClick={() => setShowBulkStatusModal(true)}
-                      variant="outline"
-                      className="gap-2"
+                      className="gap-2 bg-[#3CB31A] hover:opacity-90 text-white"
                     >
                       Update Status ({selectedOrders.size})
                     </Button>
                     <Button
                       onClick={handleBulkShip}
-                      className="bg-indigo-600 hover:bg-indigo-700 text-white gap-2"
+                      className="bg-[#3CB31A] hover:opacity-90 text-white gap-2"
                     >
                       <Truck className="w-4 h-4" />
                       Ship Selected ({selectedOrders.size})
                     </Button>
                     <Button
                       onClick={() => handleDownloadLabels()}
-                      className="bg-amber-500 hover:bg-amber-600 text-white gap-2"
+                      className="bg-[#3CB31A] hover:opacity-90 text-white gap-2"
                     >
                       <Download className="w-4 h-4" />
                       Download PDF ({selectedOrders.size})
@@ -1590,57 +1625,53 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            {/* Orders Summary Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-              <Card className="bg-yellow-50 border-yellow-200 min-w-0">
-                <CardContent className="p-3 sm:p-4">
-                  <p className="text-xs sm:text-sm text-yellow-700">Pending</p>
-                  <p className="text-xl sm:text-2xl font-bold text-yellow-800">
-                    {orders.filter(o => o.status === 'pending' && o.paymentStatus === 'paid').length}
-                  </p>
-                </CardContent>
-              </Card>
-              <Card className="bg-blue-50 border-blue-200">
-                <CardContent className="p-4">
-                  <p className="text-sm text-blue-700">Processing</p>
-                  <p className="text-2xl font-bold text-blue-800">
-                    {orders.filter(o => ['confirmed', 'processing'].includes(o.status)).length}
-                  </p>
-                </CardContent>
-              </Card>
-              <Card className="bg-indigo-50 border-indigo-200 min-w-0">
-                <CardContent className="p-3 sm:p-4">
-                  <p className="text-xs sm:text-sm text-indigo-700">Shipped</p>
-                  <p className="text-xl sm:text-2xl font-bold text-indigo-800">
-                    {orders.filter(o => ['shipped', 'out_for_delivery'].includes(o.status)).length}
-                  </p>
-                </CardContent>
-              </Card>
-              <Card className="bg-neutral-50 border-neutral-200 min-w-0">
-                <CardContent className="p-3 sm:p-4">
-                  <p className="text-xs sm:text-sm text-neutral-700">Delivered</p>
-                  <p className="text-xl sm:text-2xl font-bold text-neutral-800">
-                    {orders.filter(o => o.status === 'delivered').length}
-                  </p>
-                </CardContent>
-              </Card>
+            {/* Orders Summary + Table */}
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden min-w-0">
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[640px] text-left text-sm">
+                  <thead className="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                      <th className="py-3 px-4 font-semibold text-gray-700">Pending</th>
+                      <th className="py-3 px-4 font-semibold text-gray-700">Processing</th>
+                      <th className="py-3 px-4 font-semibold text-gray-700">Shipped</th>
+                      <th className="py-3 px-4 font-semibold text-gray-700">Delivered</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr className="border-b border-gray-200">
+                      <td className="py-3 px-4">
+                        <span className="text-xl font-bold text-yellow-800">{orders.filter(o => o.status === 'pending' && o.paymentStatus === 'paid').length}</span>
+                      </td>
+                      <td className="py-3 px-4">
+                        <span className="text-xl font-bold text-blue-800">{orders.filter(o => ['confirmed', 'processing'].includes(o.status)).length}</span>
+                      </td>
+                      <td className="py-3 px-4">
+                        <span className="text-xl font-bold text-indigo-800">{orders.filter(o => ['shipped', 'out_for_delivery'].includes(o.status)).length}</span>
+                      </td>
+                      <td className="py-3 px-4">
+                        <span className="text-xl font-bold text-neutral-800">{orders.filter(o => o.status === 'delivered').length}</span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
 
             {/* Orders Table */}
             {ordersLoading ? (
-              <div className="text-center py-12">
+              <div className="text-center py-12 mt-6">
                 <div className="inline-block w-8 h-8 border-4 border-neutral-500 border-t-transparent rounded-full animate-spin" />
               </div>
             ) : orders.length === 0 ? (
-              <div className="text-center py-12 bg-white rounded-lg shadow-sm">
+              <div className="text-center py-12 bg-white rounded-xl border border-gray-200 shadow-sm mt-6">
                 <ShoppingBag className="w-12 h-12 mx-auto text-gray-300 mb-4" />
                 <p className="text-gray-600">No orders found</p>
               </div>
             ) : (
-              <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+              <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden mt-6 min-w-0">
                 <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead className="bg-gray-50 border-b">
+                  <table className="w-full min-w-[800px] text-sm">
+                    <thead className="bg-gray-50 border-b border-gray-200">
                       <tr>
                         <th className="px-4 py-3 text-left">
                           <button
@@ -1844,7 +1875,7 @@ export default function AdminDashboard() {
                   </div>
                   <div className="p-6 border-t flex justify-end gap-3">
                     <Button variant="outline" onClick={() => setEditingOrder(null)}>Cancel</Button>
-                    <Button onClick={handleUpdateOrder} className="bg-neutral-700 hover:bg-neutral-800 text-white">
+                    <Button onClick={handleUpdateOrder} className="bg-[#3CB31A] hover:opacity-90 text-white">
                       Save Changes
                     </Button>
                   </div>
@@ -1874,7 +1905,7 @@ export default function AdminDashboard() {
                   </div>
                   <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 mt-4 sm:mt-6">
                     <Button variant="outline" onClick={() => { setShowBulkStatusModal(false); setBulkStatus('') }} className="w-full sm:w-auto">Cancel</Button>
-                    <Button onClick={handleBulkUpdateStatus} className="bg-green-600 hover:bg-green-700 text-white w-full sm:w-auto" disabled={!bulkStatus}>
+                    <Button onClick={handleBulkUpdateStatus} className="bg-[#3CB31A] hover:opacity-90 text-white w-full sm:w-auto" disabled={!bulkStatus}>
                       Update
                     </Button>
                   </div>
@@ -1887,161 +1918,109 @@ export default function AdminDashboard() {
         {/* Gallery Tab */}
         {activeTab === 'gallery' && (
           <>
-            <div className="flex flex-col sm:flex-row justify-between items-start gap-3 mb-4 sm:mb-6 min-w-0">
-              <div className="min-w-0">
-                <h2 className="text-lg sm:text-xl font-bold text-gray-800 mb-1">About Page Gallery</h2>
-                <p className="text-gray-600 text-xs sm:text-sm">Upload images and videos for Our Story page. Drag to reorder.</p>
-              </div>
+            <div className="flex flex-col sm:flex-row justify-between items-start gap-2 mb-3 min-w-0">
+              <p className="text-gray-600 text-xs">Our Story page gallery. Drag to reorder below.</p>
             </div>
 
-            {/* Add Media Form */}
-            <Card className="mb-6 sm:mb-8 shadow-lg overflow-hidden min-w-0">
-              <CardHeader className="bg-neutral-50 border-b p-4 sm:p-6">
-                <CardTitle className="flex items-center gap-2 text-gray-800 text-lg sm:text-xl">
-                  <Images className="w-5 h-5 shrink-0 text-neutral-600" />
-                  Add Media
-                </CardTitle>
-                <p className="text-xs sm:text-sm text-gray-600 mt-1">Images and videos shown on the Our Story page</p>
-              </CardHeader>
-              <CardContent className="pt-4 sm:pt-6 p-4 sm:p-6">
-                <form onSubmit={addGalleryMedia} className="space-y-4 sm:space-y-6 min-w-0">
-                  {/* Media type tabs */}
-                  <div className="min-w-0">
-                    <Label className="text-sm sm:text-base font-medium block mb-2">Media Type</Label>
-                    <div className="flex gap-2 min-w-0">
-                      <button
-                        type="button"
-                        onClick={() => { setGalleryMediaType('image'); setGalleryMediaFile(null) }}
-                        className={`flex-1 min-w-0 py-2.5 sm:py-3 px-3 sm:px-4 rounded-lg text-sm sm:text-base font-medium transition-all flex items-center justify-center gap-1.5 sm:gap-2 touch-manipulation ${
-                          galleryMediaType === 'image'
-                            ? 'bg-neutral-700 text-white shadow-md'
-                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                        }`}
-                      >
-                        <ImageIcon className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
-                        Image
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => { setGalleryMediaType('video'); setGalleryMediaFile(null) }}
-                        className={`flex-1 min-w-0 py-2.5 sm:py-3 px-3 sm:px-4 rounded-lg text-sm sm:text-base font-medium transition-all flex items-center justify-center gap-1.5 sm:gap-2 touch-manipulation ${
-                          galleryMediaType === 'video'
-                            ? 'bg-neutral-700 text-white shadow-md'
-                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                        }`}
-                      >
-                        <Video className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
-                        Video
-                      </button>
+            {/* Add Media - compact dashboard strip */}
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden mb-4 min-w-0">
+              <div className="px-3 py-2 border-b border-gray-200 bg-gray-50 flex items-center gap-2">
+                <Images className="w-4 h-4 text-gray-500 shrink-0" />
+                <span className="font-medium text-gray-800 text-sm">Add Media</span>
+              </div>
+              <div className="p-3">
+                <form onSubmit={addGalleryMedia} className="flex flex-wrap items-end gap-3">
+                  <div className="flex gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => { setGalleryMediaType('image'); setGalleryMediaFile(null) }}
+                      className={`py-1.5 px-2.5 rounded-md text-xs font-medium transition-all flex items-center gap-1 ${
+                        galleryMediaType === 'image' ? 'bg-[#3CB31A] text-white hover:opacity-90' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      }`}
+                    >
+                      <ImageIcon className="w-3.5 h-3.5" />
+                      Image
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setGalleryMediaType('video'); setGalleryMediaFile(null) }}
+                      className={`py-1.5 px-2.5 rounded-md text-xs font-medium transition-all flex items-center gap-1 ${
+                        galleryMediaType === 'video' ? 'bg-[#3CB31A] text-white hover:opacity-90' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      }`}
+                    >
+                      <Video className="w-3.5 h-3.5" />
+                      Video
+                    </button>
+                  </div>
+                  <label className="flex items-center gap-2 min-w-0 flex-1 max-w-[220px]">
+                    <span className="text-xs text-gray-500 shrink-0">File</span>
+                    <div className={`flex-1 min-w-0 border border-dashed rounded-md px-2 py-1.5 text-xs cursor-pointer truncate ${
+                      galleryMediaFile ? 'border-neutral-400 bg-neutral-50 text-gray-700' : 'border-gray-300 text-gray-500 hover:bg-gray-50'
+                    }`}>
+                      {galleryMediaFile ? galleryMediaFile.name : 'Choose file...'}
                     </div>
-                  </div>
-
-                  {/* File upload zone */}
-                  <div className="min-w-0">
-                    <Label className="text-sm sm:text-base font-medium block mb-2">Select File</Label>
-                    <label className="block min-w-0">
-                      <div className={`border-2 border-dashed rounded-xl p-4 sm:p-6 md:p-8 text-center transition-all cursor-pointer min-w-0 ${
-                        galleryMediaFile
-                          ? 'border-neutral-400 bg-neutral-50'
-                          : 'border-gray-300 hover:border-neutral-300 hover:bg-gray-50'
-                      }`}>
-                        {galleryMediaFile ? (
-                          <div className="space-y-2">
-                            {galleryMediaType === 'image' ? (
-                              <div className="relative w-32 h-32 mx-auto rounded-lg overflow-hidden bg-gray-100">
-                                <Image
-                                  src={URL.createObjectURL(galleryMediaFile)}
-                                  alt="Preview"
-                                  fill
-                                  className="object-cover"
-                                  unoptimized
-                                />
-                              </div>
-                            ) : (
-                              <div className="w-16 h-16 mx-auto rounded-full bg-emerald-100 flex items-center justify-center">
-                                <ImageIcon className="w-8 h-8 text-emerald-600" />
-                              </div>
-                            )}
-                            <p className="text-sm font-medium text-gray-700 truncate max-w-xs mx-auto">{galleryMediaFile.name}</p>
-                            <p className="text-xs text-gray-500">Click to change file</p>
-                          </div>
-                        ) : (
-                          <>
-                            <div className="w-16 h-16 mx-auto rounded-full bg-gray-100 flex items-center justify-center mb-4">
-                              <Images className="w-8 h-8 text-gray-400" />
-                            </div>
-                            <p className="text-gray-600 font-medium">Drop file here or click to browse</p>
-                            <p className="text-sm text-gray-500 mt-1">
-                              {galleryMediaType === 'image' ? 'PNG, JPG, WebP up to 10MB' : 'MP4, WebM, MOV up to 50MB'}
-                            </p>
-                          </>
-                        )}
-                        <input
-                          type="file"
-                          accept={galleryMediaType === 'video' ? 'video/*' : 'image/*'}
-                          onChange={(e) => setGalleryMediaFile(e.target.files?.[0] || null)}
-                          className="hidden"
-                        />
-                      </div>
-                    </label>
-                  </div>
-
-                  <div>
-                    <Label className="text-base font-medium">Caption (optional)</Label>
+                    <input
+                      type="file"
+                      accept={galleryMediaType === 'video' ? 'video/*' : 'image/*'}
+                      onChange={(e) => setGalleryMediaFile(e.target.files?.[0] || null)}
+                      className="hidden"
+                    />
+                  </label>
+                  <div className="flex-1 min-w-[120px] max-w-[180px]">
                     <Input
                       value={galleryCaption}
                       onChange={(e) => setGalleryCaption(e.target.value)}
-                      placeholder="Brief description for the gallery"
-                      className="mt-2"
+                      placeholder="Caption (optional)"
+                      className="h-8 text-xs"
                     />
                   </div>
-
                   <Button
                     type="submit"
                     disabled={galleryUploading || !galleryMediaFile}
-                    className="w-full sm:w-auto bg-neutral-700 hover:bg-neutral-800 text-white px-6 py-3"
+                    size="sm"
+                    className="h-8 bg-neutral-700 hover:bg-neutral-800 text-white text-xs shrink-0"
                   >
                     {galleryUploading ? (
-                      <span className="flex items-center gap-2">
-                        <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        Uploading...
-                      </span>
+                      <span className="inline-block w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                     ) : (
-                      <span className="flex items-center gap-2">
-                        <Plus className="w-5 h-5" />
-                        Add to Gallery
-                      </span>
+                      <>
+                        <Plus className="w-3.5 h-3.5 mr-1" />
+                        Add
+                      </>
                     )}
                   </Button>
                 </form>
-              </CardContent>
-            </Card>
-
-            {/* Gallery List with Drag Reorder */}
-            <Card className="shadow-lg overflow-hidden">
-              <CardHeader className="bg-gradient-to-r from-gray-50 to-slate-50 border-b">
-                <CardTitle>Gallery Items</CardTitle>
-                <p className="text-sm text-gray-500 mt-1">Drag the handle to reorder. Changes reflect on Our Story page.</p>
-              </CardHeader>
-              <CardContent>
-                {galleryLoading ? (
-                  <div className="py-12 text-center">
-                    <div className="inline-block w-8 h-8 border-4 border-neutral-500 border-t-transparent rounded-full animate-spin" />
+                {galleryMediaFile && galleryMediaType === 'image' && (
+                  <div className="mt-2 relative w-14 h-14 rounded overflow-hidden bg-gray-100 shrink-0">
+                    <Image src={URL.createObjectURL(galleryMediaFile)} alt="Preview" fill className="object-cover" unoptimized sizes="56px" />
                   </div>
-                ) : galleryItems.length === 0 ? (
-                  <div className="py-12 text-center text-gray-500">
-                    <Images className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                    <p>No media in gallery yet. Add images or videos above.</p>
-                  </div>
-                ) : (
-                  <SortableGalleryList
-                    items={galleryItems}
-                    onReorder={reorderGallery}
-                    onDelete={deleteGalleryMedia}
-                  />
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
+
+            {/* Gallery Table */}
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden min-w-0">
+              <div className="px-3 py-2 border-b border-gray-200 bg-gray-50 flex items-center gap-2">
+                <span className="font-medium text-gray-800 text-sm">Gallery Items</span>
+                <span className="text-xs text-gray-500">Drag to reorder</span>
+              </div>
+              {galleryLoading ? (
+                <div className="py-8 text-center">
+                  <div className="inline-block w-6 h-6 border-2 border-neutral-400 border-t-transparent rounded-full animate-spin" />
+                </div>
+              ) : galleryItems.length === 0 ? (
+                <div className="py-8 text-center text-gray-500 text-sm">
+                  <Images className="w-10 h-10 mx-auto mb-2 text-gray-300" />
+                  <p>No media yet. Add above.</p>
+                </div>
+              ) : (
+                <SortableGalleryList
+                  items={galleryItems}
+                  onReorder={reorderGallery}
+                  onDelete={deleteGalleryMedia}
+                />
+              )}
+            </div>
           </>
         )}
 
@@ -2057,7 +2036,7 @@ export default function AdminDashboard() {
                   if (showHeroForm) resetHeroForm()
                   else setShowHeroForm(true)
                 }}
-                className="w-full sm:w-auto order-1 sm:order-2 bg-linear-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
+                className="w-full sm:w-auto order-1 sm:order-2 bg-[#3CB31A] hover:opacity-90 text-white"
               >
                 <Plus className="w-4 h-4 mr-2 shrink-0" />
                 {showHeroForm ? 'Cancel' : 'Add Hero Slide'}
@@ -2154,7 +2133,7 @@ export default function AdminDashboard() {
                     </div>
 
                     <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4 border-t">
-                      <Button type="submit" disabled={heroLoading} className="w-full sm:w-auto bg-linear-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600">
+                      <Button type="submit" disabled={heroLoading} className="w-full sm:w-auto bg-[#3CB31A] hover:opacity-90 text-white">
                         {heroLoading ? 'Saving...' : editingHero ? 'Update Slide' : 'Create Slide'}
                       </Button>
                       <Button type="button" variant="outline" onClick={resetHeroForm} className="w-full sm:w-auto">Cancel</Button>
@@ -2164,73 +2143,81 @@ export default function AdminDashboard() {
               </Card>
             )}
 
-            {/* Hero Sections List */}
+            {/* Hero Sections Table */}
             {heroSections.length === 0 ? (
-              <div className="text-center py-12 bg-white rounded-lg shadow-sm">
+              <div className="text-center py-12 bg-white rounded-xl border border-gray-200 shadow-sm">
                 <Layers className="w-12 h-12 mx-auto text-gray-300 mb-4" />
                 <p className="text-gray-600 mb-2">No hero slides yet</p>
                 <p className="text-sm text-gray-500 mb-4">Default slides will be shown until you create custom ones.</p>
-                <Button onClick={() => setShowHeroForm(true)} className="bg-linear-to-r from-amber-500 to-orange-500">
+                <Button onClick={() => setShowHeroForm(true)} className="bg-[#3CB31A] hover:opacity-90 text-white">
                   Create Your First Slide
                 </Button>
               </div>
             ) : (
-              <>
-              <div className="mb-2 text-sm text-gray-500">Drag the handle on hover to reorder</div>
-              <SortableHeroGrid<HeroSection>
-                items={heroSections}
-                onReorder={reorderHeroSections}
-                renderCard={(hero) => (
-                  <Card className={`overflow-hidden transition-all hover:shadow-lg ${hero.isActive ? 'ring-2 ring-green-400' : ''}`}>
-                    <div className="relative w-full h-40 bg-linear-to-br from-amber-100 to-orange-100">
-                      {hero.image ? (
-                        <Image src={hero.image} alt="Hero slide" fill className="object-cover" unoptimized />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <ImageIcon className="w-12 h-12 text-neutral-300" />
-                        </div>
-                      )}
-                      <div className="absolute top-2 right-2">
-                        <span className={`text-xs px-2 py-1 rounded-full font-medium ${hero.isActive ? 'bg-amber-500 text-white' : 'bg-gray-500 text-white'}`}>
-                          {hero.isActive ? 'Active' : 'Inactive'}
-                        </span>
-                      </div>
-                      <div className="absolute bottom-2 right-2">
-                        <span className="text-xs px-2 py-1 rounded-full bg-black/60 text-white font-medium">
-                          #{hero.order + 1}
-                        </span>
-                      </div>
-                    </div>
-                    <CardContent className="p-4">
-                      <div className="mb-3">
-                        <p className="text-sm text-gray-600 mb-1">Button Link:</p>
-                        <p className="text-sm font-medium text-green-700 truncate">{hero.buttonLink}</p>
-                      </div>
-                      <div className="mb-3">
-                        <p className="text-sm text-gray-600 mb-1">Button Text:</p>
-                        <p className="text-sm font-medium text-gray-800">{hero.buttonText || 'Shop Now'}</p>
-                      </div>
-                      <div className="flex flex-wrap gap-1.5 sm:gap-2 pt-3 border-t">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => toggleHeroActive(hero)}
-                          className={`flex-1 min-w-0 ${hero.isActive ? 'text-orange-600 border-orange-200 hover:bg-orange-50' : 'text-neutral-600 border-neutral-200 hover:bg-neutral-50'}`}
-                        >
-                          {hero.isActive ? <><EyeOff className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 shrink-0" /> Hide</> : <><Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 shrink-0" /> Show</>}
-                        </Button>
-                        <Button variant="outline" size="sm" onClick={() => handleEditHero(hero)} className="flex-1 min-w-0">
-                          <Pencil className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 shrink-0" /> Edit
-                        </Button>
-                        <Button variant="destructive" size="sm" onClick={() => handleDeleteHero(hero.id)} className="shrink-0">
-                          <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
-              />
-              </>
+              <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden min-w-0">
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[640px] text-left text-sm">
+                    <thead className="bg-gray-50 border-b border-gray-200">
+                      <tr>
+                        <th className="py-3 px-3 font-semibold text-gray-700 w-20">Order</th>
+                        <th className="py-3 px-3 font-semibold text-gray-700">Image</th>
+                        <th className="py-3 px-3 font-semibold text-gray-700">Button Text</th>
+                        <th className="py-3 px-3 font-semibold text-gray-700">Button Link</th>
+                        <th className="py-3 px-3 font-semibold text-gray-700">Active</th>
+                        <th className="py-3 px-3 font-semibold text-gray-700 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {heroSections.map((hero, index) => (
+                        <tr key={hero.id} className={`hover:bg-gray-50 ${hero.isActive ? 'bg-amber-50/50' : ''}`}>
+                          <td className="py-2 px-3">
+                            <div className="flex items-center gap-1">
+                              <Button type="button" variant="ghost" size="sm" className="p-1 h-8 w-8" onClick={() => moveHero(index, 'up')} disabled={index === 0} aria-label="Move up">
+                                <ChevronUp className="w-4 h-4" />
+                              </Button>
+                              <span className="font-medium text-gray-700">#{index + 1}</span>
+                              <Button type="button" variant="ghost" size="sm" className="p-1 h-8 w-8" onClick={() => moveHero(index, 'down')} disabled={index === heroSections.length - 1} aria-label="Move down">
+                                <ChevronDown className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </td>
+                          <td className="py-2 px-3">
+                            <div className="relative w-16 h-10 rounded overflow-hidden bg-gray-100 shrink-0">
+                              {hero.image ? (
+                                <Image src={hero.image} alt="" fill className="object-cover" unoptimized sizes="64px" />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center">
+                                  <ImageIcon className="w-6 h-6 text-gray-300" />
+                                </div>
+                              )}
+                            </div>
+                          </td>
+                          <td className="py-2 px-3 text-gray-900">{hero.buttonText || 'Shop Now'}</td>
+                          <td className="py-2 px-3 text-gray-600 max-w-[180px] truncate">{hero.buttonLink}</td>
+                          <td className="py-2 px-3">
+                            <span className={`inline-block text-xs font-medium px-2 py-0.5 rounded ${hero.isActive ? 'bg-amber-100 text-amber-800' : 'bg-gray-200 text-gray-600'}`}>
+                              {hero.isActive ? 'Active' : 'Inactive'}
+                            </span>
+                          </td>
+                          <td className="py-2 px-3 text-right">
+                            <div className="flex items-center justify-end gap-1 flex-wrap">
+                              <Button variant="outline" size="sm" onClick={() => toggleHeroActive(hero)} className="shrink-0">
+                                {hero.isActive ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                              </Button>
+                              <Button variant="outline" size="sm" onClick={() => handleEditHero(hero)} className="shrink-0">
+                                <Pencil className="w-3.5 h-3.5" />
+                              </Button>
+                              <Button variant="destructive" size="sm" onClick={() => handleDeleteHero(hero.id)} className="shrink-0">
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             )}
           </>
         )}
