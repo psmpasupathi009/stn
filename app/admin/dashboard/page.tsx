@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { jsPDF } from 'jspdf'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
@@ -988,9 +987,9 @@ export default function AdminDashboard() {
 
       if (res.ok) {
         const { labels } = await res.json()
-        
-        // Generate PDF and download
-        const pdf = generateLabelsPDF(labels)
+        // Dynamic import jspdf only when user downloads (smaller initial admin bundle)
+        const { default: jsPDF } = await import('jspdf')
+        const pdf = generateLabelsPDF(jsPDF, labels)
         const filename = `shipping-labels-${new Date().toISOString().slice(0, 10)}.pdf`
         pdf.save(filename)
         toast.success(`Downloaded ${ids.length} label(s) as PDF`)
@@ -1003,7 +1002,9 @@ export default function AdminDashboard() {
     }
   }
 
-  const generateLabelsPDF = (labels: Array<{
+  const generateLabelsPDF = (
+    JsPDFClass: typeof import('jspdf').default,
+    labels: Array<{
     orderId: string
     orderDate: string
     customerName: string
@@ -1015,8 +1016,9 @@ export default function AdminDashboard() {
     items: Array<{ name: string; itemCode: string; weight: string; quantity: number; price: number }>
     trackingNumber?: string
     courierName?: string
-  }>) => {
-    const doc = new jsPDF({ unit: 'mm', format: 'a4' })
+  }>
+  ) => {
+    const doc = new JsPDFClass({ unit: 'mm', format: 'a4' })
     const pageWidth = doc.internal.pageSize.getWidth()
     const margin = 15
     let y = margin

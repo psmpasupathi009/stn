@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  reactStrictMode: true,
   images: {
     remotePatterns: [
       {
@@ -9,6 +10,10 @@ const nextConfig: NextConfig = {
         pathname: "/**",
       },
     ],
+  },
+  // Tree-shake lucide-react so only used icons are bundled (faster loads)
+  experimental: {
+    optimizePackageImports: ["lucide-react"],
   },
 };
 

@@ -11,34 +11,7 @@ import { toast } from 'sonner'
 import { Star, MessageSquare, User, ChevronLeft } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
-
-interface Product {
-  id: string
-  name: string
-  category: string
-  itemCode: string
-  weight: string
-  mrp: number
-  salePrice: number
-  gst: number
-  hsnCode: string
-  image?: string
-  images?: string[]
-  description?: string
-  inStock: boolean
-  rating?: number
-  reviewCount?: number
-}
-
-interface Review {
-  id: string
-  productId: string
-  userId: string
-  rating: number
-  comment: string | null
-  createdAt: string
-  user: { name: string | null; email: string }
-}
+import type { Product, Review } from '@/lib/types'
 
 function StarRating({ value, size = 'md' }: { value: number; size?: 'sm' | 'md' }) {
   const filled = Math.min(5, Math.max(0, Math.round(value)))

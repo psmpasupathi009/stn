@@ -11,20 +11,7 @@ import { toast } from 'sonner'
 import { Search, Package, Filter, X, LayoutGrid } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import ProductCard from '@/components/homepage/ProductCard'
-
-interface Product {
-  id: string
-  name: string
-  category: string
-  salePrice: number
-  mrp: number
-  image?: string
-  itemCode: string
-  rating?: number
-  reviewCount?: number
-  createdAt?: string
-  updatedAt?: string
-}
+import type { Product } from '@/lib/types'
 
 function ProductsPageContent() {
   const searchParams = useSearchParams()

@@ -19,31 +19,7 @@ import {
   ArrowRight,
 } from 'lucide-react'
 
-interface OrderItem {
-  id: string
-  quantity: number
-  price: number
-  product: {
-    id: string
-    name: string
-    image?: string
-  }
-}
-
-interface TrackedOrder {
-  id: string
-  status: string
-  paymentStatus: string
-  totalAmount: number
-  shippingAddress: string
-  trackingNumber?: string
-  courierName?: string
-  shippedAt?: string
-  expectedDelivery?: string
-  deliveredAt?: string
-  createdAt: string
-  items: OrderItem[]
-}
+import type { Order, OrderItem } from '@/lib/types'
 
 const TRACKING_STEPS = [
   { 
@@ -89,7 +65,7 @@ function getStatusIndex(status: string): number {
   return index >= 0 ? index : 0
 }
 
-function TimelineTracker({ order }: { order: TrackedOrder }) {
+function TimelineTracker({ order }: { order: Order }) {
   const currentIndex = getStatusIndex(order.status)
   const isCancelled = order.status === 'cancelled'
 
@@ -102,13 +78,15 @@ function TimelineTracker({ order }: { order: TrackedOrder }) {
         <h3 className="text-xl font-bold text-red-700 mb-2">Order Cancelled</h3>
         <p className="text-red-600 mb-4">This order has been cancelled.</p>
         {order.paymentStatus === 'paid' && (
-          <p className="text-sm text-gray-700 mb-3">If you had paid for this order, you can request a refund from My Orders.</p>
-          <Link href="/home/orders">
-            <Button className="bg-[var(--primary-green)] hover:opacity-90 text-white gap-2">
-              Go to My Orders
-              <ArrowRight className="w-4 h-4" />
-            </Button>
-          </Link>
+          <>
+            <p className="text-sm text-gray-700 mb-3">If you had paid for this order, you can request a refund from My Orders.</p>
+            <Link href="/home/orders">
+              <Button className="bg-[var(--primary-green)] hover:opacity-90 text-white gap-2">
+                Go to My Orders
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            </Link>
+          </>
         )}
       </div>
     )
@@ -224,7 +202,7 @@ function TimelineTracker({ order }: { order: TrackedOrder }) {
 export default function TrackOrderPage() {
   const [orderId, setOrderId] = useState('')
   const [email, setEmail] = useState('')
-  const [order, setOrder] = useState<TrackedOrder | null>(null)
+  const [order, setOrder] = useState<Order | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 

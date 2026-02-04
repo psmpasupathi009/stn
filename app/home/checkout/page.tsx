@@ -10,27 +10,7 @@ import { useAuth } from '@/lib/context'
 import Script from 'next/script'
 import { toast } from 'sonner'
 import { ShoppingBag, Truck, Shield, ChevronLeft, Package, MapPin } from 'lucide-react'
-
-interface CartItem {
-  id: string
-  quantity: number
-  product: {
-    id: string
-    name: string
-    salePrice: number
-    mrp: number
-    image?: string
-  }
-}
-
-interface BuyNowProduct {
-  id: string
-  name: string
-  salePrice: number
-  mrp: number
-  image?: string
-  quantity: number
-}
+import type { CartItem, BuyNowProduct } from '@/lib/types'
 
 const GST_RATE = 0.05 // 5% GST
 

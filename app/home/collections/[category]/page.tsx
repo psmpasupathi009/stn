@@ -8,17 +8,7 @@ import { useAuth } from '@/lib/context'
 import { categoryMapping } from '@/components/CategoryMarquee'
 import { toast } from 'sonner'
 
-interface Product {
-  id: string
-  name: string
-  category: string
-  salePrice: number
-  mrp: number
-  image?: string
-  itemCode: string
-  rating?: number
-  reviewCount?: number
-}
+import type { Product } from '@/lib/types'
 
 const categoryTitles: Record<string, { title: string; description: string }> = {
   'healthy-mixes': {

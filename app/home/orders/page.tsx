@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -20,43 +20,7 @@ import {
   RotateCcw
 } from 'lucide-react'
 import { toast } from 'sonner'
-
-interface OrderItem {
-  id: string
-  quantity: number
-  price: number
-  product: {
-    id: string
-    name: string
-    image?: string
-    weight?: string
-  }
-}
-
-interface Order {
-  id: string
-  totalAmount: number
-  subtotal?: number
-  gstAmount?: number
-  status: string
-  paymentStatus: string
-  shippingAddress: string
-  trackingNumber?: string
-  courierName?: string
-  shippedAt?: string
-  expectedDelivery?: string
-  deliveredAt?: string
-  refundRequested?: boolean
-  refundRequestedAt?: string
-  refundReason?: string
-  refundReasonOther?: string
-  refundComment?: string
-  refundStatus?: string
-  refundProcessedAt?: string
-  refundRejectionReason?: string
-  items: OrderItem[]
-  createdAt: string
-}
+import type { Order, OrderItem } from '@/lib/types'
 
 const ORDER_STEPS = [
   { status: 'pending', label: 'Order Placed', icon: ShoppingBag },
@@ -561,15 +525,7 @@ export default function OrdersPage() {
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('all')
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/home/login')
-      return
-    }
-    fetchOrders()
-  }, [isAuthenticated, router])
-
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async () => {
     try {
       const res = await fetch('/api/orders', { credentials: 'include' })
       if (res.ok) {
@@ -581,15 +537,25 @@ export default function OrdersPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
-  const filteredOrders = orders.filter(order => {
-    if (filter === 'all') return true
-    if (filter === 'active') return !['delivered', 'cancelled'].includes(order.status) && order.paymentStatus === 'paid'
-    if (filter === 'delivered') return order.status === 'delivered'
-    if (filter === 'cancelled') return order.status === 'cancelled'
-    return true
-  })
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push('/home/login')
+      return
+    }
+    fetchOrders()
+  }, [isAuthenticated, router, fetchOrders])
+
+  const filteredOrders = useMemo(() => {
+    return orders.filter(order => {
+      if (filter === 'all') return true
+      if (filter === 'active') return !['delivered', 'cancelled'].includes(order.status) && order.paymentStatus === 'paid'
+      if (filter === 'delivered') return order.status === 'delivered'
+      if (filter === 'cancelled') return order.status === 'cancelled'
+      return true
+    })
+  }, [orders, filter])
 
   if (loading) {
     return (

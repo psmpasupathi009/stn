@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import Marquee from 'react-fast-marquee'
+import type { LucideIcon } from 'lucide-react'
 import {
   Wheat,
   Droplets,
@@ -30,8 +31,16 @@ export const categoryMapping: Record<string, string> = {
 // Solid green for all category icon backgrounds (#3CB31A = primary green)
 const ICON_BG_GREEN = 'from-[#3CB31A] to-[#3CB31A]'
 
+type CategoryItem = {
+  name: string
+  icon: LucideIcon
+  slug: string
+  color: string
+  dashed?: boolean
+}
+
 // Categories with proper Lucide icons
-const categories = [
+const categories: CategoryItem[] = [
   {
     name: 'Healthy Mixes',
     icon: Wheat,
@@ -100,7 +109,7 @@ export default function CategoryMarquee() {
         <div className="flex items-end gap-3 sm:gap-5 md:gap-6 lg:gap-8 shrink-0">
           {categories.map((category) => {
             const categoryParam = categoryMapping[category.slug] ?? category.slug
-            const href = category.href ?? (categoryParam ? `/home/products?category=${encodeURIComponent(categoryParam)}` : '/home/products')
+            const href = categoryParam ? `/home/products?category=${encodeURIComponent(categoryParam)}` : '/home/products'
             const IconComponent = category.icon
             return (
               <Link
@@ -112,14 +121,14 @@ export default function CategoryMarquee() {
                 <div className="flex flex-col items-center flex-none">
                   <div
                     className={`rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg shrink-0 w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 lg:w-11 lg:h-11 ${
-                      category.dashed
+                      category.dashed === true
                         ? 'border-2 border-dashed border-[#3CB31A] bg-[#3CB31A]/20'
                         : `bg-linear-to-br ${category.color} shadow-md`
                     }`}
                   >
                     <IconComponent
                       className={`shrink-0 w-4 h-4 sm:w-[18px] sm:h-[18px] md:w-5 md:h-5 lg:w-[22px] lg:h-[22px] ${
-                        category.dashed ? 'text-amber-600' : 'text-white'
+                        category.dashed === true ? 'text-amber-600' : 'text-white'
                       }`}
                       strokeWidth={2}
                     />
@@ -129,7 +138,7 @@ export default function CategoryMarquee() {
                 <div className="min-h-[2.25rem] sm:min-h-[2.5rem] flex items-start justify-center pt-1 sm:pt-1.5 w-full">
                   <span
                     className={`text-[9px] sm:text-[10px] md:text-xs font-medium text-center leading-tight transition-colors line-clamp-2 w-full px-0.5 max-w-[72px] ${
-                      category.dashed
+                      category.dashed === true
                         ? 'text-neutral-600 group-hover:text-neutral-900'
                         : 'text-gray-700 group-hover:text-neutral-900'
                     }`}

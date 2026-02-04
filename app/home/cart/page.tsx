@@ -1,28 +1,12 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/lib/context'
 import { toast } from 'sonner'
-
-interface CartItem {
-  id: string
-  quantity: number
-  product: {
-    id: string
-    name: string
-    salePrice: number
-    mrp: number
-    image?: string
-  }
-}
-
-interface Cart {
-  id: string
-  items: CartItem[]
-}
+import type { Cart, CartItem } from '@/lib/types'
 
 export default function CartPage() {
   const { isAuthenticated } = useAuth()
@@ -38,7 +22,7 @@ export default function CartPage() {
     fetchCart()
   }, [isAuthenticated, router])
 
-  const fetchCart = async () => {
+  const fetchCart = useCallback(async () => {
     try {
       const res = await fetch('/api/cart', { credentials: 'include' })
       if (res.ok) {
@@ -50,9 +34,9 @@ export default function CartPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
-  const updateQuantity = async (itemId: string, newQuantity: number) => {
+  const updateQuantity = useCallback(async (itemId: string, newQuantity: number) => {
     try {
       const res = await fetch(`/api/cart/${itemId}`, {
         method: 'PUT',
@@ -68,9 +52,9 @@ export default function CartPage() {
       console.error('Error updating cart:', error)
       toast.error('Failed to update cart')
     }
-  }
+  }, [])
 
-  const removeItem = async (itemId: string) => {
+  const removeItem = useCallback(async (itemId: string) => {
     try {
       const res = await fetch(`/api/cart/${itemId}`, {
         method: 'DELETE',
@@ -84,17 +68,17 @@ export default function CartPage() {
       console.error('Error removing item:', error)
       toast.error('Failed to remove item')
     }
-  }
+  }, [])
 
-  const calculateTotal = () => {
+  const total = useMemo(() => {
     if (!cart) return 0
     return cart.items.reduce((sum, item) => sum + item.product.salePrice * item.quantity, 0)
-  }
+  }, [cart])
 
-  const handleCheckout = () => {
+  const handleCheckout = useCallback(() => {
     if (!cart || cart.items.length === 0) return
     router.push('/home/checkout')
-  }
+  }, [cart, router])
 
   if (loading) {
     return (
@@ -184,11 +168,11 @@ export default function CartPage() {
                 <div className="space-y-3 mb-4">
                   <div className="flex justify-between text-neutral-600">
                     <span>Subtotal</span>
-                    <span>₹{calculateTotal().toFixed(2)}</span>
+                    <span>₹{total.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between font-bold text-lg pt-4 border-t border-neutral-200">
                     <span>Total</span>
-                    <span className="text-amber-600">₹{calculateTotal().toFixed(2)}</span>
+                    <span className="text-amber-600">₹{total.toFixed(2)}</span>
                   </div>
                 </div>
                 <Button
