@@ -56,7 +56,7 @@ export default function ProfilePage() {
             <CardContent className="space-y-4">
               {(user.role?.toUpperCase() === 'ADMIN') && (
                 <Button
-                  className="w-full bg-green-700 text-white hover:bg-green-600"
+                  className="w-full bg-neutral-700 text-white hover:bg-neutral-600"
                   onClick={() => router.push('/admin/dashboard')}
                 >
                   Admin Dashboard

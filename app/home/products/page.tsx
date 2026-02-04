@@ -200,7 +200,7 @@ function ProductsPageContent() {
                 onChange={(e) => setCategory(e.target.value)}
                 className={cn(
                   'h-9 sm:h-10 rounded-lg border border-gray-200 bg-gray-50 px-3 pr-8 text-xs sm:text-sm font-medium text-gray-700 min-w-0 flex-1 sm:flex-initial sm:w-auto max-w-full',
-                  'focus:outline-none focus:ring-2 focus:ring-[var(--primary-green)] focus:ring-offset-1'
+                  'focus:outline-none focus:ring-2 focus:ring-neutral-400 focus:ring-offset-1'
                 )}
                 aria-label="Filter by category"
               >
@@ -325,7 +325,7 @@ function ProductsPageFallback() {
 
 export default function ProductsPage() {
   return (
-    <div className="min-h-screen bg-gray-50/50 w-full min-w-0 overflow-x-hidden">
+    <div className="min-h-screen bg-white w-full min-w-0 overflow-x-hidden">
       <Suspense fallback={<ProductsPageFallback />}>
         <ProductsPageContent />
       </Suspense>

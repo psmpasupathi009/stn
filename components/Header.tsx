@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { useAuth } from '@/lib/context'
 import { useState, useEffect, useCallback } from 'react'
 import {
@@ -59,18 +60,18 @@ export default function Header() {
   }, [refreshCartCount])
 
   const iconButtonClass =
-    'p-2.5 rounded-full text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 transition-colors focus:outline-none focus:ring-2 focus:ring-neutral-300 focus:ring-offset-1'
+    'p-2.5 rounded-full text-white hover:bg-white/20 transition-colors focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-[var(--primary-green)]'
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-neutral-200">
+    <header className="sticky top-0 z-50 bg-[var(--primary-green)] border-b border-[var(--primary-green)] shadow-sm">
       <div className="container mx-auto w-full min-w-0 px-3 sm:px-4 md:px-6 max-w-7xl">
         <div className="flex items-center justify-between h-14 sm:h-16 md:h-17">
-          {/* Left: Menu / Close menu toggle (Rolls-Royce style) */}
+          {/* Left: Menu / Close menu toggle */}
           <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={() => setMenuOpen(!menuOpen)}
-              className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-neutral-700 hover:text-neutral-900 rounded-md hover:bg-neutral-50 transition-colors uppercase tracking-wide"
+              className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-white hover:bg-white/20 rounded-md transition-colors uppercase tracking-wide"
               aria-label={menuOpen ? 'Close menu' : 'Open menu'}
               aria-expanded={menuOpen}
             >
@@ -90,7 +91,7 @@ export default function Header() {
             <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
               <SheetContent side="left" className="w-[280px] sm:w-[340px] p-0 flex flex-col bg-neutral-50 border-neutral-200 shadow-2xl">
                 <SheetHeader className="p-4 border-b border-neutral-200 flex flex-row items-center justify-between space-y-0">
-                  <SheetTitle className="text-base font-semibold uppercase tracking-wide" style={{ color: '#3CB31A' }}>
+                  <SheetTitle className="text-base font-semibold uppercase tracking-wide text-neutral-900">
                     Menu
                   </SheetTitle>
                   <SheetClose asChild>
@@ -126,12 +127,19 @@ export default function Header() {
             </Sheet>
           </div>
 
-          {/* Center: Company Name */}
+          {/* Center: Logo + Company Name */}
           <Link
             href="/"
-            className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center"
+            className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center gap-2"
           >
-            <h1 className="text-lg sm:text-xl md:text-2xl font-bold" style={{ color: '#3CB31A' }}>
+            <Image
+              src="/STN LOGO.png"
+              alt="STN GOLDEN HEALTHY FOODS"
+              width={40}
+              height={40}
+              className="h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10 object-contain shrink-0"
+            />
+            <h1 className="text-base sm:text-lg md:text-xl font-bold text-white whitespace-nowrap">
               <span className="sm:hidden">STN</span>
               <span className="hidden sm:inline">STN GOLDEN HEALTHY FOODS</span>
             </h1>
@@ -149,8 +157,7 @@ export default function Header() {
                   <User size={ICON_SIZE} strokeWidth={2} />
                   {user?.role?.toUpperCase() === 'ADMIN' && (
                     <span
-                      className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white"
-                      style={{ backgroundColor: '#3CB31A' }}
+                      className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white bg-white"
                       title="Admin"
                     />
                   )}
@@ -158,8 +165,7 @@ export default function Header() {
                 {user?.role?.toUpperCase() === 'ADMIN' && (
                   <Link
                     href="/admin/dashboard"
-                    className="hidden sm:flex ml-0.5 p-2 rounded-full hover:bg-green-50"
-                    style={{ color: '#3CB31A' }}
+                    className="hidden sm:flex ml-0.5 p-2 rounded-full hover:bg-white/20 text-white"
                     aria-label="Admin dashboard"
                   >
                     <LayoutDashboard size={ICON_SIZE} strokeWidth={2} />

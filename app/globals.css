@@ -70,9 +70,9 @@ a, button {
   transition: all 0.2s ease-in-out;
 }
 
-/* Better focus states */
+/* Better focus states - neutral (green only on scroll-to-top and Buy Now) */
 :focus-visible {
-  outline: 2px solid #3CB31A;
+  outline: 2px solid hsl(220 13% 60%);
   outline-offset: 2px;
 }
 
@@ -120,9 +120,9 @@ a, button {
   animation: caret-blink 1.2s ease-out infinite;
 }
 
-/* Gradient text utility */
+/* Gradient text utility - neutral */
 .gradient-text {
-  background: linear-gradient(135deg, #3CB31A, #2E8B57);
+  background: linear-gradient(135deg, #374151, #6b7280);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

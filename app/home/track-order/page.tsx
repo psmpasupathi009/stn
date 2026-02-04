@@ -144,14 +144,14 @@ function TimelineTracker({ order }: { order: TrackedOrder }) {
               <div
                 className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all ${
                   isCompleted
-                    ? 'bg-green-500 border-green-500 text-white'
+                    ? 'bg-neutral-600 border-neutral-600 text-white'
                     : 'bg-white border-gray-300 text-gray-400'
-                } ${isCurrent ? 'ring-4 ring-green-100' : ''}`}
+                } ${isCurrent ? 'ring-4 ring-neutral-200' : ''}`}
               >
                 <Icon className="w-5 h-5" />
               </div>
               {index < TRACKING_STEPS.length - 1 && (
-                <div className={`w-0.5 flex-1 mt-2 ${isCompleted ? 'bg-green-500' : 'bg-gray-200'}`} />
+                <div className={`w-0.5 flex-1 mt-2 ${isCompleted ? 'bg-neutral-500' : 'bg-gray-200'}`} />
               )}
             </div>
 
@@ -193,8 +193,8 @@ function TimelineTracker({ order }: { order: TrackedOrder }) {
 
               {/* Show expected delivery when applicable */}
               {step.status === 'out_for_delivery' && isCurrent && order.expectedDelivery && (
-                <div className="mt-3 p-3 bg-green-50 rounded-lg">
-                  <p className="text-sm text-green-700">
+                <div className="mt-3 p-3 bg-neutral-50 rounded-lg">
+                  <p className="text-sm text-neutral-700">
                     <span className="font-medium">Expected by: </span>
                     {new Date(order.expectedDelivery).toLocaleDateString('en-IN', {
                       weekday: 'long',
@@ -257,7 +257,7 @@ export default function TrackOrderPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white w-full min-w-0 overflow-x-hidden">
+    <div className="min-h-screen bg-white w-full min-w-0 overflow-x-hidden">
       <div className="container mx-auto w-full min-w-0 px-3 sm:px-4 md:px-6 py-8 sm:py-12 md:py-16 max-w-7xl">
         {/* Header */}
         <div className="text-center mb-10">
@@ -311,7 +311,7 @@ export default function TrackOrderPage() {
 
             <Button
               type="submit"
-              className="w-full h-12 bg-green-600 hover:bg-green-700 text-white text-base font-medium"
+              className="w-full h-12 bg-neutral-800 hover:bg-neutral-900 text-white text-base font-medium"
               disabled={loading}
             >
               {loading ? (
@@ -333,10 +333,10 @@ export default function TrackOrderPage() {
         {order && (
           <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
             {/* Order Header */}
-            <div className="p-6 bg-gradient-to-r from-green-500 to-green-600 text-white">
+            <div className="p-6 bg-neutral-800 text-white">
               <div className="flex flex-wrap justify-between items-start gap-4">
                 <div>
-                  <p className="text-green-100 text-sm mb-1">Order ID</p>
+                  <p className="text-neutral-300 text-sm mb-1">Order ID</p>
                   <h2 className="text-2xl font-bold">#{order.id.slice(-8).toUpperCase()}</h2>
                 </div>
                 <div className="text-right">
@@ -346,7 +346,7 @@ export default function TrackOrderPage() {
               </div>
               <div className="flex flex-wrap gap-4 mt-4 text-sm">
                 <div className="flex items-center gap-1.5">
-                  <Calendar className="w-4 h-4 text-green-200" />
+                  <Calendar className="w-4 h-4 text-neutral-400" />
                   <span>
                     {new Date(order.createdAt).toLocaleDateString('en-IN', {
                       day: 'numeric',
@@ -356,7 +356,7 @@ export default function TrackOrderPage() {
                   </span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <CreditCard className="w-4 h-4 text-green-200" />
+                  <CreditCard className="w-4 h-4 text-neutral-400" />
                   <span className={order.paymentStatus === 'paid' ? 'text-white' : 'text-yellow-200'}>
                     {order.paymentStatus === 'paid' ? 'Payment Complete' : 'Payment ' + order.paymentStatus}
                   </span>
@@ -430,7 +430,7 @@ export default function TrackOrderPage() {
         <div className="mt-8 text-center text-sm text-gray-500">
           <p>
             Need help?{' '}
-            <Link href="/home/contact" className="text-green-600 hover:text-green-700 font-medium">
+            <Link href="/home/contact" className="text-neutral-700 hover:text-neutral-900 font-medium">
               Contact Support
             </Link>
           </p>

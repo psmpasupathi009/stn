@@ -87,13 +87,13 @@ function OrderStatusTracker({ status }: { status: string }) {
               <div
                 className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center border-2 transition-all ${
                   isCompleted
-                    ? 'bg-green-500 border-green-500 text-white'
+                    ? 'bg-neutral-600 border-neutral-600 text-white'
                     : 'bg-white border-gray-300 text-gray-400'
-                } ${isCurrent ? 'ring-4 ring-green-100' : ''}`}
+                } ${isCurrent ? 'ring-4 ring-neutral-200' : ''}`}
               >
                 <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
-              <p className={`text-xs mt-2 text-center ${isCompleted ? 'text-green-600 font-medium' : 'text-gray-400'}`}>
+              <p className={`text-xs mt-2 text-center ${isCompleted ? 'text-neutral-700 font-medium' : 'text-gray-400'}`}>
                 {step.label}
               </p>
             </div>
@@ -150,7 +150,7 @@ function OrderCard({ order }: { order: Order }) {
             <p className="text-2xl font-bold text-gray-900">₹{order.totalAmount.toLocaleString('en-IN')}</p>
             <div className="flex items-center gap-2 mt-1">
               <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                order.paymentStatus === 'paid' ? 'bg-green-100 text-green-700' :
+                order.paymentStatus === 'paid' ? 'bg-neutral-100 text-neutral-800' :
                 order.paymentStatus === 'pending' ? 'bg-yellow-100 text-yellow-700' :
                 'bg-red-100 text-red-700'
               }`}>
@@ -270,7 +270,7 @@ function OrderCard({ order }: { order: Order }) {
             )}
             <div className="flex justify-between text-sm">
               <span className="text-gray-600">Delivery</span>
-              <span className="text-green-600">FREE</span>
+              <span className="text-neutral-700">FREE</span>
             </div>
             <div className="flex justify-between font-bold text-lg pt-2 border-t">
               <span>Total</span>
@@ -324,7 +324,7 @@ export default function OrdersPage() {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-green-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-12 h-12 border-4 border-neutral-500 border-t-transparent rounded-full animate-spin" />
           <p className="text-gray-600">Loading your orders...</p>
         </div>
       </div>
@@ -353,7 +353,7 @@ export default function OrdersPage() {
               onClick={() => setFilter(tab.value)}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 filter === tab.value
-                  ? 'bg-green-600 text-white'
+                  ? 'bg-neutral-700 text-white'
                   : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
               }`}
             >
@@ -398,7 +398,7 @@ export default function OrdersPage() {
         <div className="mt-8 text-center">
           <Link
             href="/home/track-order"
-            className="inline-flex items-center gap-2 text-green-600 hover:text-green-700 font-medium"
+            className="inline-flex items-center gap-2 text-neutral-700 hover:text-neutral-900 font-medium"
           >
             Track order with Order ID
             <ExternalLink className="w-4 h-4" />

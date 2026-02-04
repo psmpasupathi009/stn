@@ -100,7 +100,7 @@ export default function CartPage() {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <div className="animate-pulse flex flex-col items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-green-200" />
+          <div className="w-12 h-12 rounded-full bg-gray-200" />
           <p className="text-neutral-600">Loading your cart...</p>
         </div>
       </div>
@@ -116,7 +116,7 @@ export default function CartPage() {
           <p className="text-neutral-600 mb-6">Add some products to get started!</p>
           <Button
             onClick={() => router.push('/home/products')}
-            className="bg-green-600 hover:bg-green-700 text-white px-8 py-6 text-base rounded-xl"
+            className="bg-[var(--primary-green)] hover:opacity-90 text-white px-8 py-6 text-base rounded-xl"
           >
             Continue Shopping
           </Button>
@@ -126,7 +126,7 @@ export default function CartPage() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50 w-full min-w-0 overflow-x-hidden">
+    <div className="min-h-screen bg-white w-full min-w-0 overflow-x-hidden">
         <div className="container mx-auto w-full min-w-0 px-3 sm:px-4 md:px-6 py-6 sm:py-8 md:py-12 max-w-7xl">
           <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-neutral-900 mb-6 sm:mb-8">Shopping Cart</h1>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">

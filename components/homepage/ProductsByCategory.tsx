@@ -164,7 +164,7 @@ export default function ProductsByCategory() {
         <div className="text-center mt-16">
           <Link
             href="/home/products"
-            className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white font-semibold px-8 py-3.5 rounded-xl transition-all shadow-lg shadow-emerald-900/20 hover:shadow-xl hover:shadow-emerald-900/25 hover:-translate-y-0.5"
+            className="inline-flex items-center gap-2 bg-[var(--primary-green)] hover:opacity-90 text-white font-semibold px-8 py-3.5 rounded-xl transition-all shadow-lg hover:-translate-y-0.5"
           >
             Browse All Products
             <ChevronRight className="w-5 h-5" />

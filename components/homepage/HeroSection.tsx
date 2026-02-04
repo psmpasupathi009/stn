@@ -123,11 +123,11 @@ export default function HeroSection() {
                     <div className="absolute inset-0 bg-linear-to-t from-black/30 via-transparent to-transparent pointer-events-none" />
                   </>
                 ) : (
-                  <div className="absolute inset-0 bg-linear-to-br from-green-100 via-green-50 to-green-200 flex items-center justify-center">
+                  <div className="absolute inset-0 bg-linear-to-br from-gray-100 via-white to-gray-100 flex items-center justify-center">
                     <div className="text-center px-4">
                       <HeroIcon
                         iconName={slide.icon}
-                        className="w-16 h-16 sm:w-20 sm:h-20 md:w-28 md:h-28 lg:w-36 lg:h-36 text-green-600 mx-auto mb-3 sm:mb-4"
+                        className="w-16 h-16 sm:w-20 sm:h-20 md:w-28 md:h-28 lg:w-36 lg:h-36 text-neutral-500 mx-auto mb-3 sm:mb-4"
                       />
                       <h2 className="text-lg sm:text-xl md:text-3xl lg:text-4xl font-bold text-gray-800 max-w-sm sm:max-w-md md:max-w-lg mx-auto leading-tight">
                         {slide.title}

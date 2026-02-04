@@ -254,7 +254,7 @@ function CheckoutContent() {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <div className="animate-pulse flex flex-col items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-green-200" />
+          <div className="w-12 h-12 rounded-full bg-gray-200" />
           <p className="text-gray-600">Loading checkout...</p>
         </div>
       </div>
@@ -272,7 +272,7 @@ function CheckoutContent() {
           <p className="text-gray-600 mb-6">Add some products to continue.</p>
           <Button
             onClick={() => router.push('/home/products')}
-            className="bg-green-600 hover:bg-green-700 text-white px-8 py-6 text-base rounded-xl"
+            className="bg-neutral-700 hover:bg-neutral-800 text-white px-8 py-6 text-base rounded-xl"
           >
             Browse Products
           </Button>
@@ -300,8 +300,8 @@ function CheckoutContent() {
               {/* Shipping Address */}
               <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
-                    <MapPin className="w-5 h-5 text-green-600" />
+                  <div className="w-10 h-10 rounded-full bg-neutral-100 flex items-center justify-center">
+                    <MapPin className="w-5 h-5 text-neutral-600" />
                   </div>
                   <h2 className="text-lg font-bold text-gray-900">Shipping Address</h2>
                 </div>
@@ -375,8 +375,8 @@ function CheckoutContent() {
               {/* Order Items */}
               <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
-                    <Package className="w-5 h-5 text-green-600" />
+                  <div className="w-10 h-10 rounded-full bg-neutral-100 flex items-center justify-center">
+                    <Package className="w-5 h-5 text-neutral-600" />
                   </div>
                   <h2 className="text-lg font-bold text-gray-900">Order Items ({orderItems.length})</h2>
                 </div>
@@ -424,7 +424,7 @@ function CheckoutContent() {
                     <span>GST (5%)</span>
                     <span>₹{gstAmount.toLocaleString('en-IN')}</span>
                   </div>
-                  <div className="flex justify-between text-green-600">
+                  <div className="flex justify-between text-neutral-600">
                     <span className="flex items-center gap-1">
                       <Truck className="w-4 h-4" />
                       Delivery
@@ -432,7 +432,7 @@ function CheckoutContent() {
                     <span className="font-medium">FREE</span>
                   </div>
                   {totalSavings > 0 && (
-                    <div className="flex justify-between text-green-600 bg-green-50 -mx-2 px-2 py-2 rounded-lg">
+                    <div className="flex justify-between text-neutral-700 bg-neutral-50 -mx-2 px-2 py-2 rounded-lg">
                       <span>You Save</span>
                       <span className="font-semibold">₹{totalSavings.toLocaleString('en-IN')}</span>
                     </div>
@@ -443,14 +443,14 @@ function CheckoutContent() {
                 <div className="border-t border-gray-200 pt-4 mb-6">
                   <div className="flex justify-between items-center">
                     <span className="text-lg font-bold text-gray-900">Total Amount</span>
-                    <span className="text-2xl font-bold text-green-600">₹{totalAmount.toLocaleString('en-IN')}</span>
+                    <span className="text-2xl font-bold text-neutral-900">₹{totalAmount.toLocaleString('en-IN')}</span>
                   </div>
                   <p className="text-xs text-gray-500 mt-1">Inclusive of all taxes</p>
                 </div>
 
                 {/* Pay Button */}
                 <Button
-                  className="w-full bg-green-600 hover:bg-green-700 text-white py-6 rounded-xl font-semibold text-base"
+                  className="w-full bg-[var(--primary-green)] hover:opacity-90 text-white py-6 rounded-xl font-semibold text-base"
                   onClick={handlePayment}
                   disabled={processing}
                 >
@@ -460,11 +460,11 @@ function CheckoutContent() {
                 {/* Trust Badges */}
                 <div className="mt-6 pt-6 border-t border-gray-200">
                   <div className="flex items-center gap-3 text-sm text-gray-600 mb-3">
-                    <Shield className="w-5 h-5 text-green-600" />
+                    <Shield className="w-5 h-5 text-neutral-600" />
                     <span>Secure payment via Razorpay</span>
                   </div>
                   <div className="flex items-center gap-3 text-sm text-gray-600">
-                    <Truck className="w-5 h-5 text-green-600" />
+                    <Truck className="w-5 h-5 text-neutral-600" />
                     <span>Free delivery across India</span>
                   </div>
                 </div>
@@ -479,7 +479,7 @@ function CheckoutContent() {
 
 function CheckoutFallback() {
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+    <div className="min-h-screen bg-white flex items-center justify-center">
       <div className="animate-pulse text-gray-500">Loading...</div>
     </div>
   )

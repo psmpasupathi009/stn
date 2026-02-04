@@ -9,7 +9,7 @@ export default function WhatsAppButton() {
       href={`https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`}
       target="_blank"
       rel="noopener noreferrer"
-      className="fixed z-[100] bg-green-500 hover:bg-green-600 text-white rounded-full shadow-lg transition-all hover:scale-110 touch-manipulation bottom-5 right-4 sm:bottom-6 sm:right-6 p-3 sm:p-4"
+      className="fixed z-[100] bg-neutral-600 hover:bg-neutral-700 text-white rounded-full shadow-lg transition-all hover:scale-110 touch-manipulation bottom-5 right-4 sm:bottom-6 sm:right-6 p-3 sm:p-4"
       style={{ marginBottom: 'env(safe-area-inset-bottom, 0)' }}
       aria-label="Contact us on WhatsApp"
     >

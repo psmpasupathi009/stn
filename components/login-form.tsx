@@ -136,7 +136,7 @@ export function LoginForm() {
         Don&apos;t have an account?{' '}
         <Link
           href="/home/signup"
-          className="font-medium text-[var(--primary-green)] hover:underline underline-offset-4"
+          className="font-medium text-neutral-700 hover:underline underline-offset-4"
         >
           Sign up
         </Link>

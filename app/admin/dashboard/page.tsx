@@ -108,7 +108,7 @@ const ORDER_STATUSES = [
   { value: 'processing', label: 'Processing', color: 'bg-purple-100 text-purple-800' },
   { value: 'shipped', label: 'Shipped', color: 'bg-indigo-100 text-indigo-800' },
   { value: 'out_for_delivery', label: 'Out for Delivery', color: 'bg-cyan-100 text-cyan-800' },
-  { value: 'delivered', label: 'Delivered', color: 'bg-green-100 text-green-800' },
+  { value: 'delivered', label: 'Delivered', color: 'bg-neutral-100 text-neutral-800' },
   { value: 'cancelled', label: 'Cancelled', color: 'bg-red-100 text-red-800' },
 ]
 
@@ -165,6 +165,8 @@ export default function AdminDashboard() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('')
   const [newCategoryName, setNewCategoryName] = useState('')
+  const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set())
+  const [bulkStockUpdating, setBulkStockUpdating] = useState(false)
 
   // Hero sections state
   const [heroSections, setHeroSections] = useState<HeroSection[]>([])
@@ -426,6 +428,54 @@ export default function AdminDashboard() {
     } catch (error) {
       console.error('Error deleting product:', error)
       toast.error('Failed to delete product')
+    }
+  }
+
+  const toggleProductSelection = (id: string) => {
+    setSelectedProducts((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  const selectAllProducts = () => {
+    if (selectedProducts.size === products.length) {
+      setSelectedProducts(new Set())
+    } else {
+      setSelectedProducts(new Set(products.map((p) => p.id)))
+    }
+  }
+
+  const handleBulkStockChange = async (inStock: boolean) => {
+    const ids = Array.from(selectedProducts)
+    if (ids.length === 0) return
+    setBulkStockUpdating(true)
+    try {
+      const results = await Promise.allSettled(
+        ids.map((id) =>
+          fetch(`/api/products/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ inStock }),
+          })
+        )
+      )
+      const failed = results.filter((r) => r.status === 'rejected' || (r.status === 'fulfilled' && !(r as PromiseFulfilledResult<Response>).value.ok))
+      if (failed.length > 0) {
+        toast.error(`Failed to update ${failed.length} product(s)`)
+      } else {
+        toast.success(`${ids.length} product(s) set to ${inStock ? 'In Stock' : 'Out of Stock'}`)
+        setSelectedProducts(new Set())
+        fetchProducts()
+      }
+    } catch (error) {
+      console.error('Bulk stock update error:', error)
+      toast.error('Failed to update stock')
+    } finally {
+      setBulkStockUpdating(false)
     }
   }
 
@@ -1038,8 +1088,8 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="bg-linear-to-br from-gray-50 to-green-50 min-h-screen">
-      <div className="container mx-auto w-full max-w-full min-w-0 px-3 sm:px-4 md:px-6 py-6 sm:py-8 overflow-x-auto">
+    <div className="bg-white min-h-screen">
+      <div className="container mx-auto w-full min-w-0 max-w-7xl px-3 sm:px-4 md:px-6 py-6 sm:py-8 overflow-x-auto">
         {/* Header */}
         <div className="mb-6 sm:mb-8">
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">Admin Dashboard</h1>
@@ -1052,7 +1102,7 @@ export default function AdminDashboard() {
             onClick={() => setActiveTab('products')}
             className={`flex items-center justify-center gap-1.5 sm:gap-2 px-3 py-2 sm:px-4 sm:py-2.5 rounded-md text-sm sm:text-base font-medium transition-all min-w-0 flex-1 sm:flex-initial ${
               activeTab === 'products'
-                ? 'bg-linear-to-r from-green-500 to-green-600 text-white shadow-md'
+                ? 'bg-neutral-700 text-white shadow-md'
                 : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
@@ -1063,7 +1113,7 @@ export default function AdminDashboard() {
             onClick={() => setActiveTab('orders')}
             className={`flex items-center justify-center gap-1.5 sm:gap-2 px-3 py-2 sm:px-4 sm:py-2.5 rounded-md text-sm sm:text-base font-medium transition-all min-w-0 flex-1 sm:flex-initial ${
               activeTab === 'orders'
-                ? 'bg-linear-to-r from-green-500 to-green-600 text-white shadow-md'
+                ? 'bg-neutral-700 text-white shadow-md'
                 : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
@@ -1079,7 +1129,7 @@ export default function AdminDashboard() {
             onClick={() => setActiveTab('hero')}
             className={`flex items-center justify-center gap-1.5 sm:gap-2 px-3 py-2 sm:px-4 sm:py-2.5 rounded-md text-sm sm:text-base font-medium transition-all min-w-0 flex-1 sm:flex-initial ${
               activeTab === 'hero'
-                ? 'bg-linear-to-r from-green-500 to-green-600 text-white shadow-md'
+                ? 'bg-neutral-700 text-white shadow-md'
                 : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
@@ -1090,7 +1140,7 @@ export default function AdminDashboard() {
             onClick={() => setActiveTab('gallery')}
             className={`flex items-center justify-center gap-1.5 sm:gap-2 px-3 py-2 sm:px-4 sm:py-2.5 rounded-md text-sm sm:text-base font-medium transition-all min-w-0 flex-1 sm:flex-initial ${
               activeTab === 'gallery'
-                ? 'bg-linear-to-r from-green-500 to-green-600 text-white shadow-md'
+                ? 'bg-neutral-700 text-white shadow-md'
                 : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
@@ -1114,6 +1164,34 @@ export default function AdminDashboard() {
                 {showForm ? 'Cancel' : 'Add New Product'}
               </Button>
             </div>
+
+            {/* Bulk stock actions */}
+            {selectedProducts.size > 0 && (
+              <div className="mb-4 sm:mb-6 flex flex-wrap items-center gap-2 p-3 bg-neutral-50 rounded-lg border border-neutral-200">
+                <span className="text-sm font-medium text-neutral-700">
+                  {selectedProducts.size} product(s) selected
+                </span>
+                <Button
+                  size="sm"
+                  onClick={() => handleBulkStockChange(true)}
+                  disabled={bulkStockUpdating}
+                  className="bg-[#3CB31A] hover:opacity-90 text-white"
+                >
+                  Set In Stock
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleBulkStockChange(false)}
+                  disabled={bulkStockUpdating}
+                >
+                  Set Out of Stock
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => setSelectedProducts(new Set())}>
+                  Clear selection
+                </Button>
+              </div>
+            )}
 
             {/* Search and Filter */}
             <div className="mb-4 sm:mb-6 grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 min-w-0">
@@ -1139,7 +1217,7 @@ export default function AdminDashboard() {
             {/* Product Form */}
             {showForm && (
               <Card className="mb-6 sm:mb-8 shadow-lg overflow-hidden">
-                <CardHeader className="bg-linear-to-r from-green-50 to-green-100 p-4 sm:p-6">
+                <CardHeader className="bg-neutral-50 p-4 sm:p-6">
                   <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
                     {editingProduct ? <Pencil className="w-5 h-5 shrink-0" /> : <Plus className="w-5 h-5 shrink-0" />}
                     {editingProduct ? 'Edit Product' : 'Create New Product'}
@@ -1277,15 +1355,18 @@ export default function AdminDashboard() {
                         </div>
                       )}
                     </div>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        id="inStock"
-                        checked={formData.inStock}
-                        onChange={(e) => setFormData({ ...formData, inStock: e.target.checked })}
-                        className="h-4 w-4"
-                      />
-                      <Label htmlFor="inStock" className="cursor-pointer">In Stock</Label>
+                    <div className="flex flex-col gap-1">
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          id="inStock"
+                          checked={formData.inStock}
+                          onChange={(e) => setFormData({ ...formData, inStock: e.target.checked })}
+                          className="h-4 w-4"
+                        />
+                        <Label htmlFor="inStock" className="cursor-pointer">In Stock</Label>
+                      </div>
+                      <p className="text-xs text-gray-500">Uncheck to set product as Out of Stock (status shown on product page)</p>
                     </div>
                     <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2">
                       <Button type="submit" disabled={uploading} className="w-full sm:w-auto bg-linear-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600">
@@ -1315,15 +1396,44 @@ export default function AdminDashboard() {
                     </Button>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 min-w-0">
+                  <>
+                    {products.length > 0 && (
+                      <div className="flex items-center gap-2 mb-4">
+                        <button
+                          type="button"
+                          onClick={selectAllProducts}
+                          className="flex items-center gap-2 text-sm text-neutral-600 hover:text-neutral-900"
+                        >
+                          {selectedProducts.size === products.length ? (
+                            <CheckSquare className="w-4 h-4 text-[#3CB31A]" />
+                          ) : (
+                            <Square className="w-4 h-4" />
+                          )}
+                          <span>{selectedProducts.size === products.length ? 'Deselect all' : 'Select all'}</span>
+                        </button>
+                      </div>
+                    )}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 min-w-0">
                     {products.map((product) => (
-                      <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow bg-white min-w-0">
-                        <div className="aspect-square bg-linear-to-br from-green-50 to-green-100 relative min-h-0">
+                      <Card key={product.id} className={`overflow-hidden hover:shadow-lg transition-shadow bg-white min-w-0 ${selectedProducts.has(product.id) ? 'ring-2 ring-[#3CB31A]' : ''}`}>
+                        <div className="aspect-square bg-neutral-100 relative min-h-0">
+                          <button
+                            type="button"
+                            onClick={() => toggleProductSelection(product.id)}
+                            className="absolute top-2 left-2 z-10 w-8 h-8 rounded-md bg-white/90 shadow flex items-center justify-center hover:bg-white border border-neutral-200"
+                            aria-label={selectedProducts.has(product.id) ? 'Deselect product' : 'Select product'}
+                          >
+                            {selectedProducts.has(product.id) ? (
+                              <CheckSquare className="w-4 h-4 text-[#3CB31A]" />
+                            ) : (
+                              <Square className="w-4 h-4 text-neutral-400" />
+                            )}
+                          </button>
                           {product.image ? (
                             <Image src={product.image} alt={product.name} fill className="object-cover" unoptimized />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center">
-                              <ImageIcon className="w-12 h-12 text-green-200" />
+                              <ImageIcon className="w-12 h-12 text-neutral-300" />
                             </div>
                           )}
                           {!product.inStock && (
@@ -1355,7 +1465,8 @@ export default function AdminDashboard() {
                         </CardContent>
                       </Card>
                     ))}
-                  </div>
+                    </div>
+                  </>
                 )}
               </>
             )}
@@ -1505,10 +1616,10 @@ export default function AdminDashboard() {
                   </p>
                 </CardContent>
               </Card>
-              <Card className="bg-green-50 border-green-200 min-w-0">
+              <Card className="bg-neutral-50 border-neutral-200 min-w-0">
                 <CardContent className="p-3 sm:p-4">
-                  <p className="text-xs sm:text-sm text-green-700">Delivered</p>
-                  <p className="text-xl sm:text-2xl font-bold text-green-800">
+                  <p className="text-xs sm:text-sm text-neutral-700">Delivered</p>
+                  <p className="text-xl sm:text-2xl font-bold text-neutral-800">
                     {orders.filter(o => o.status === 'delivered').length}
                   </p>
                 </CardContent>
@@ -1518,7 +1629,7 @@ export default function AdminDashboard() {
             {/* Orders Table */}
             {ordersLoading ? (
               <div className="text-center py-12">
-                <div className="inline-block w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full animate-spin" />
+                <div className="inline-block w-8 h-8 border-4 border-neutral-500 border-t-transparent rounded-full animate-spin" />
               </div>
             ) : orders.length === 0 ? (
               <div className="text-center py-12 bg-white rounded-lg shadow-sm">
@@ -1537,7 +1648,7 @@ export default function AdminDashboard() {
                             className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
                           >
                             {selectedOrders.size === orders.filter(o => o.paymentStatus === 'paid').length ? (
-                              <CheckSquare className="w-4 h-4 text-green-600" />
+                              <CheckSquare className="w-4 h-4 text-neutral-600" />
                             ) : (
                               <Square className="w-4 h-4" />
                             )}
@@ -1560,7 +1671,7 @@ export default function AdminDashboard() {
                             {order.paymentStatus === 'paid' && (
                               <button onClick={() => handleOrderSelect(order.id)}>
                                 {selectedOrders.has(order.id) ? (
-                                  <CheckSquare className="w-4 h-4 text-green-600" />
+                                  <CheckSquare className="w-4 h-4 text-neutral-600" />
                                 ) : (
                                   <Square className="w-4 h-4 text-gray-400" />
                                 )}
@@ -1593,7 +1704,7 @@ export default function AdminDashboard() {
                           </td>
                           <td className="px-2 sm:px-4 py-2 sm:py-3">
                             <span className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium ${
-                              order.paymentStatus === 'paid' ? 'bg-green-100 text-green-800' :
+                              order.paymentStatus === 'paid' ? 'bg-neutral-100 text-neutral-800' :
                               order.paymentStatus === 'pending' ? 'bg-yellow-100 text-yellow-800' :
                               'bg-red-100 text-red-800'
                             }`}>
@@ -1733,7 +1844,7 @@ export default function AdminDashboard() {
                   </div>
                   <div className="p-6 border-t flex justify-end gap-3">
                     <Button variant="outline" onClick={() => setEditingOrder(null)}>Cancel</Button>
-                    <Button onClick={handleUpdateOrder} className="bg-green-600 hover:bg-green-700 text-white">
+                    <Button onClick={handleUpdateOrder} className="bg-neutral-700 hover:bg-neutral-800 text-white">
                       Save Changes
                     </Button>
                   </div>
@@ -1785,9 +1896,9 @@ export default function AdminDashboard() {
 
             {/* Add Media Form */}
             <Card className="mb-6 sm:mb-8 shadow-lg overflow-hidden min-w-0">
-              <CardHeader className="bg-gradient-to-r from-emerald-50 to-teal-50 border-b p-4 sm:p-6">
+              <CardHeader className="bg-neutral-50 border-b p-4 sm:p-6">
                 <CardTitle className="flex items-center gap-2 text-gray-800 text-lg sm:text-xl">
-                  <Images className="w-5 h-5 shrink-0 text-emerald-600" />
+                  <Images className="w-5 h-5 shrink-0 text-neutral-600" />
                   Add Media
                 </CardTitle>
                 <p className="text-xs sm:text-sm text-gray-600 mt-1">Images and videos shown on the Our Story page</p>
@@ -1803,7 +1914,7 @@ export default function AdminDashboard() {
                         onClick={() => { setGalleryMediaType('image'); setGalleryMediaFile(null) }}
                         className={`flex-1 min-w-0 py-2.5 sm:py-3 px-3 sm:px-4 rounded-lg text-sm sm:text-base font-medium transition-all flex items-center justify-center gap-1.5 sm:gap-2 touch-manipulation ${
                           galleryMediaType === 'image'
-                            ? 'bg-emerald-600 text-white shadow-md'
+                            ? 'bg-neutral-700 text-white shadow-md'
                             : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                         }`}
                       >
@@ -1815,7 +1926,7 @@ export default function AdminDashboard() {
                         onClick={() => { setGalleryMediaType('video'); setGalleryMediaFile(null) }}
                         className={`flex-1 min-w-0 py-2.5 sm:py-3 px-3 sm:px-4 rounded-lg text-sm sm:text-base font-medium transition-all flex items-center justify-center gap-1.5 sm:gap-2 touch-manipulation ${
                           galleryMediaType === 'video'
-                            ? 'bg-emerald-600 text-white shadow-md'
+                            ? 'bg-neutral-700 text-white shadow-md'
                             : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                         }`}
                       >
@@ -1831,8 +1942,8 @@ export default function AdminDashboard() {
                     <label className="block min-w-0">
                       <div className={`border-2 border-dashed rounded-xl p-4 sm:p-6 md:p-8 text-center transition-all cursor-pointer min-w-0 ${
                         galleryMediaFile
-                          ? 'border-emerald-400 bg-emerald-50'
-                          : 'border-gray-300 hover:border-emerald-300 hover:bg-gray-50'
+                          ? 'border-neutral-400 bg-neutral-50'
+                          : 'border-gray-300 hover:border-neutral-300 hover:bg-gray-50'
                       }`}>
                         {galleryMediaFile ? (
                           <div className="space-y-2">
@@ -1888,7 +1999,7 @@ export default function AdminDashboard() {
                   <Button
                     type="submit"
                     disabled={galleryUploading || !galleryMediaFile}
-                    className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3"
+                    className="w-full sm:w-auto bg-neutral-700 hover:bg-neutral-800 text-white px-6 py-3"
                   >
                     {galleryUploading ? (
                       <span className="flex items-center gap-2">
@@ -1915,7 +2026,7 @@ export default function AdminDashboard() {
               <CardContent>
                 {galleryLoading ? (
                   <div className="py-12 text-center">
-                    <div className="inline-block w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full animate-spin" />
+                    <div className="inline-block w-8 h-8 border-4 border-neutral-500 border-t-transparent rounded-full animate-spin" />
                   </div>
                 ) : galleryItems.length === 0 ? (
                   <div className="py-12 text-center text-gray-500">
@@ -1956,7 +2067,7 @@ export default function AdminDashboard() {
             {/* Hero Form - Simplified */}
             {showHeroForm && (
               <Card className="mb-6 sm:mb-8 shadow-lg overflow-hidden min-w-0">
-                <CardHeader className="bg-linear-to-r from-green-50 to-green-100 p-4 sm:p-6">
+                <CardHeader className="bg-neutral-50 p-4 sm:p-6">
                   <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
                     {editingHero ? <Pencil className="w-5 h-5 shrink-0" /> : <Plus className="w-5 h-5 shrink-0" />}
                     {editingHero ? 'Edit Hero Slide' : 'Create Hero Slide'}
@@ -2076,7 +2187,7 @@ export default function AdminDashboard() {
                         <Image src={hero.image} alt="Hero slide" fill className="object-cover" unoptimized />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
-                          <ImageIcon className="w-12 h-12 text-green-300" />
+                          <ImageIcon className="w-12 h-12 text-neutral-300" />
                         </div>
                       )}
                       <div className="absolute top-2 right-2">
@@ -2104,7 +2215,7 @@ export default function AdminDashboard() {
                           variant="outline"
                           size="sm"
                           onClick={() => toggleHeroActive(hero)}
-                          className={`flex-1 min-w-0 ${hero.isActive ? 'text-orange-600 border-orange-200 hover:bg-orange-50' : 'text-green-600 border-green-200 hover:bg-green-50'}`}
+                          className={`flex-1 min-w-0 ${hero.isActive ? 'text-orange-600 border-orange-200 hover:bg-orange-50' : 'text-neutral-600 border-neutral-200 hover:bg-neutral-50'}`}
                         >
                           {hero.isActive ? <><EyeOff className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 shrink-0" /> Hide</> : <><Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 shrink-0" /> Show</>}
                         </Button>

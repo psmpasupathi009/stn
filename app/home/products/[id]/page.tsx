@@ -205,7 +205,7 @@ export default function ProductDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50 w-full min-w-0 overflow-x-hidden">
+    <div className="min-h-screen bg-white w-full min-w-0 overflow-x-hidden">
       <div className="container mx-auto w-full min-w-0 px-3 sm:px-4 md:px-6 py-6 sm:py-8 md:py-10 lg:py-12 max-w-7xl">
         {/* Back link */}
         <div className="mb-4 sm:mb-6">
@@ -279,15 +279,19 @@ export default function ProductDetailPage() {
                 ₹{product.salePrice.toLocaleString('en-IN')}
               </span>
               {product.mrp > product.salePrice && (
-                <>
                   <span className="text-lg sm:text-xl text-neutral-500 line-through">
                     ₹{product.mrp.toLocaleString('en-IN')}
                   </span>
-                  <span className="bg-[var(--primary-green)] text-white text-xs sm:text-sm font-medium px-2.5 py-1 rounded-md">
-                    Sale
-                  </span>
-                </>
-              )}
+                )}
+              <span
+                className={`text-xs sm:text-sm font-medium px-2.5 py-1 rounded-md ${
+                  product.inStock
+                    ? 'bg-[#3CB31A] text-white'
+                    : 'bg-neutral-400 text-white'
+                }`}
+              >
+                {product.inStock ? 'In Stock' : 'Out of Stock'}
+              </span>
             </div>
             <p className="text-sm text-neutral-600 mb-5 sm:mb-6">Shipping calculated at checkout.</p>
 
@@ -326,7 +330,9 @@ export default function ProductDetailPage() {
                 { icon: '🔒', label: 'Secure' },
               ].map(({ icon, label }) => (
                 <div key={label} className="text-center py-2 px-1">
-                  <span className="text-xl sm:text-2xl block mb-1">{icon}</span>
+                  <span className="inline-flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full text-xl sm:text-2xl mb-1 bg-[#3CB31A]/15 text-[#3CB31A] border-2 border-[#3CB31A]">
+                    {icon}
+                  </span>
                   <p className="text-[10px] sm:text-xs text-neutral-600 uppercase tracking-wide">{label}</p>
                 </div>
               ))}
@@ -337,7 +343,7 @@ export default function ProductDetailPage() {
               <button
                 onClick={addToCart}
                 disabled={!product.inStock}
-                className="flex-1 min-w-0 border-2 border-[var(--primary-green)] text-[var(--primary-green)] py-3 px-5 sm:px-6 rounded-xl font-semibold hover:bg-green-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 min-w-0 border-2 border-neutral-300 text-neutral-700 py-3 px-5 sm:px-6 rounded-xl font-semibold hover:bg-neutral-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Add to cart
               </button>
@@ -389,7 +395,7 @@ export default function ProductDetailPage() {
                       <button
                         key={r}
                         type="button"
-                        className="p-0.5 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary-green)] focus-visible:ring-offset-1"
+                        className="p-0.5 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-1"
                         onMouseEnter={() => setHoverRating(r)}
                         onMouseLeave={() => setHoverRating(0)}
                         onClick={() => setReviewRating(r)}
@@ -415,7 +421,7 @@ export default function ProductDetailPage() {
                     onChange={(e) => setReviewComment(e.target.value)}
                     className={cn(
                       'flex-1 min-h-[60px] w-full rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-xs ring-offset-white',
-                      'placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary-green)] focus-visible:ring-offset-1',
+                      'placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-1',
                       'disabled:cursor-not-allowed disabled:opacity-50 resize-none'
                     )}
                     maxLength={500}
@@ -425,7 +431,7 @@ export default function ProductDetailPage() {
                     onClick={submitReview}
                     disabled={submittingReview || reviewRating < 1}
                     size="sm"
-                    className="bg-[var(--primary-green)] hover:opacity-90 shrink-0 h-8"
+                    className="bg-neutral-700 hover:bg-neutral-800 shrink-0 h-8"
                   >
                     {submittingReview ? '…' : 'Submit'}
                   </Button>

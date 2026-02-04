@@ -39,13 +39,13 @@ export default function ContactPage() {
               <div className="space-y-6">
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-2">Email</h3>
-                  <a href="mailto:info@stngoldenhealthyfoods.com" className="text-green-700 hover:underline">
+                  <a href="mailto:info@stngoldenhealthyfoods.com" className="text-neutral-700 hover:underline">
                     info@stngoldenhealthyfoods.com
                   </a>
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-2">Phone</h3>
-                  <a href="tel:+919942590202" className="text-green-700 hover:underline">
+                  <a href="tel:+919942590202" className="text-neutral-700 hover:underline">
                     +919942590202
                   </a>
                 </div>
@@ -60,13 +60,13 @@ export default function ContactPage() {
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-4">Follow Us</h3>
                   <div className="flex gap-4">
-                    <a href="#" className="text-gray-600 hover:text-green-700">
+                    <a href="#" className="text-gray-600 hover:text-neutral-800">
                       Facebook
                     </a>
-                    <a href="#" className="text-gray-600 hover:text-green-700">
+                    <a href="#" className="text-gray-600 hover:text-neutral-800">
                       Instagram
                     </a>
-                    <a href="#" className="text-gray-600 hover:text-green-700">
+                    <a href="#" className="text-gray-600 hover:text-neutral-800">
                       YouTube
                     </a>
                   </div>
@@ -111,13 +111,13 @@ export default function ContactPage() {
                     rows={6}
                     value={formData.message}
                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                    className="w-full min-w-0 rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary-green)] focus:ring-offset-1 resize-y min-h-[120px]"
+                    className="w-full min-w-0 rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-400 focus:ring-offset-1 resize-y min-h-[120px]"
                     required
                   />
                 </div>
                 <Button
                   type="submit"
-                  className="w-full bg-[var(--primary-green)] text-white hover:opacity-90"
+                  className="w-full bg-neutral-800 text-white hover:bg-neutral-900"
                 >
                   {submitted ? 'Message Sent!' : 'Send Message'}
                 </Button>
