@@ -92,6 +92,8 @@ interface Order {
   expectedDelivery?: string
   deliveredAt?: string
   adminNotes?: string
+  refundRequested?: boolean
+  refundRequestedAt?: string
   createdAt: string
   updatedAt: string
   user: {
@@ -200,6 +202,7 @@ export default function AdminDashboard() {
   const [showBulkStatusModal, setShowBulkStatusModal] = useState(false)
   const [shippingFormData, setShippingFormData] = useState({
     status: '',
+    paymentStatus: '',
     trackingNumber: '',
     courierName: '',
     expectedDelivery: '',
@@ -858,6 +861,7 @@ export default function AdminDashboard() {
         setEditingOrder(null)
         setShippingFormData({
           status: '',
+          paymentStatus: '',
           trackingNumber: '',
           courierName: '',
           expectedDelivery: '',
@@ -1079,6 +1083,7 @@ export default function AdminDashboard() {
     setEditingOrder(order)
     setShippingFormData({
       status: order.status,
+      paymentStatus: order.paymentStatus || '',
       trackingNumber: order.trackingNumber || '',
       courierName: order.courierName || '',
       expectedDelivery: order.expectedDelivery ? order.expectedDelivery.split('T')[0] : '',
@@ -1737,10 +1742,16 @@ export default function AdminDashboard() {
                             <span className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium ${
                               order.paymentStatus === 'paid' ? 'bg-neutral-100 text-neutral-800' :
                               order.paymentStatus === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                              order.paymentStatus === 'refunded' ? 'bg-purple-100 text-purple-800' :
                               'bg-red-100 text-red-800'
                             }`}>
                               {order.paymentStatus}
                             </span>
+                            {order.refundRequested && order.paymentStatus !== 'refunded' && (
+                              <span className="ml-1 inline-block px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-100 text-amber-800" title="Refund requested by customer">
+                                Refund req.
+                              </span>
+                            )}
                           </td>
                           <td className="px-2 sm:px-4 py-2 sm:py-3">
                             <p className="text-xs sm:text-sm">{new Date(order.createdAt).toLocaleDateString('en-IN')}</p>
@@ -1833,6 +1844,22 @@ export default function AdminDashboard() {
                             <option key={s.value} value={s.value}>{s.label}</option>
                           ))}
                         </select>
+                      </div>
+                      <div className="min-w-0">
+                        <Label className="text-sm sm:text-base">Payment Status</Label>
+                        <select
+                          className="w-full min-w-0 rounded-md border border-gray-300 px-3 py-2 mt-1 h-9 sm:h-10 text-sm sm:text-base"
+                          value={shippingFormData.paymentStatus}
+                          onChange={(e) => setShippingFormData({ ...shippingFormData, paymentStatus: e.target.value })}
+                        >
+                          <option value="paid">Paid</option>
+                          <option value="pending">Pending</option>
+                          <option value="failed">Failed</option>
+                          <option value="refunded">Refunded</option>
+                        </select>
+                        {editingOrder.refundRequested && (
+                          <p className="text-xs text-amber-600 mt-1">Customer requested refund</p>
+                        )}
                       </div>
                       <div>
                         <Label>Courier Name</Label>

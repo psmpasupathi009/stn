@@ -15,7 +15,9 @@ import {
   ShoppingBag,
   Calendar,
   Copy,
-  ExternalLink
+  ExternalLink,
+  XCircle,
+  RotateCcw
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -44,6 +46,8 @@ interface Order {
   shippedAt?: string
   expectedDelivery?: string
   deliveredAt?: string
+  refundRequested?: boolean
+  refundRequestedAt?: string
   items: OrderItem[]
   createdAt: string
 }
@@ -111,8 +115,59 @@ function OrderStatusTracker({ status }: { status: string }) {
   )
 }
 
-function OrderCard({ order }: { order: Order }) {
+const CANCELLABLE_STATUSES = ['pending', 'confirmed']
+
+function OrderCard({ order, refreshOrders }: { order: Order; refreshOrders: () => void }) {
   const [isExpanded, setIsExpanded] = useState(false)
+  const [loading, setLoading] = useState(false)
+
+  const handleCancel = async () => {
+    if (!confirm('Are you sure you want to cancel this order? This cannot be undone.')) return
+    setLoading(true)
+    try {
+      const res = await fetch(`/api/orders/${order.id}`, {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'cancel' }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (res.ok) {
+        toast.success('Order cancelled.')
+        refreshOrders()
+      } else {
+        toast.error(data.error || 'Failed to cancel order')
+      }
+    } catch {
+      toast.error('Failed to cancel order')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleRequestRefund = async () => {
+    if (!confirm('Request a refund for this order? Our team will process it and contact you.')) return
+    setLoading(true)
+    try {
+      const res = await fetch(`/api/orders/${order.id}`, {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'requestRefund' }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (res.ok) {
+        toast.success('Refund requested. We will process it shortly.')
+        refreshOrders()
+      } else {
+        toast.error(data.error || 'Failed to request refund')
+      }
+    } catch {
+      toast.error('Failed to request refund')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const copyOrderId = () => {
     navigator.clipboard.writeText(order.id)
@@ -166,6 +221,61 @@ function OrderCard({ order }: { order: Order }) {
         <div className="p-4 sm:p-6 bg-gray-50">
           <OrderStatusTracker status={order.status} />
           
+          {/* Cancel / Request Refund */}
+          {order.paymentStatus === 'paid' && order.status !== 'cancelled' && (
+            <div className="mt-4 flex flex-wrap gap-2">
+              {CANCELLABLE_STATUSES.includes(order.status) && (
+                <button
+                  type="button"
+                  onClick={handleCancel}
+                  disabled={loading}
+                  className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-xl border border-red-200 transition-colors disabled:opacity-50"
+                >
+                  <XCircle className="w-4 h-4" />
+                  Cancel order
+                </button>
+              )}
+              {order.status === 'delivered' && !order.refundRequested && (
+                <button
+                  type="button"
+                  onClick={handleRequestRefund}
+                  disabled={loading}
+                  className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-[#3CB31A] bg-[#3CB31A]/10 hover:bg-[#3CB31A]/20 rounded-xl border border-[#3CB31A]/30 transition-colors disabled:opacity-50"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                  Request refund
+                </button>
+              )}
+              {order.refundRequested && (
+                <span className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-amber-700 bg-amber-50 rounded-xl border border-amber-200">
+                  <RotateCcw className="w-4 h-4" />
+                  Refund requested
+                </span>
+              )}
+            </div>
+          )}
+          {order.paymentStatus === 'paid' && order.status === 'cancelled' && !order.refundRequested && (
+            <div className="mt-4">
+              <button
+                type="button"
+                onClick={handleRequestRefund}
+                disabled={loading}
+                className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-[#3CB31A] bg-[#3CB31A]/10 hover:bg-[#3CB31A]/20 rounded-xl border border-[#3CB31A]/30 transition-colors disabled:opacity-50"
+              >
+                <RotateCcw className="w-4 h-4" />
+                Request refund
+              </button>
+            </div>
+          )}
+          {order.status === 'cancelled' && order.refundRequested && (
+            <div className="mt-4">
+              <span className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-amber-700 bg-amber-50 rounded-xl border border-amber-200">
+                <RotateCcw className="w-4 h-4" />
+                Refund requested
+              </span>
+            </div>
+          )}
+
           {/* Shipping Info */}
           {order.trackingNumber && (
             <div className="mt-4 p-3 bg-white rounded-lg border border-gray-200">
@@ -389,7 +499,7 @@ export default function OrdersPage() {
         ) : (
           <div className="space-y-6">
             {filteredOrders.map((order) => (
-              <OrderCard key={order.id} order={order} />
+              <OrderCard key={order.id} order={order} refreshOrders={fetchOrders} />
             ))}
           </div>
         )}

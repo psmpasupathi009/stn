@@ -111,7 +111,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { orderId, status, trackingNumber, courierName, expectedDelivery, adminNotes } = body
+    const { orderId, status, paymentStatus, trackingNumber, courierName, expectedDelivery, adminNotes } = body
 
     if (!orderId) {
       return NextResponse.json({ error: 'Order ID is required' }, { status: 400 })
@@ -147,6 +147,10 @@ export async function PUT(request: NextRequest) {
     
     if (adminNotes !== undefined) {
       updateData.adminNotes = adminNotes
+    }
+
+    if (paymentStatus !== undefined && ['pending', 'paid', 'failed', 'refunded'].includes(paymentStatus)) {
+      updateData.paymentStatus = paymentStatus
     }
 
     const order = await prisma.order.update({
