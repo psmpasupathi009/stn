@@ -5,6 +5,7 @@ import { AuthProvider } from "@/lib/context";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
+import { PageLoadingOverlay } from "@/components/PageLoadingOverlay";
 import { Toaster } from "sonner";
 
 const geistSans = Geist({
@@ -34,11 +35,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="overflow-x-hidden">
+      <head>
+        <link rel="preload" href="/stn%20loading%20image.png" as="image" />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-w-0 overflow-x-hidden`}
       >
         <AuthProvider>
           <Toaster position="top-center" richColors closeButton />
+          <PageLoadingOverlay />
           <Header />
           <main className="min-h-screen min-w-0 overflow-x-hidden pt-14 sm:pt-16 md:pt-[4.25rem]">
             {children}

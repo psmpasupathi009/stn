@@ -1,5 +1,0 @@
-export { default as HeroSection } from './HeroSection'
-export { default as ProductsByCategory } from './ProductsByCategory'
-export { default as TrustSection } from './TrustSection'
-export { default as ProductCard } from './ProductCard'
-export * from './types'

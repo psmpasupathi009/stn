@@ -26,9 +26,10 @@ stn/
 │       └── ...
 ├── components/
 │   ├── Header.tsx | Footer.tsx | ScrollToTop.tsx
-│   ├── CategoryMarquee.tsx | CategoryIcons.tsx
+│   ├── CategoryMarquee.tsx
+│   ├── PageLoadingOverlay.tsx
 │   ├── homepage/           # HeroSection, ProductsByCategory, ProductCard, TrustSection, types
-│   ├── admin/              # SortableGalleryList, SortableHeroList, SortableHeroGrid
+│   ├── admin/              # SortableGalleryList
 │   ├── ui/                 # Button, Card, Input, Label, Sheet, etc.
 │   └── login-form.tsx
 ├── lib/                    # context, session, prisma, razorpay, email, auth, utils
