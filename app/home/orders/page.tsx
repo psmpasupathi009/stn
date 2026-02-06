@@ -20,6 +20,7 @@ import {
   RotateCcw
 } from 'lucide-react'
 import { toast } from 'sonner'
+import { getOrderStatusIndex } from '@/lib/order-status'
 import type { Order, OrderItem } from '@/lib/types'
 
 const ORDER_STEPS = [
@@ -31,13 +32,8 @@ const ORDER_STEPS = [
   { status: 'delivered', label: 'Delivered', icon: CheckCircle2 },
 ]
 
-function getStatusIndex(status: string): number {
-  const index = ORDER_STEPS.findIndex(s => s.status === status)
-  return index >= 0 ? index : 0
-}
-
 function OrderStatusTracker({ status }: { status: string }) {
-  const currentIndex = getStatusIndex(status)
+  const currentIndex = getOrderStatusIndex(status)
   const isCancelled = status === 'cancelled'
 
   if (isCancelled) {

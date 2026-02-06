@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useAuth } from '@/lib/context'
+import { useCartStore } from '@/lib/stores/cart-store'
 import Script from 'next/script'
 import { toast } from 'sonner'
 import { ShoppingBag, Truck, Shield, ChevronLeft, Package, MapPin } from 'lucide-react'
@@ -18,13 +19,16 @@ function CheckoutContent() {
   const { isAuthenticated, user } = useAuth()
   const router = useRouter()
   const searchParams = useSearchParams()
-  
-  const [cartItems, setCartItems] = useState<CartItem[]>([])
+  const { cart, loading: cartLoading, fetchCart } = useCartStore()
+
   const [buyNowProduct, setBuyNowProduct] = useState<BuyNowProduct | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [buyNowLoading, setBuyNowLoading] = useState(true)
   const [processing, setProcessing] = useState(false)
   const [isBuyNow, setIsBuyNow] = useState(false)
-  
+
+  const cartItems = isBuyNow ? [] : (cart?.items ?? [])
+  const loading = isBuyNow ? buyNowLoading : cartLoading
+
   // Shipping address state
   const [address, setAddress] = useState({
     fullName: '',
@@ -35,20 +39,6 @@ function CheckoutContent() {
     state: '',
     pincode: '',
   })
-
-  const fetchCart = useCallback(async () => {
-    try {
-      const res = await fetch('/api/cart', { credentials: 'include' })
-      if (res.ok) {
-        const data = await res.json()
-        setCartItems(data?.items || [])
-      }
-    } catch (error) {
-      console.error('Error fetching cart:', error)
-    } finally {
-      setLoading(false)
-    }
-  }, [])
 
   const fetchProduct = useCallback(async (productId: string, quantity: number) => {
     try {
@@ -71,7 +61,7 @@ function CheckoutContent() {
       console.error('Error fetching product:', error)
       toast.error('Failed to load product')
     } finally {
-      setLoading(false)
+      setBuyNowLoading(false)
     }
   }, [router])
 
@@ -80,16 +70,12 @@ function CheckoutContent() {
       router.push('/home/login')
       return
     }
-
     const productId = searchParams.get('productId')
     const quantity = searchParams.get('quantity') || '1'
-    
     if (productId) {
-      // Buy Now flow - fetch single product
       setIsBuyNow(true)
       fetchProduct(productId, parseInt(quantity))
     } else {
-      // Normal checkout - fetch cart
       setIsBuyNow(false)
       fetchCart()
     }
@@ -200,6 +186,7 @@ function CheckoutContent() {
 
             if (verifyRes.ok) {
               window.dispatchEvent(new CustomEvent('cart-updated'))
+              useCartStore.getState().fetchCart()
               toast.success('Payment successful! Order placed & processing. You can cancel before we ship.')
               router.push('/home/orders')
             } else {

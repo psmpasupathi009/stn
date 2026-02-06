@@ -1,10 +1,11 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useAuth } from '@/lib/context'
+import { useCartStore } from '@/lib/stores/cart-store'
 import { categoryMapping } from '@/components/CategoryMarquee'
 import { toast } from 'sonner'
 
@@ -55,6 +56,7 @@ export default function CategoryPage() {
   const actualCategory = categoryMapping[categorySlug] || categorySlug
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
+  const router = useRouter()
   const { isAuthenticated } = useAuth()
 
   useEffect(() => {
@@ -82,10 +84,9 @@ export default function CategoryPage() {
 
   const addToCart = async (productId: string) => {
     if (!isAuthenticated) {
-      window.location.href = '/home/login'
+      router.push('/home/login')
       return
     }
-
     try {
       const res = await fetch('/api/cart', {
         method: 'POST',
@@ -93,9 +94,9 @@ export default function CategoryPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ productId, quantity: 1 }),
       })
-
       if (res.ok) {
         window.dispatchEvent(new CustomEvent('cart-updated'))
+        useCartStore.getState().fetchCart()
         toast.success('Added to cart!')
       } else {
         const data = await res.json().catch(() => ({}))

@@ -19,54 +19,20 @@ import {
   ArrowRight,
 } from 'lucide-react'
 
+import { getOrderStatusIndex } from '@/lib/order-status'
 import type { Order, OrderItem } from '@/lib/types'
 
 const TRACKING_STEPS = [
-  { 
-    status: 'pending', 
-    label: 'Order Placed', 
-    description: 'Your order has been placed successfully',
-    icon: ShoppingBag 
-  },
-  { 
-    status: 'confirmed', 
-    label: 'Order Confirmed', 
-    description: 'Your order has been confirmed',
-    icon: CheckCircle2 
-  },
-  { 
-    status: 'processing', 
-    label: 'Processing', 
-    description: 'Your order is being prepared',
-    icon: Package 
-  },
-  { 
-    status: 'shipped', 
-    label: 'Shipped', 
-    description: 'Your order is on the way',
-    icon: Truck 
-  },
-  { 
-    status: 'out_for_delivery', 
-    label: 'Out for Delivery', 
-    description: 'Your order will be delivered today',
-    icon: MapPin 
-  },
-  { 
-    status: 'delivered', 
-    label: 'Delivered', 
-    description: 'Your order has been delivered',
-    icon: CheckCircle2 
-  },
+  { status: 'pending', label: 'Order Placed', description: 'Your order has been placed successfully', icon: ShoppingBag },
+  { status: 'confirmed', label: 'Order Confirmed', description: 'Your order has been confirmed', icon: CheckCircle2 },
+  { status: 'processing', label: 'Processing', description: 'Your order is being prepared', icon: Package },
+  { status: 'shipped', label: 'Shipped', description: 'Your order is on the way', icon: Truck },
+  { status: 'out_for_delivery', label: 'Out for Delivery', description: 'Your order will be delivered today', icon: MapPin },
+  { status: 'delivered', label: 'Delivered', description: 'Your order has been delivered', icon: CheckCircle2 },
 ]
 
-function getStatusIndex(status: string): number {
-  const index = TRACKING_STEPS.findIndex(s => s.status === status)
-  return index >= 0 ? index : 0
-}
-
 function TimelineTracker({ order }: { order: Order }) {
-  const currentIndex = getStatusIndex(order.status)
+  const currentIndex = getOrderStatusIndex(order.status)
   const isCancelled = order.status === 'cancelled'
 
   if (isCancelled) {

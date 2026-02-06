@@ -1,12 +1,18 @@
 'use client'
 
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
+const CONTACT_EMAIL = 'info@stngoldenhealthyfoods.com'
+const CONTACT_PHONE = '+919942590202'
+const CONTACT_ADDRESS = '46/1, Kongu Nagar, Opp. Power House,\nPollachi Main Road, Dharapuram,\nTiruppur - 638 656'
+
+type ContactFormState = { name: string; email: string; phone: string; message: string }
+
 export default function ContactPage() {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ContactFormState>({
     name: '',
     email: '',
     phone: '',
@@ -14,13 +20,19 @@ export default function ContactPage() {
   })
   const [submitted, setSubmitted] = useState(false)
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    // Here you would typically send the form data to your API
-    console.log('Form submitted:', formData)
-    setSubmitted(true)
-    setTimeout(() => setSubmitted(false), 3000)
-  }
+  const handleChange = useCallback((field: keyof ContactFormState) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData((prev) => ({ ...prev, [field]: e.target.value }))
+  }, [])
+
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault()
+      console.log('Form submitted:', formData)
+      setSubmitted(true)
+      setTimeout(() => setSubmitted(false), 3000)
+    },
+    [formData]
+  )
 
   return (
     <div className="bg-white min-h-screen w-full min-w-0 overflow-x-hidden">
@@ -40,23 +52,19 @@ export default function ContactPage() {
               <div className="space-y-6">
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-2">Email</h3>
-                  <a href="mailto:info@stngoldenhealthyfoods.com" className="text-neutral-700 hover:underline">
-                    info@stngoldenhealthyfoods.com
+                  <a href={`mailto:${CONTACT_EMAIL}`} className="text-neutral-700 hover:underline">
+                    {CONTACT_EMAIL}
                   </a>
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-2">Phone</h3>
-                  <a href="tel:+919942590202" className="text-neutral-700 hover:underline">
-                    +919942590202
+                  <a href={`tel:${CONTACT_PHONE.replace(/\s/g, '')}`} className="text-neutral-700 hover:underline">
+                    {CONTACT_PHONE}
                   </a>
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-2">Address</h3>
-                  <p className="text-gray-700">
-                    46/1, Kongu Nagar, Opp. Power House,<br />
-                    Pollachi Main Road, Dharapuram,<br />
-                    Tiruppur - 638 656
-                  </p>
+                  <p className="text-gray-700 whitespace-pre-line">{CONTACT_ADDRESS}</p>
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-4">Follow Us</h3>
@@ -79,31 +87,15 @@ export default function ContactPage() {
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
                   <Label htmlFor="name">Name</Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    required
-                  />
+                  <Input id="name" value={formData.name} onChange={handleChange('name')} required />
                 </div>
                 <div>
                   <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    required
-                  />
+                  <Input id="email" type="email" value={formData.email} onChange={handleChange('email')} required />
                 </div>
                 <div>
                   <Label htmlFor="phone">Phone</Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  />
+                  <Input id="phone" type="tel" value={formData.phone} onChange={handleChange('phone')} />
                 </div>
                 <div>
                   <Label htmlFor="message">Message</Label>
@@ -111,7 +103,7 @@ export default function ContactPage() {
                     id="message"
                     rows={6}
                     value={formData.message}
-                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                    onChange={handleChange('message')}
                     className="w-full min-w-0 rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-400 focus:ring-offset-1 resize-y min-h-[120px]"
                     required
                   />

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { ChevronUp } from 'lucide-react'
 
 const SCROLL_THRESHOLD = 300
@@ -8,18 +8,16 @@ const SCROLL_THRESHOLD = 300
 export default function ScrollToTop() {
   const [visible, setVisible] = useState(false)
 
+  const scrollToTop = useCallback(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [])
+
   useEffect(() => {
-    const onScroll = () => {
-      setVisible(window.scrollY > SCROLL_THRESHOLD)
-    }
+    const onScroll = () => setVisible(window.scrollY > SCROLL_THRESHOLD)
     window.addEventListener('scroll', onScroll, { passive: true })
     onScroll()
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
-
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
 
   if (!visible) return null
 

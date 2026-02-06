@@ -1,11 +1,13 @@
 'use client'
 
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo, useCallback } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/context'
+import { useCartStore } from '@/lib/stores/cart-store'
 import { toast } from 'sonner'
 import { ChevronRight } from 'lucide-react'
+import { sortProductsByRatingAndDate } from '@/lib/utils'
 import type { Product } from './types'
 import ProductCard from './ProductCard'
 
@@ -19,13 +21,13 @@ export default function ProductsByCategory() {
   const { isAuthenticated } = useAuth()
 
   useEffect(() => {
-    let cancelled = false
+    const ac = new AbortController()
+    const opts = { signal: ac.signal }
     Promise.all([
-      fetch('/api/categories').then((r) => r.json()),
-      fetch('/api/products').then((r) => r.json()),
+      fetch('/api/categories', opts).then((r) => r.json()),
+      fetch('/api/products', opts).then((r) => r.json()),
     ])
       .then(([catData, prodData]) => {
-        if (cancelled) return
         const names = Array.isArray(catData)
           ? catData.map((c: { category: string }) => c.category).filter(Boolean)
           : []
@@ -38,11 +40,9 @@ export default function ProductsByCategory() {
         )
         setAllProducts(separate)
       })
-      .catch((err) => console.error('Home products fetch error:', err))
-      .finally(() => {
-        if (!cancelled) setLoading(false)
-      })
-    return () => { cancelled = true }
+      .catch((err) => (err?.name === 'AbortError' ? undefined : console.error('Home products fetch error:', err)))
+      .finally(() => setLoading(false))
+    return () => ac.abort()
   }, [])
 
   const productsByCategory = useMemo(() => {
@@ -56,61 +56,50 @@ export default function ProductsByCategory() {
     return categories
       .map((cat) => {
         const list = map.get(cat) || []
-        const sorted = [...list].sort((a, b) => {
-          const aRating = a.rating ?? 0
-          const bRating = b.rating ?? 0
-          const aHasRating = aRating > 0
-          const bHasRating = bRating > 0
-          if (aHasRating && bHasRating) return bRating - aRating
-          if (aHasRating && !bHasRating) return -1
-          if (!aHasRating && bHasRating) return 1
-          const aDate = a.createdAt || a.updatedAt || ''
-          const bDate = b.createdAt || b.updatedAt || ''
-          return bDate.localeCompare(aDate)
-        })
-        return {
-          category: cat,
-          products: sorted.slice(0, RECENT_PER_CATEGORY),
-        }
+        const sorted = sortProductsByRatingAndDate(list)
+        return { category: cat, products: sorted.slice(0, RECENT_PER_CATEGORY) }
       })
       .filter(({ products }) => products.length > 0)
   }, [allProducts, categories])
 
-  const addToCart = async (productId: string) => {
-    if (!isAuthenticated) {
-      router.push('/home/login')
-      return
-    }
-
-    try {
-      const res = await fetch('/api/cart', {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ productId, quantity: 1 }),
-      })
-
-      if (res.ok) {
-        window.dispatchEvent(new CustomEvent('cart-updated'))
-        toast.success('Added to cart!')
-      } else {
-        const data = await res.json().catch(() => ({}))
-        toast.error(data.error || 'Failed to add to cart')
+  const addToCart = useCallback(
+    async (productId: string) => {
+      if (!isAuthenticated) {
+        router.push('/home/login')
+        return
       }
-    } catch (error) {
-      console.error('Error adding to cart:', error)
-      toast.error('Failed to add to cart')
-    }
-  }
+      try {
+        const res = await fetch('/api/cart', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ productId, quantity: 1 }),
+        })
+        if (res.ok) {
+          window.dispatchEvent(new CustomEvent('cart-updated'))
+          useCartStore.getState().fetchCart()
+          toast.success('Added to cart!')
+        } else {
+          const data = await res.json().catch(() => ({}))
+          toast.error(data.error || 'Failed to add to cart')
+        }
+      } catch {
+        toast.error('Failed to add to cart')
+      }
+    },
+    [isAuthenticated, router]
+  )
 
-  const buyNow = (productId: string) => {
-    if (!isAuthenticated) {
-      router.push('/home/login')
-      return
-    }
-    // Direct to checkout with product ID for instant buy
-    router.push(`/home/checkout?productId=${productId}&quantity=1`)
-  }
+  const buyNow = useCallback(
+    (productId: string) => {
+      if (!isAuthenticated) {
+        router.push('/home/login')
+        return
+      }
+      router.push(`/home/checkout?productId=${productId}&quantity=1`)
+    },
+    [isAuthenticated, router]
+  )
 
   return (
     <section className="py-14 sm:py-16 md:py-24 bg-gradient-to-b from-white via-gray-50/50 to-emerald-50/30">

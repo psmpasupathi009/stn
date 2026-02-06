@@ -7,9 +7,10 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useAuth } from '@/lib/context'
+import { useCartStore } from '@/lib/stores/cart-store'
 import { toast } from 'sonner'
 import { Search, Package, Filter, X, LayoutGrid } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { cn, sortProductsByRatingAndDate } from '@/lib/utils'
 import ProductCard from '@/components/homepage/ProductCard'
 import type { Product } from '@/lib/types'
 
@@ -24,13 +25,13 @@ function ProductsPageContent() {
   const { isAuthenticated } = useAuth()
 
   useEffect(() => {
-    let cancelled = false
+    const ac = new AbortController()
+    const opts = { credentials: 'include' as RequestCredentials, signal: ac.signal }
     Promise.all([
-      fetch('/api/categories', { credentials: 'include' }).then((r) => r.json()),
-      fetch('/api/products', { credentials: 'include' }).then((r) => r.json()),
+      fetch('/api/categories', opts).then((r) => r.json()),
+      fetch('/api/products', opts).then((r) => r.json()),
     ])
       .then(([catData, prodData]) => {
-        if (cancelled) return
         const names = Array.isArray(catData)
           ? catData.map((c: { category: string }) => c.category).filter(Boolean)
           : []
@@ -38,10 +39,8 @@ function ProductsPageContent() {
         setAllProducts(Array.isArray(prodData) ? prodData : [])
       })
       .catch(() => {})
-      .finally(() => {
-        if (!cancelled) setLoading(false)
-      })
-    return () => { cancelled = true }
+      .finally(() => setLoading(false))
+    return () => ac.abort()
   }, [])
 
   const hasActiveFilters = Boolean(categoryFromUrl.trim() || searchQuery.trim())
@@ -75,19 +74,7 @@ function ProductsPageContent() {
           (p.itemCode?.toLowerCase() || '').includes(q)
       )
     }
-    const sorted = [...list].sort((a, b) => {
-      const aRating = a.rating ?? 0
-      const bRating = b.rating ?? 0
-      const aHasRating = aRating > 0
-      const bHasRating = bRating > 0
-      if (aHasRating && bHasRating) return bRating - aRating
-      if (aHasRating && !bHasRating) return -1
-      if (!aHasRating && bHasRating) return 1
-      const aDate = a.createdAt || a.updatedAt || ''
-      const bDate = b.createdAt || b.updatedAt || ''
-      return bDate.localeCompare(aDate)
-    })
-    return sorted
+    return sortProductsByRatingAndDate(list)
   }, [allProducts, categoryFromUrl, searchQuery])
 
   const addToCart = useCallback(
@@ -105,6 +92,7 @@ function ProductsPageContent() {
         })
         if (res.ok) {
           window.dispatchEvent(new CustomEvent('cart-updated'))
+          useCartStore.getState().fetchCart()
           toast.success('Added to cart!')
         } else {
           const data = await res.json().catch(() => ({}))

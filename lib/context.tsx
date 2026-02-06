@@ -1,8 +1,8 @@
 'use client'
 
-import React, { createContext, useContext, useState, useEffect } from 'react'
+import React, { createContext, useCallback, useContext, useState, useEffect } from 'react'
 
-interface User {
+export interface AuthUser {
   id: string
   email: string
   name?: string | null
@@ -12,9 +12,9 @@ interface User {
 }
 
 interface AuthContextType {
-  user: User | null
+  user: AuthUser | null
   isLoading: boolean
-  setUser: (user: User | null) => void
+  setUser: (user: AuthUser | null) => void
   signOut: () => Promise<void>
   logout: () => Promise<void>
   isAuthenticated: boolean
@@ -22,56 +22,54 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
+const AUTH_ME_URL = '/api/auth/me'
+const SIGN_OUT_URL = '/api/auth/signout'
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUserState] = useState<User | null>(null)
+  const [user, setUserState] = useState<AuthUser | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
-  // On mount, fetch current user from session cookie
+  const setUser = useCallback((userData: AuthUser | null) => {
+    setUserState(userData)
+  }, [])
+
   useEffect(() => {
+    const ac = new AbortController()
     const fetchUser = async () => {
       try {
-        const res = await fetch('/api/auth/me', {
+        const res = await fetch(AUTH_ME_URL, {
           cache: 'no-store',
           credentials: 'include',
+          signal: ac.signal,
         })
         const data = await res.json()
-        if (data.user) {
-          setUserState(data.user)
+        if (data?.user) setUserState(data.user)
+      } catch (err) {
+        if ((err as { name?: string })?.name !== 'AbortError') {
+          console.error('Failed to fetch user:', err)
         }
-      } catch (error) {
-        console.error('Failed to fetch user:', error)
       } finally {
         setIsLoading(false)
       }
     }
-
     fetchUser()
+    return () => ac.abort()
   }, [])
 
-  const setUser = (userData: User | null) => {
-    setUserState(userData)
-  }
-
-  const signOut = async () => {
+  const signOut = useCallback(async () => {
     try {
-      // Call signout API to clear cookie
-      await fetch('/api/auth/signout', {
-        method: 'POST',
-        credentials: 'include',
-      })
-    } catch (error) {
-      console.error('Failed to sign out:', error)
+      await fetch(SIGN_OUT_URL, { method: 'POST', credentials: 'include' })
+    } catch (err) {
+      console.error('Failed to sign out:', err)
     } finally {
-      // Clear user state and any local storage
       setUserState(null)
       if (typeof window !== 'undefined') {
-        // Clear any remaining localStorage items
         localStorage.removeItem('token')
         localStorage.removeItem('user')
         localStorage.removeItem('cart')
       }
     }
-  }
+  }, [])
 
   return (
     <AuthContext.Provider

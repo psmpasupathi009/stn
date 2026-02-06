@@ -1,5 +1,6 @@
 'use client'
 
+import { memo } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Droplets, ShoppingCart, ArrowRight, Star } from 'lucide-react'
@@ -21,7 +22,7 @@ export interface ProductCardProps {
   className?: string
 }
 
-export default function ProductCard({ product, onAddToCart, onBuyNow, className = '' }: ProductCardProps) {
+function ProductCard({ product, onAddToCart, onBuyNow, className = '' }: ProductCardProps) {
   const hasDiscount = product.mrp > product.salePrice
   const discountPercent = hasDiscount
     ? Math.round(((product.mrp - product.salePrice) / product.mrp) * 100)
@@ -126,3 +127,5 @@ export default function ProductCard({ product, onAddToCart, onBuyNow, className 
     </div>
   )
 }
+
+export default memo(ProductCard)

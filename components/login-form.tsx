@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/lib/context'
 import { Button } from '@/components/ui/button'
@@ -10,7 +10,26 @@ import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { PasswordInput } from '@/components/ui/password-input'
 
-export function LoginForm() {
+const DEFAULT_AFTER_LOGIN = { admin: '/admin/dashboard', user: '/home' }
+
+function isSafeCallbackUrl(url: string): boolean {
+  if (!url || typeof url !== 'string') return false
+  try {
+    const u = new URL(url, window.location.origin)
+    return u.origin === window.location.origin && u.pathname.startsWith('/')
+  } catch {
+    return false
+  }
+}
+
+/** Wrapper that reads callbackUrl from URL and passes to LoginForm (use inside Suspense). */
+export function LoginFormWithCallback() {
+  const searchParams = useSearchParams()
+  const callbackUrl = searchParams.get('callbackUrl')
+  return <LoginForm callbackUrl={callbackUrl} />
+}
+
+export function LoginForm({ callbackUrl }: { callbackUrl?: string | null }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -58,11 +77,13 @@ export function LoginForm() {
 
       if (res.ok && data.user) {
         setUser(data.user)
-        if (data.user.role === 'ADMIN') {
-          router.push('/admin/dashboard')
-        } else {
-          router.push('/home')
-        }
+        const target =
+          isSafeCallbackUrl(callbackUrl ?? '')
+            ? callbackUrl!
+            : data.user.role === 'ADMIN'
+              ? DEFAULT_AFTER_LOGIN.admin
+              : DEFAULT_AFTER_LOGIN.user
+        router.push(target)
       } else {
         setError(data.error || 'Invalid email or password')
       }

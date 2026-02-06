@@ -7,8 +7,9 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { useAuth } from '@/lib/context'
+import { useCartStore } from '@/lib/stores/cart-store'
 import { toast } from 'sonner'
-import { Star, MessageSquare, User, ChevronLeft } from 'lucide-react'
+import { Star, MessageSquare, User, ChevronLeft, Share2 } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import type { Product, Review } from '@/lib/types'
@@ -78,10 +79,17 @@ export default function ProductDetailPage() {
   }, [productId])
 
   useEffect(() => {
-    if (productId) {
-      fetchProduct()
-      fetchReviews()
-    }
+    if (!productId) return
+    let cancelled = false
+    setLoading(true)
+    setReviewsLoading(true)
+    Promise.all([fetchProduct(), fetchReviews()]).finally(() => {
+      if (!cancelled) {
+        setLoading(false)
+        setReviewsLoading(false)
+      }
+    })
+    return () => { cancelled = true }
   }, [productId, fetchProduct, fetchReviews])
 
   const addToCart = async () => {
@@ -100,6 +108,7 @@ export default function ProductDetailPage() {
 
       if (res.ok) {
         window.dispatchEvent(new CustomEvent('cart-updated'))
+        useCartStore.getState().fetchCart()
         toast.success('Added to cart!')
       } else {
         const data = await res.json().catch(() => ({}))
@@ -154,6 +163,36 @@ export default function ProductDetailPage() {
 
   const displayRating = product?.rating ?? 0
   const displayReviewCount = product?.reviewCount ?? 0
+
+  const shareProduct = async () => {
+    const url = typeof window !== 'undefined' ? window.location.href : ''
+    const title = product?.name ? `${product.name} | STN Golden Healthy Foods` : 'Product | STN Golden Healthy Foods'
+    const text = product?.name ? `Check out ${product.name}` : 'Check out this product'
+
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      try {
+        await navigator.share({ title, text, url })
+        toast.success('Link shared!')
+      } catch (err) {
+        if ((err as Error).name !== 'AbortError') {
+          copyToClipboard(url)
+        }
+      }
+    } else {
+      copyToClipboard(url)
+    }
+  }
+
+  const copyToClipboard = (url: string) => {
+    if (typeof navigator === 'undefined' || !navigator.clipboard) {
+      toast.error('Sharing not supported')
+      return
+    }
+    navigator.clipboard.writeText(url).then(
+      () => toast.success('Link copied to clipboard'),
+      () => toast.error('Could not copy link')
+    )
+  }
 
   if (loading) {
     return (
@@ -234,9 +273,19 @@ export default function ProductDetailPage() {
 
           {/* Product Info */}
           <div className="min-w-0 flex flex-col">
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-neutral-900 mb-2 sm:mb-3 leading-tight">
-              {product.name}
-            </h1>
+            <div className="flex items-start justify-between gap-3 mb-2 sm:mb-3">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-neutral-900 leading-tight min-w-0 flex-1">
+                {product.name}
+              </h1>
+              <button
+                type="button"
+                onClick={shareProduct}
+                className="shrink-0 p-2 rounded-full border border-neutral-300 text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900 transition-colors"
+                aria-label="Share this product"
+              >
+                <Share2 className="w-5 h-5" />
+              </button>
+            </div>
 
             {/* Rating & review count - always visible */}
             <div className="flex flex-wrap items-center gap-3 mb-4 sm:mb-5">

@@ -2,7 +2,8 @@
 
 import Link from 'next/link'
 import { useAuth } from '@/lib/context'
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
+import { useCartStore, useCartCount } from '@/lib/stores/cart-store'
 import {
   User,
   ShoppingBasket,
@@ -25,39 +26,28 @@ const NAV_LINKS = [
   { href: '/home/contact', label: 'Contact' },
   { href: '/home/orders', label: 'My Orders' },
   { href: '/home/track-order', label: 'Track Order' },
-]
+] as const
+
+const NAV_LINK_CLASS =
+  'px-5 py-3.5 text-sm font-medium text-neutral-800 hover:bg-neutral-100 hover:text-neutral-900 transition-colors border-b border-neutral-100 uppercase tracking-wide'
 
 export default function Header() {
   const { user, isAuthenticated } = useAuth()
-  const [cartCount, setCartCount] = useState(0)
   const [menuOpen, setMenuOpen] = useState(false)
-
-  const refreshCartCount = useCallback(() => {
-    if (!isAuthenticated) return
-    fetch('/api/cart', { credentials: 'include' })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data?.items) {
-          const total = data.items.reduce((s: number, i: { quantity?: number }) => s + (i.quantity || 1), 0)
-          setCartCount(total)
-        } else if (data?.error) setCartCount(0)
-      })
-      .catch(() => setCartCount(0))
-  }, [isAuthenticated])
+  const cartCount = useCartCount()
+  const fetchCart = useCartStore((s) => s.fetchCart)
 
   useEffect(() => {
-    if (isAuthenticated) {
-      refreshCartCount()
-    }
-  }, [isAuthenticated, refreshCartCount])
-
-  const displayCartCount = isAuthenticated ? cartCount : 0
+    if (isAuthenticated) fetchCart()
+  }, [isAuthenticated, fetchCart])
 
   useEffect(() => {
-    const handler = () => refreshCartCount()
+    const handler = () => fetchCart()
     window.addEventListener('cart-updated', handler)
     return () => window.removeEventListener('cart-updated', handler)
-  }, [refreshCartCount])
+  }, [fetchCart])
+
+  const displayCartCount = isAuthenticated ? cartCount : 0
 
   const iconButtonClass =
     'p-2.5 rounded-full text-white hover:bg-white/20 transition-colors focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-[var(--primary-green)]'
@@ -106,37 +96,20 @@ export default function Header() {
                 </SheetHeader>
                 <nav className="flex flex-col py-4 flex-1 overflow-y-auto">
                   {!isAuthenticated && (
-                    <Link
-                      href="/home/login"
-                      className="px-5 py-3.5 text-sm font-medium text-neutral-800 hover:bg-neutral-100 hover:text-neutral-900 transition-colors border-b border-neutral-100 uppercase tracking-wide"
-                      onClick={() => setMenuOpen(false)}
-                    >
+                    <Link href="/home/login" className={NAV_LINK_CLASS} onClick={() => setMenuOpen(false)}>
                       Login
                     </Link>
                   )}
-                  <Link
-                    href="/home/products"
-                    className="px-5 py-3.5 text-sm font-medium text-neutral-800 hover:bg-neutral-100 hover:text-neutral-900 transition-colors border-b border-neutral-100 uppercase tracking-wide"
-                    onClick={() => setMenuOpen(false)}
-                  >
+                  <Link href="/home/products" className={NAV_LINK_CLASS} onClick={() => setMenuOpen(false)}>
                     Shop All
                   </Link>
                   {NAV_LINKS.map((link) => (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      className="px-5 py-3.5 text-sm font-medium text-neutral-800 hover:bg-neutral-100 hover:text-neutral-900 transition-colors border-b border-neutral-100 uppercase tracking-wide"
-                      onClick={() => setMenuOpen(false)}
-                    >
+                    <Link key={link.href} href={link.href} className={NAV_LINK_CLASS} onClick={() => setMenuOpen(false)}>
                       {link.label}
                     </Link>
                   ))}
                   {user?.role?.toUpperCase() === 'ADMIN' && (
-                    <Link
-                      href="/admin/dashboard"
-                      className="px-5 py-3.5 text-sm font-medium text-neutral-800 hover:bg-neutral-100 hover:text-neutral-900 transition-colors border-b border-neutral-100 uppercase tracking-wide"
-                      onClick={() => setMenuOpen(false)}
-                    >
+                    <Link href="/admin/dashboard" className={NAV_LINK_CLASS} onClick={() => setMenuOpen(false)}>
                       Admin Dashboard
                     </Link>
                   )}

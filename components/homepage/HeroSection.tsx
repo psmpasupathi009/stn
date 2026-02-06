@@ -46,16 +46,16 @@ export default function HeroSection() {
   }
 
   useEffect(() => {
-    let cancelled = false
-    fetch('/api/hero-sections?active=true')
+    const ac = new AbortController()
+    fetch('/api/hero-sections?active=true', { signal: ac.signal })
       .then((res) => (res.ok ? res.json() : []))
       .then((data) => {
-        if (cancelled || !Array.isArray(data)) return
+        if (!Array.isArray(data)) return
         setHeroSlides(data)
         setHeroImageErrors(new Set())
       })
-      .catch((err) => console.error('Hero sections fetch error:', err))
-    return () => { cancelled = true }
+      .catch((err) => (err?.name === 'AbortError' ? undefined : console.error('Hero sections fetch error:', err)))
+    return () => ac.abort()
   }, [])
 
   useEffect(() => {

@@ -1,6 +1,18 @@
+import { Suspense } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { LoginForm } from '@/components/login-form'
+import { LoginFormWithCallback } from '@/components/login-form'
+
+function LoginFormFallback() {
+  return (
+    <div className="w-full min-w-0 rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:p-5 md:p-6 lg:p-8 animate-pulse">
+      <div className="h-8 w-32 bg-gray-100 rounded mb-4 mx-auto" />
+      <div className="h-10 bg-gray-100 rounded mb-4" />
+      <div className="h-10 bg-gray-100 rounded mb-6" />
+      <div className="h-10 bg-gray-200 rounded" />
+    </div>
+  )
+}
 
 export default function LoginPage() {
   return (
@@ -19,9 +31,9 @@ export default function LoginPage() {
           />
           <span className="truncate">STN GOLDEN HEALTHY FOODS</span>
         </Link>
-        <div className="w-full min-w-0 rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:p-5 md:p-6 lg:p-8">
-          <LoginForm />
-        </div>
+        <Suspense fallback={<LoginFormFallback />}>
+          <LoginFormWithCallback />
+        </Suspense>
       </div>
     </div>
   )

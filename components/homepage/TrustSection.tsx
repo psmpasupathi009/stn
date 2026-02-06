@@ -1,6 +1,19 @@
 'use client'
 
 import { Gem, Truck, Lock, MessageCircle, Globe } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
+
+const TRUST_ITEMS: { title: string; description: string; icon: LucideIcon; iconClass: string; boxClass: string; colClass?: string }[] = [
+  { title: 'Premium Quality', description: 'Carefully selected ingredients.', icon: Gem, iconClass: 'text-neutral-600', boxClass: 'bg-neutral-100' },
+  { title: 'Free Delivery', description: 'Zero delivery charges on all orders', icon: Truck, iconClass: 'text-amber-600', boxClass: 'bg-linear-to-br from-amber-100 to-orange-100' },
+  { title: 'Secure Checkout', description: 'Encrypted & safe transactions', icon: Lock, iconClass: 'text-blue-600', boxClass: 'bg-linear-to-br from-blue-100 to-indigo-100' },
+  { title: 'Customer Support', description: 'Your questions answered with care', icon: MessageCircle, iconClass: 'text-purple-600', boxClass: 'bg-linear-to-br from-purple-100 to-pink-100' },
+  { title: 'Pan-India Shipping', description: 'Reachable. Reliable. Nationwide.', icon: Globe, iconClass: 'text-neutral-600', boxClass: 'bg-neutral-100', colClass: 'col-span-2 md:col-span-1' },
+]
+
+const CARD_CLASS = 'bg-white rounded-xl p-4 sm:p-6 shadow-sm hover:shadow-md transition-shadow'
+const ICON_WRAP_CLASS = 'w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-3 sm:mb-4 rounded-full flex items-center justify-center'
+const ICON_SIZE_CLASS = 'w-6 h-6 sm:w-7 sm:h-7'
 
 export default function TrustSection() {
   return (
@@ -10,41 +23,15 @@ export default function TrustSection() {
           Why Customers Trust Us
         </h2>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6 text-center">
-          <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm hover:shadow-md transition-shadow">
-            <div className="w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-3 sm:mb-4 bg-neutral-100 rounded-full flex items-center justify-center">
-              <Gem className="w-6 h-6 sm:w-7 sm:h-7 text-neutral-600" />
+          {TRUST_ITEMS.map(({ title, description, icon: Icon, iconClass, boxClass, colClass }) => (
+            <div key={title} className={`${CARD_CLASS} ${colClass ?? ''}`}>
+              <div className={`${ICON_WRAP_CLASS} ${boxClass}`}>
+                <Icon className={`${ICON_SIZE_CLASS} ${iconClass}`} />
+              </div>
+              <h3 className="font-semibold text-sm sm:text-base mb-1 sm:mb-2 text-gray-800">{title}</h3>
+              <p className="text-xs sm:text-sm text-gray-600">{description}</p>
             </div>
-            <h3 className="font-semibold text-sm sm:text-base mb-1 sm:mb-2 text-gray-800">Premium Quality</h3>
-            <p className="text-xs sm:text-sm text-gray-600">Carefully selected ingredients.</p>
-          </div>
-          <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm hover:shadow-md transition-shadow">
-            <div className="w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-3 sm:mb-4 bg-linear-to-br from-amber-100 to-orange-100 rounded-full flex items-center justify-center">
-              <Truck className="w-6 h-6 sm:w-7 sm:h-7 text-amber-600" />
-            </div>
-            <h3 className="font-semibold text-sm sm:text-base mb-1 sm:mb-2 text-gray-800">Free Delivery</h3>
-            <p className="text-xs sm:text-sm text-gray-600">Zero delivery charges on all orders</p>
-          </div>
-          <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm hover:shadow-md transition-shadow">
-            <div className="w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-3 sm:mb-4 bg-linear-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center">
-              <Lock className="w-6 h-6 sm:w-7 sm:h-7 text-blue-600" />
-            </div>
-            <h3 className="font-semibold text-sm sm:text-base mb-1 sm:mb-2 text-gray-800">Secure Checkout</h3>
-            <p className="text-xs sm:text-sm text-gray-600">Encrypted & safe transactions</p>
-          </div>
-          <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm hover:shadow-md transition-shadow">
-            <div className="w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-3 sm:mb-4 bg-linear-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center">
-              <MessageCircle className="w-6 h-6 sm:w-7 sm:h-7 text-purple-600" />
-            </div>
-            <h3 className="font-semibold text-sm sm:text-base mb-1 sm:mb-2 text-gray-800">Customer Support</h3>
-            <p className="text-xs sm:text-sm text-gray-600">Your questions answered with care</p>
-          </div>
-          <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm hover:shadow-md transition-shadow col-span-2 md:col-span-1">
-            <div className="w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-3 sm:mb-4 bg-neutral-100 rounded-full flex items-center justify-center">
-              <Globe className="w-6 h-6 sm:w-7 sm:h-7 text-neutral-600" />
-            </div>
-            <h3 className="font-semibold text-sm sm:text-base mb-1 sm:mb-2 text-gray-800">Pan-India Shipping</h3>
-            <p className="text-xs sm:text-sm text-gray-600">Reachable. Reliable. Nationwide.</p>
-          </div>
+          ))}
         </div>
       </div>
     </section>
