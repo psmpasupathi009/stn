@@ -53,19 +53,27 @@ export default function ProfilePage() {
             <CardHeader>
               <CardTitle>Actions</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-0 overflow-hidden rounded-lg border border-gray-200">
+              {/* Indian flag tricolor: Saffron → White → Green */}
               {(user.role?.toUpperCase() === 'ADMIN') && (
                 <Button
-                  className="w-full bg-neutral-700 text-white hover:bg-neutral-600"
+                  className="w-full rounded-none border-0 border-b border-gray-200 bg-[#FF9933] text-white hover:bg-[#E88B2E] hover:opacity-95 py-3 font-medium"
                   onClick={() => router.push('/admin/dashboard')}
                 >
                   Admin Dashboard
                 </Button>
               )}
-              <Button variant="outline" className="w-full" onClick={() => router.push('/home/orders')}>
+              <Button
+                variant="outline"
+                className="w-full rounded-none border-0 border-b border-gray-200 bg-white text-gray-800 hover:bg-gray-50 font-medium py-3"
+                onClick={() => router.push('/home/orders')}
+              >
                 My Orders
               </Button>
-              <Button variant="destructive" className="w-full" onClick={logout}>
+              <Button
+                className="w-full rounded-none border-0 bg-[#138808] text-white hover:bg-[#0F6B06] hover:opacity-95 font-medium py-3"
+                onClick={logout}
+              >
                 Logout
               </Button>
             </CardContent>

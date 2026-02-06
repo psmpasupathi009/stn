@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { Droplets, ShoppingCart, Zap, ArrowRight, Star } from 'lucide-react'
+import { Droplets, ShoppingCart, ArrowRight, Star } from 'lucide-react'
 
 export interface ProductCardProps {
   product: {
@@ -107,9 +107,8 @@ export default function ProductCard({ product, onAddToCart, onBuyNow, className 
               e.stopPropagation()
               onBuyNow(product.id)
             }}
-            className="flex-1 min-w-0 bg-[var(--primary-green)] hover:opacity-90 text-white text-xs sm:text-sm font-semibold py-2.5 sm:py-3 rounded-xl flex items-center justify-center gap-1.5 shadow-md transition-all touch-manipulation"
+            className="flex-1 min-w-0 bg-[var(--primary-green)] hover:opacity-90 text-white text-xs sm:text-sm font-semibold py-2.5 sm:py-3 rounded-xl flex items-center justify-center shadow-md transition-all touch-manipulation"
           >
-            <Zap className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
             <span className="truncate">Buy Now</span>
           </button>
           <button

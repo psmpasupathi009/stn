@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import {
@@ -10,10 +10,6 @@ import {
   Flame,
   ChefHat,
   Leaf,
-  ChevronLeft,
-  ChevronRight,
-  Pause,
-  Play,
 } from 'lucide-react'
 import type { HeroSlide } from './types'
 
@@ -67,14 +63,6 @@ export default function HeroSection() {
     const id = setInterval(() => setCurrentSlide((prev) => (prev + 1) % heroCount), 5000)
     return () => clearInterval(id)
   }, [heroCount, isPlaying])
-
-  const goToNext = useCallback(() => {
-    setCurrentSlide((prev) => (prev + 1) % heroCount)
-  }, [heroCount])
-
-  const goToPrev = useCallback(() => {
-    setCurrentSlide((prev) => (prev - 1 + heroCount) % heroCount)
-  }, [heroCount])
 
   if (heroCount === 0) return null
 
@@ -146,27 +134,6 @@ export default function HeroSection() {
             )
           })}
         </div>
-
-        {heroCount > 1 && (
-          <div className="flex items-center justify-center gap-4 sm:gap-6 mt-4 sm:mt-5 md:mt-6">
-            <button onClick={goToPrev} className="p-2 text-gray-400 hover:text-gray-700 transition-colors" aria-label="Previous slide">
-              <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" strokeWidth={1.5} />
-            </button>
-            <span className="text-sm sm:text-base text-gray-600 font-medium tabular-nums min-w-[40px] text-center">
-              {currentIndex + 1}/{heroCount}
-            </span>
-            <button onClick={goToNext} className="p-2 text-gray-400 hover:text-gray-700 transition-colors" aria-label="Next slide">
-              <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" strokeWidth={1.5} />
-            </button>
-            <button
-              onClick={() => setIsPlaying(!isPlaying)}
-              className="p-2 text-gray-400 hover:text-gray-700 transition-colors"
-              aria-label={isPlaying ? 'Pause slideshow' : 'Play slideshow'}
-            >
-              {isPlaying ? <Pause className="w-4 h-4 sm:w-5 sm:h-5" strokeWidth={1.5} /> : <Play className="w-4 h-4 sm:w-5 sm:h-5" strokeWidth={1.5} />}
-            </button>
-          </div>
-        )}
       </div>
     </section>
   )
