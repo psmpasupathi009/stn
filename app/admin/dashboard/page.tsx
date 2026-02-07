@@ -33,10 +33,12 @@ import {
   ChevronDown,
   RotateCcw,
   BookOpen,
+  FileText,
 } from 'lucide-react'
 import SortableGalleryList from '@/components/admin/SortableGalleryList'
 import { getAboutTemplateForIndex } from '@/lib/about-sections'
 import { COMPANY } from '@/lib/company'
+import { generateInvoicePDF, type InvoiceOrder } from '@/lib/invoice-pdf'
 import type { AboutSection } from '@/lib/types'
 
 interface Product {
@@ -1160,10 +1162,28 @@ export default function AdminDashboard() {
       ])
       const pdf = generateLabelsPDF(jsPDFModule.default, labels, { qrDataUrls, barcodeDataUrls, fragileIcon })
       pdf.save(`shipping-labels-${new Date().toISOString().slice(0, 10)}.pdf`)
-      toast.success(`Downloaded ${ids.length} label(s) as PDF`)
+        toast.success(`Downloaded ${ids.length} label(s) as PDF`)
     } catch (error) {
       console.error('Error downloading labels:', error)
       toast.error('Failed to generate labels')
+    }
+  }
+
+  const handleDownloadInvoice = async (orderId: string) => {
+    try {
+      const res = await fetch(`/api/orders/${orderId}?invoice=true`, { credentials: 'include' })
+      if (!res.ok) {
+        toast.error('Failed to load order')
+        return
+      }
+      const { order } = (await res.json()) as { order: InvoiceOrder }
+      const jsPDF = (await import('jspdf')).default
+      const doc = generateInvoicePDF(jsPDF, order)
+      doc.save(`invoice-${order.id.slice(-8).toUpperCase()}-${new Date(order.createdAt).toISOString().slice(0, 10)}.pdf`)
+      toast.success('Invoice downloaded')
+    } catch (error) {
+      console.error('Error downloading invoice:', error)
+      toast.error('Failed to generate invoice')
     }
   }
 
@@ -2205,8 +2225,19 @@ export default function AdminDashboard() {
                                 size="sm"
                                 onClick={() => openEditOrder(order)}
                                 className="h-8 w-8 p-0"
+                                title="Edit order"
                               >
                                 <Pencil className="w-3 h-3" />
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleDownloadInvoice(order.id)}
+                                className="h-8 w-8 p-0"
+                                disabled={order.paymentStatus !== 'paid'}
+                                title="Download invoice"
+                              >
+                                <FileText className="w-3 h-3" />
                               </Button>
                               <Button
                                 variant="outline"
@@ -2214,6 +2245,7 @@ export default function AdminDashboard() {
                                 onClick={() => handleDownloadLabels([order.id])}
                                 className="h-8 w-8 p-0"
                                 disabled={order.paymentStatus !== 'paid'}
+                                title="Download shipping label"
                               >
                                 <Download className="w-3 h-3" />
                               </Button>

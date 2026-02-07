@@ -18,7 +18,9 @@ import {
   RotateCcw,
   RefreshCw,
   Share2,
+  FileText,
 } from 'lucide-react'
+import { generateInvoicePDF, type InvoiceOrder } from '@/lib/invoice-pdf'
 import { toast } from 'sonner'
 import type { Order, OrderItem } from '@/lib/types'
 
@@ -291,6 +293,28 @@ function OrderCard({ order, refreshOrders }: { order: Order; refreshOrders: () =
 
       <div className="px-4 sm:px-6 py-4 bg-gradient-to-b from-neutral-50 to-white border-b border-neutral-100">
         <div className="flex flex-wrap items-center gap-2">
+          {order.paymentStatus === 'paid' && (
+            <button
+              type="button"
+              onClick={async () => {
+                try {
+                  const res = await fetch(`/api/orders/${order.id}?invoice=true`, { credentials: 'include' })
+                  if (!res.ok) return toast.error('Could not load invoice')
+                  const { order: inv } = (await res.json()) as { order: InvoiceOrder }
+                  const jsPDF = (await import('jspdf')).default
+                  const doc = generateInvoicePDF(jsPDF, inv)
+                  doc.save(`invoice-${order.id.slice(-8).toUpperCase()}-${new Date(order.createdAt).toISOString().slice(0, 10)}.pdf`)
+                  toast.success('Invoice downloaded')
+                } catch {
+                  toast.error('Failed to generate invoice')
+                }
+              }}
+              className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-neutral-700 bg-white border border-neutral-200 hover:bg-neutral-50 rounded-xl transition-colors shadow-sm"
+            >
+              <FileText className="w-4 h-4" />
+              Download invoice
+            </button>
+          )}
           {order.status !== 'cancelled' && order.status !== 'delivered' && (
             <Link
               href={`/home/track-order?orderId=${encodeURIComponent(order.id)}`}

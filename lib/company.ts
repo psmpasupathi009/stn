@@ -29,3 +29,12 @@ Tamil Nadu, India`,
 
 export const COMPANY_PHONE_PRIMARY = COMPANY.phones[0]
 export const COMPANY_PHONE_TEL = `tel:${COMPANY.phoneNumbers[0].replace(/\s/g, '')}`
+
+/** Razorpay payment provider details for invoice / compliance (as per invoice.pdf) */
+export const RAZORPAY_PROVIDER = {
+  registeredName: 'Razorpay Payments Private Limited',
+  CIN: 'U62099KA2024PTC188982',
+  PAN: 'AANCR6717K',
+  TAN: 'BLRR30567F',
+  GST: '29AANCR6717K1ZN',
+} as const
