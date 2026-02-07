@@ -32,8 +32,11 @@ import {
   ChevronUp,
   ChevronDown,
   RotateCcw,
+  BookOpen,
 } from 'lucide-react'
 import SortableGalleryList from '@/components/admin/SortableGalleryList'
+import { getAboutTemplateForIndex } from '@/lib/about-sections'
+import type { AboutSection } from '@/lib/types'
 
 interface Product {
   id: string
@@ -139,6 +142,8 @@ const CATEGORIES = [
 
 const MAX_PRODUCT_IMAGES = 5
 
+const INITIAL_ABOUT_FORM = { title: '', content: '', imageLeft: false, order: 0 }
+
 interface GalleryItem {
   id: string
   url: string
@@ -147,7 +152,7 @@ interface GalleryItem {
   order: number
 }
 
-type TabType = 'products' | 'hero' | 'orders' | 'gallery'
+type TabType = 'products' | 'hero' | 'about' | 'orders' | 'gallery'
 
 export default function AdminDashboard() {
   const { user, isAuthenticated } = useAuth()
@@ -201,6 +206,15 @@ export default function AdminDashboard() {
   const [heroImagePreview, setHeroImagePreview] = useState<string | null>(null)
   const [heroLoading, setHeroLoading] = useState(false)
 
+  // About sections state
+  const [aboutSections, setAboutSections] = useState<AboutSection[]>([])
+  const [showAboutForm, setShowAboutForm] = useState(false)
+  const [editingAbout, setEditingAbout] = useState<AboutSection | null>(null)
+  const [aboutFormData, setAboutFormData] = useState(INITIAL_ABOUT_FORM)
+  const [aboutImageFile, setAboutImageFile] = useState<File | null>(null)
+  const [aboutImagePreview, setAboutImagePreview] = useState<string | null>(null)
+  const [aboutLoading, setAboutLoading] = useState(false)
+
   // Orders state
   const [orders, setOrders] = useState<Order[]>([])
   const [ordersLoading, setOrdersLoading] = useState(false)
@@ -247,6 +261,7 @@ export default function AdminDashboard() {
     fetchProducts()
     fetchCategories()
     fetchHeroSections()
+    fetchAboutSections()
     fetchOrders()
     fetchGallery()
     // eslint-disable-next-line react-hooks/exhaustive-deps -- run once when auth is ready; fetch fns are stable in intent
@@ -300,6 +315,18 @@ export default function AdminDashboard() {
       }
     } catch (error) {
       console.error('Error fetching hero sections:', error)
+    }
+  }
+
+  const fetchAboutSections = async () => {
+    try {
+      const res = await fetch('/api/about-sections', { credentials: 'include' })
+      if (res.ok) {
+        const data = await res.json()
+        setAboutSections(Array.isArray(data) ? data : [])
+      }
+    } catch (error) {
+      console.error('Error fetching about sections:', error)
     }
   }
 
@@ -713,6 +740,120 @@ export default function AdminDashboard() {
     })
     setHeroImageFile(null)
     setHeroImagePreview(null)
+  }
+
+  // About section handlers
+  const handleAboutImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setAboutImageFile(file)
+      const reader = new FileReader()
+      reader.onloadend = () => setAboutImagePreview(reader.result as string)
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const handleAboutImageUpload = async (): Promise<string | null> => {
+    if (!aboutImageFile) return editingAbout?.image ?? null
+    try {
+      const fd = new FormData()
+      fd.append('file', aboutImageFile)
+      const res = await fetch('/api/upload', { method: 'POST', body: fd, credentials: 'include' })
+      if (!res.ok) return null
+      const data = await res.json()
+      return data.url ?? null
+    } catch (error) {
+      console.error('Error uploading about image:', error)
+      return null
+    }
+  }
+
+  const handleAboutSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!aboutImageFile && !aboutImagePreview && !editingAbout?.image) {
+      toast.error('Please upload an image for this section')
+      return
+    }
+    setAboutLoading(true)
+    try {
+      const imageUrl = await handleAboutImageUpload()
+      const isEdit = !!editingAbout
+      const res = await fetch(
+        isEdit ? `/api/about-sections/${editingAbout.id}` : '/api/about-sections',
+        {
+          method: isEdit ? 'PUT' : 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title: aboutFormData.title || 'Section',
+            content: aboutFormData.content || '',
+            image: imageUrl ?? editingAbout?.image ?? null,
+            imageLeft: aboutFormData.imageLeft,
+            order: aboutFormData.order,
+          }),
+        }
+      )
+      if (res.ok) {
+        resetAboutForm()
+        fetchAboutSections()
+        toast.success(isEdit ? 'About section updated!' : 'About section added!')
+      } else {
+        const err = await res.json().catch(() => ({}))
+        toast.error((err as { error?: string }).error || 'Failed to save about section')
+      }
+    } catch (error) {
+      console.error('Error saving about section:', error)
+      toast.error('Failed to save about section')
+    } finally {
+      setAboutLoading(false)
+    }
+  }
+
+  const handleEditAbout = (section: AboutSection) => {
+    setEditingAbout(section)
+    setAboutFormData({
+      title: section.title || '',
+      content: section.content || '',
+      imageLeft: section.imageLeft,
+      order: section.order,
+    })
+    setAboutImagePreview(section.image || null)
+    setAboutImageFile(null)
+    setShowAboutForm(true)
+  }
+
+  const handleDeleteAbout = async (id: string) => {
+    if (!confirm('Delete this about section?')) return
+    try {
+      const res = await fetch(`/api/about-sections/${id}`, { method: 'DELETE', credentials: 'include' })
+      if (res.ok) {
+        fetchAboutSections()
+        toast.success('About section deleted!')
+      } else toast.error('Failed to delete about section')
+    } catch (error) {
+      console.error('Error deleting about section:', error)
+      toast.error('Failed to delete about section')
+    }
+  }
+
+  const resetAboutForm = () => {
+    setShowAboutForm(false)
+    setEditingAbout(null)
+    setAboutFormData(INITIAL_ABOUT_FORM)
+    setAboutImageFile(null)
+    setAboutImagePreview(null)
+  }
+
+  const openAboutFormForAdd = () => {
+    setEditingAbout(null)
+    setAboutImageFile(null)
+    setAboutImagePreview(null)
+    const template = getAboutTemplateForIndex(aboutSections.length)
+    setAboutFormData({
+      ...template,
+      order: aboutSections.length,
+    })
+    setShowAboutForm(true)
   }
 
   // Orders functions
@@ -1235,6 +1376,17 @@ export default function AdminDashboard() {
           >
             <Layers className="w-4 h-4 shrink-0" />
             Hero
+          </button>
+          <button
+            onClick={() => setActiveTab('about')}
+            className={`flex items-center justify-center gap-1.5 sm:gap-2 px-3 py-2 sm:px-4 sm:py-2.5 rounded-md text-sm sm:text-base font-medium transition-all min-w-0 flex-1 sm:flex-initial ${
+              activeTab === 'about'
+                ? 'bg-[#3CB31A] text-white shadow-md hover:opacity-90'
+                : 'text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            <BookOpen className="w-4 h-4 shrink-0" />
+            About
           </button>
           <button
             onClick={() => setActiveTab('gallery')}
@@ -2476,6 +2628,173 @@ export default function AdminDashboard() {
                                 <Pencil className="w-3.5 h-3.5" />
                               </Button>
                               <Button variant="destructive" size="sm" onClick={() => handleDeleteHero(hero.id)} className="shrink-0">
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+
+        {/* About Sections Tab */}
+        {activeTab === 'about' && (
+          <>
+            <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 mb-4 sm:mb-6 min-w-0">
+              <p className="text-gray-600 text-sm sm:text-base order-2 sm:order-1">
+                Manage Our Story page left/right image blocks. Upload image, set title and content. Order controls display sequence.
+              </p>
+              <Button
+                onClick={() => (showAboutForm ? resetAboutForm() : openAboutFormForAdd())}
+                className="w-full sm:w-auto order-1 sm:order-2 bg-[#3CB31A] hover:opacity-90 text-white"
+              >
+                <Plus className="w-4 h-4 mr-2 shrink-0" />
+                {showAboutForm ? 'Cancel' : 'Add About Section'}
+              </Button>
+            </div>
+
+            {showAboutForm && (
+              <Card className="mb-6 sm:mb-8 shadow-lg overflow-hidden min-w-0">
+                <CardHeader className="bg-neutral-50 p-4 sm:p-6">
+                  <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                    {editingAbout ? <Pencil className="w-5 h-5 shrink-0" /> : <Plus className="w-5 h-5 shrink-0" />}
+                    {editingAbout ? 'Edit About Section' : 'Add About Section'}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-4 sm:pt-6 p-4 sm:p-6">
+                  <form onSubmit={handleAboutSubmit} className="space-y-4 sm:space-y-6 min-w-0">
+                    <div className="min-w-0">
+                      <Label className="text-sm sm:text-base font-semibold">Image *</Label>
+                      <p className="text-xs sm:text-sm text-gray-500 mb-2">Upload image for this block (shown left or right on Our Story page)</p>
+                      <Input type="file" accept="image/*" onChange={handleAboutImageChange} className="w-full min-w-0" />
+                      {(aboutImagePreview || editingAbout?.image) && (
+                        <div className="mt-4 relative w-full max-w-2xl h-36 sm:h-48 min-w-0">
+                          <Image
+                            src={aboutImagePreview || editingAbout?.image || ''}
+                            alt="Preview"
+                            fill
+                            className="object-cover rounded-lg border shadow-sm"
+                            unoptimized
+                          />
+                        </div>
+                      )}
+                      {!aboutImagePreview && !editingAbout?.image && (
+                        <div className="mt-4 w-full max-w-2xl h-48 bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
+                          <div className="text-center text-gray-400">
+                            <ImageIcon className="w-12 h-12 mx-auto mb-2" />
+                            <p>No image selected</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="min-w-0">
+                      <Label className="text-sm sm:text-base">Title</Label>
+                      <Input
+                        value={aboutFormData.title}
+                        onChange={(e) => setAboutFormData({ ...aboutFormData, title: e.target.value })}
+                        placeholder="e.g. Our Story"
+                        className="mt-1 w-full min-w-0"
+                      />
+                    </div>
+                    <div className="min-w-0">
+                      <Label className="text-sm sm:text-base">Content</Label>
+                      <textarea
+                        value={aboutFormData.content}
+                        onChange={(e) => setAboutFormData({ ...aboutFormData, content: e.target.value })}
+                        placeholder="Section text..."
+                        rows={4}
+                        className="mt-1 w-full min-w-0 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 min-w-0">
+                      <div className="min-w-0">
+                        <Label className="text-sm sm:text-base">Display Order</Label>
+                        <Input
+                          type="number"
+                          min="0"
+                          value={aboutFormData.order}
+                          onChange={(e) => setAboutFormData({ ...aboutFormData, order: parseInt(e.target.value) || 0 })}
+                          className="mt-1 w-full min-w-0"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">Lower numbers appear first</p>
+                      </div>
+                      <div className="flex items-end pb-2 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            id="aboutImageLeft"
+                            checked={aboutFormData.imageLeft}
+                            onChange={(e) => setAboutFormData({ ...aboutFormData, imageLeft: e.target.checked })}
+                            className="h-4 w-4 shrink-0"
+                          />
+                          <Label htmlFor="aboutImageLeft" className="cursor-pointer text-sm sm:text-base">Image on left</Label>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4 border-t">
+                      <Button type="submit" disabled={aboutLoading} className="w-full sm:w-auto bg-[#3CB31A] hover:opacity-90 text-white">
+                        {aboutLoading ? 'Saving...' : editingAbout ? 'Update Section' : 'Add Section'}
+                      </Button>
+                      <Button type="button" variant="outline" onClick={resetAboutForm} className="w-full sm:w-auto">Cancel</Button>
+                    </div>
+                  </form>
+                </CardContent>
+              </Card>
+            )}
+
+            {aboutSections.length === 0 ? (
+              <div className="text-center py-12 bg-white rounded-xl border border-gray-200 shadow-sm">
+                <BookOpen className="w-12 h-12 mx-auto text-gray-300 mb-4" />
+                <p className="text-gray-600 mb-2">No about sections yet</p>
+                <p className="text-sm text-gray-500 mb-4">Add sections to show on the Our Story page. Upload an image and set title/content.</p>
+                <Button onClick={openAboutFormForAdd} className="bg-[#3CB31A] hover:opacity-90 text-white">
+                  Add First Section
+                </Button>
+              </div>
+            ) : (
+              <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden min-w-0">
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[640px] text-left text-sm">
+                    <thead className="bg-gray-50 border-b border-gray-200">
+                      <tr>
+                        <th className="py-3 px-3 font-semibold text-gray-700 w-20">Order</th>
+                        <th className="py-3 px-3 font-semibold text-gray-700">Image</th>
+                        <th className="py-3 px-3 font-semibold text-gray-700">Title</th>
+                        <th className="py-3 px-3 font-semibold text-gray-700 max-w-[200px]">Content</th>
+                        <th className="py-3 px-3 font-semibold text-gray-700 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {aboutSections.map((section, index) => (
+                        <tr key={section.id} className="hover:bg-gray-50">
+                          <td className="py-2 px-3 font-medium text-gray-700">#{index + 1}</td>
+                          <td className="py-2 px-3">
+                            <div className="relative w-16 h-10 rounded overflow-hidden bg-gray-100 shrink-0">
+                              {section.image ? (
+                                <Image src={section.image} alt="" fill className="object-cover" unoptimized sizes="64px" />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center">
+                                  <ImageIcon className="w-6 h-6 text-gray-300" />
+                                </div>
+                              )}
+                            </div>
+                          </td>
+                          <td className="py-2 px-3 text-gray-900">{section.title || '—'}</td>
+                          <td className="py-2 px-3 text-gray-600 max-w-[200px] truncate">{section.content || '—'}</td>
+                          <td className="py-2 px-3 text-right">
+                            <div className="flex items-center justify-end gap-1 flex-wrap">
+                              <Button variant="outline" size="sm" onClick={() => handleEditAbout(section)} className="shrink-0">
+                                <Pencil className="w-3.5 h-3.5" />
+                              </Button>
+                              <Button variant="destructive" size="sm" onClick={() => handleDeleteAbout(section.id)} className="shrink-0">
                                 <Trash2 className="w-3.5 h-3.5" />
                               </Button>
                             </div>

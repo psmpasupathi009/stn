@@ -5,6 +5,8 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { X, Maximize2, ChevronLeft, ChevronRight } from 'lucide-react'
+import type { AboutSection } from '@/lib/types'
+import { getDefaultAboutSectionsWithIds } from '@/lib/about-sections'
 
 interface GalleryItem {
   id: string
@@ -17,12 +19,22 @@ interface GalleryItem {
 export default function OurStoryPage() {
   const [gallery, setGallery] = useState<GalleryItem[]>([])
   const [viewItem, setViewItem] = useState<GalleryItem | null>(null)
+  const [aboutSections, setAboutSections] = useState<AboutSection[]>(getDefaultAboutSectionsWithIds())
 
   useEffect(() => {
     fetch('/api/gallery')
       .then((r) => r.json())
       .then((data) => setGallery(Array.isArray(data) ? data : []))
       .catch(() => setGallery([]))
+  }, [])
+
+  useEffect(() => {
+    fetch('/api/about-sections')
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) setAboutSections(data)
+      })
+      .catch(() => {})
   }, [])
 
   const currentIndex = viewItem ? gallery.findIndex((i) => i.id === viewItem.id) : -1
@@ -59,30 +71,6 @@ export default function OurStoryPage() {
     }
   }, [viewItem, gallery])
 
-  const aboutSections = [
-    {
-      id: 1,
-      image: '/STN LOGO.png',
-      title: 'Our Story',
-      content: 'We are two brothers hailing from Kovilpatti in the southern part of Tamil Nadu. From a middle-class family, our elder brother ran a small petty shop in our hometown. With those resources we started this cold-pressed oil firm in 2023. The initial two years were an absolute challenge. Once our customers came to know about our product quality and its goodness, our sales grew gradually. Today we sell 25+ products along with wood-pressed oil.',
-      imageLeft: false,
-    },
-    {
-      id: 2,
-      image: '/stn loading image.png',
-      title: 'Our Vision and Mission',
-      content: 'With the 21st century witnessing ever-growing awareness on eating healthy, we concentrate on giving traditional oil to people the same way our ancients used it. At STN GOLDEN HEALTHY FOODS, we are dedicated to producing pure, natural, and traditionally extracted wood-pressed oils that preserve the true goodness of nature. Rooted in age-old methods and modern quality standards, our oils deliver authentic taste, nutrition, and wellness.',
-      imageLeft: true,
-    },
-    {
-      id: 3,
-      image: '/STN LOGO.png',
-      title: 'Why Wood Pressed Oil?',
-      content: 'We source premium-grade seeds from trusted farmers and process them using wooden cold-press techniques without heat or chemicals. Essential nutrients, natural aroma, and original flavor remain intact. Quality and purity are at the heart of everything we do. Every step follows strict hygiene and quality controls. Our oils are free from additives and preservatives—ideal for healthy cooking and traditional wellness.',
-      imageLeft: false,
-    },
-  ]
-
   return (
     <div className="bg-white min-h-screen w-full min-w-0 overflow-x-hidden">
       <div className="container mx-auto w-full min-w-0 px-3 sm:px-4 md:px-6 py-8 sm:py-12 md:py-16 lg:py-20 max-w-7xl">
@@ -116,14 +104,20 @@ export default function OurStoryPage() {
                   section.imageLeft ? 'order-2 lg:order-1' : 'order-1 lg:order-2'
                 }`}
               >
-                <Image
-                  src={section.image}
-                  alt={section.title}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                  unoptimized
-                />
+                {section.image ? (
+                  <Image
+                    src={section.image}
+                    alt={section.title}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 1024px) 100vw, 50vw"
+                    unoptimized
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center text-gray-400">
+                    <span className="text-sm">No image</span>
+                  </div>
+                )}
               </div>
             </section>
           ))}

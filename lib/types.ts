@@ -104,3 +104,13 @@ export interface BuyNowProduct {
   image?: string
   quantity: number
 }
+
+// —— About (Our Story page sections) ——
+export interface AboutSection {
+  id: string
+  title: string
+  content: string
+  image?: string
+  imageLeft: boolean
+  order: number
+}

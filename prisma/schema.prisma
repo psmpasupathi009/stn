@@ -174,3 +174,14 @@ model GalleryMedia {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model AboutSection {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  title     String
+  content   String
+  image     String?  // Cloudinary or URL for left/right block
+  imageLeft Boolean  @default(false) // true = image on left, false = image on right
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
