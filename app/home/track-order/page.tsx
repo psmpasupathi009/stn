@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -166,11 +167,17 @@ function TimelineTracker({ order }: { order: Order }) {
 }
 
 export default function TrackOrderPage() {
+  const searchParams = useSearchParams()
   const [orderId, setOrderId] = useState('')
   const [email, setEmail] = useState('')
   const [order, setOrder] = useState<Order | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+
+  useEffect(() => {
+    const id = searchParams.get('orderId')
+    if (id) setOrderId(id)
+  }, [searchParams])
 
   const handleTrack = async (e: React.FormEvent) => {
     e.preventDefault()
