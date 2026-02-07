@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { COMPANY } from '@/lib/company'
 
 export default function TermsPage() {
   return (
@@ -87,16 +88,16 @@ export default function TermsPage() {
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 mt-8">8. Grievance Redressal &amp; Complaints</h2>
               <p className="leading-relaxed">
                 For any complaint, grievance, or dispute regarding your order or our services, please contact us first at{' '}
-                <a href="mailto:info@stngoldenhealthyfoods.com" className="text-[var(--primary-green)] hover:underline">info@stngoldenhealthyfoods.com</a>
-                {' '}or call +91 99425 90202. We will endeavour to resolve your concern promptly. Our registered address: 46/1, Kongu Nagar, Opp. Power House, Pollachi Main Road, Dharapuram, Tiruppur – 638 656. If your concern remains unresolved, you may approach the appropriate consumer dispute redressal forum under the Consumer Protection Act, 2019.
+                <a href={`mailto:${COMPANY.email}`} className="text-[var(--primary-green)] hover:underline">{COMPANY.email}</a>
+                {' '}or call {COMPANY.phones.join(' / ')}. We will endeavour to resolve your concern promptly. Our registered address: {COMPANY.addressInline}. If your concern remains unresolved, you may approach the appropriate consumer dispute redressal forum under the Consumer Protection Act, 2019.
               </p>
             </section>
 
             <div className="pt-8 border-t border-gray-200">
               <p className="text-gray-600">
                 For questions about these terms, contact us at{' '}
-                <a href="mailto:info@stngoldenhealthyfoods.com" className="text-[var(--primary-green)] hover:underline">
-                  info@stngoldenhealthyfoods.com
+                <a href={`mailto:${COMPANY.email}`} className="text-[var(--primary-green)] hover:underline">
+                  {COMPANY.email}
                 </a>
                 .
               </p>

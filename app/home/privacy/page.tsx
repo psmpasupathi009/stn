@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { COMPANY } from '@/lib/company'
 
 export default function PrivacyPage() {
   return (
@@ -62,8 +63,8 @@ export default function PrivacyPage() {
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 mt-8">5. Your Rights &amp; Grievance</h2>
               <p className="mb-3">You may request access to, correction of, or deletion of your personal data. For any privacy-related grievance or complaint, contact us at:</p>
               <p className="font-medium">
-                <a href="mailto:info@stngoldenhealthyfoods.com" className="text-[var(--primary-green)] hover:underline">
-                  info@stngoldenhealthyfoods.com
+                <a href={`mailto:${COMPANY.email}`} className="text-[var(--primary-green)] hover:underline">
+                  {COMPANY.email}
                 </a>
               </p>
               <p className="mt-2 text-sm text-gray-600">We will respond to your request in line with applicable law.</p>
@@ -79,8 +80,8 @@ export default function PrivacyPage() {
             <div className="pt-8 border-t border-gray-200">
               <p className="text-gray-600">
                 For any privacy-related questions, contact us at{' '}
-                <a href="mailto:info@stngoldenhealthyfoods.com" className="text-[var(--primary-green)] hover:underline">
-                  info@stngoldenhealthyfoods.com
+                <a href={`mailto:${COMPANY.email}`} className="text-[var(--primary-green)] hover:underline">
+                  {COMPANY.email}
                 </a>
                 .
               </p>

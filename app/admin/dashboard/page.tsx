@@ -53,6 +53,9 @@ interface Product {
   reviewCount?: number
 }
 
+/** Dashboard product form: each image is either existing URL or new file with preview. Max 5. */
+type ProductImageItem = { type: 'existing'; url: string } | { type: 'new'; file: File; preview: string }
+
 interface HeroSection {
   id: string
   title: string
@@ -168,8 +171,7 @@ export default function AdminDashboard() {
     description: '',
     inStock: true,
   })
-  const [imageFile, setImageFile] = useState<File | null>(null)
-  const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [productImages, setProductImages] = useState<ProductImageItem[]>([])
   const [uploading, setUploading] = useState(false)
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
@@ -304,42 +306,51 @@ export default function AdminDashboard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchProducts when category/search change only
   }, [selectedCategory, searchQuery])
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      setImageFile(file)
+  const MAX_PRODUCT_IMAGES = 5
+
+  const addProductImages = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files ? Array.from(e.target.files) : []
+    if (files.length === 0) return
+    const remaining = MAX_PRODUCT_IMAGES - productImages.length
+    const toAdd = files.slice(0, remaining)
+    toAdd.forEach((file) => {
       const reader = new FileReader()
       reader.onloadend = () => {
-        setImagePreview(reader.result as string)
+        const preview = reader.result as string
+        setProductImages((prev) => {
+          const next = [...prev, { type: 'new' as const, file, preview }]
+          return next.slice(0, MAX_PRODUCT_IMAGES)
+        })
       }
       reader.readAsDataURL(file)
-    }
+    })
+    e.target.value = ''
   }
 
-  const handleImageUpload = async (): Promise<string | null> => {
-    if (!imageFile) return editingProduct?.image || null
+  const removeProductImage = (index: number) => {
+    setProductImages((prev) => prev.filter((_, i) => i !== index))
+  }
 
-    setUploading(true)
+  const uploadProductImages = async (): Promise<string[]> => {
+    const existing = productImages.filter((i): i is { type: 'existing'; url: string } => i.type === 'existing').map((i) => i.url)
+    const newItems = productImages.filter((i): i is { type: 'new'; file: File; preview: string } => i.type === 'new')
+    if (newItems.length === 0) return existing
+
     try {
-      const formData = new FormData()
-      formData.append('file', imageFile)
-
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-        credentials: 'include',
-      })
-
-      if (res.ok) {
-        const data = await res.json()
-        return data.url
+      const uploaded: string[] = []
+      for (const item of newItems) {
+        const fd = new FormData()
+        fd.append('file', item.file)
+        const res = await fetch('/api/upload', { method: 'POST', body: fd, credentials: 'include' })
+        if (res.ok) {
+          const data = await res.json()
+          uploaded.push(data.url)
+        }
       }
-      return null
+      return [...existing, ...uploaded].slice(0, MAX_PRODUCT_IMAGES)
     } catch (error) {
-      console.error('Error uploading image:', error)
-      return null
-    } finally {
-      setUploading(false)
+      console.error('Error uploading images:', error)
+      return existing
     }
   }
 
@@ -351,10 +362,12 @@ export default function AdminDashboard() {
       return
     }
     setUploading(true)
+    const allUrls = await uploadProductImages()
+    const imageUrl = allUrls[0] || editingProduct?.image || null
+    const images = allUrls
 
+    setUploading(true)
     try {
-      const imageUrl = await handleImageUpload()
-
       const url = editingProduct
         ? `/api/products/${editingProduct.id}`
         : '/api/products'
@@ -367,7 +380,8 @@ export default function AdminDashboard() {
         body: JSON.stringify({
           ...formData,
           category: categoryValue,
-          image: imageUrl || editingProduct?.image || null,
+          image: imageUrl,
+          images,
           mrp: parseFloat(formData.mrp),
           salePrice: parseFloat(formData.salePrice),
           gst: parseFloat(formData.gst || '0'),
@@ -390,8 +404,7 @@ export default function AdminDashboard() {
           description: '',
           inStock: true,
         })
-        setImageFile(null)
-        setImagePreview(null)
+        setProductImages([])
         fetchProducts()
         fetchCategories()
         toast.success(editingProduct ? 'Product updated successfully!' : 'Product created successfully!')
@@ -421,8 +434,10 @@ export default function AdminDashboard() {
       description: product.description || '',
       inStock: product.inStock,
     })
-    setImagePreview(product.image || null)
-    setImageFile(null)
+    const urls: string[] = []
+    if (product.image) urls.push(product.image)
+    if (product.images?.length) urls.push(...product.images.filter((u) => u && !urls.includes(u)))
+    setProductImages(urls.slice(0, MAX_PRODUCT_IMAGES).map((url) => ({ type: 'existing' as const, url })))
     setShowForm(true)
   }
 
@@ -511,8 +526,7 @@ export default function AdminDashboard() {
       description: '',
       inStock: true,
     })
-    setImageFile(null)
-    setImagePreview(null)
+    setProductImages([])
   }
 
   // Hero section handlers
@@ -1424,20 +1438,45 @@ export default function AdminDashboard() {
                       />
                     </div>
                     <div className="min-w-0">
-                      <Label className="text-sm sm:text-base">Product Image</Label>
-                      <Input type="file" accept="image/*" onChange={handleImageChange} className="mt-1 w-full min-w-0" />
-                      {(imagePreview || editingProduct?.image) && (
-                        <div className="mt-4 relative w-24 h-24 sm:w-32 sm:h-32">
-                          <Image
-                            src={imagePreview || editingProduct?.image || ''}
-                            alt="Preview"
-                            width={128}
-                            height={128}
-                            className="object-cover rounded-lg border shadow-sm"
-                            unoptimized
-                          />
-                        </div>
-                      )}
+                      <Label className="text-sm sm:text-base">Product Images (max {MAX_PRODUCT_IMAGES})</Label>
+                      <p className="text-xs text-gray-500 mt-0.5">First image is the main display image.</p>
+                      <div className="mt-2 flex flex-wrap gap-3">
+                        {productImages.map((item, index) => (
+                          <div key={index} className="relative group">
+                            <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-lg border bg-gray-100 overflow-hidden">
+                              <Image
+                                src={item.type === 'existing' ? item.url : item.preview}
+                                alt={`Product ${index + 1}`}
+                                fill
+                                className="object-cover"
+                                unoptimized
+                                sizes="96px"
+                              />
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => removeProductImage(index)}
+                              className="absolute -top-1 -right-1 p-1 rounded-full bg-red-500 text-white hover:bg-red-600 shadow"
+                              aria-label="Remove image"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        ))}
+                        {productImages.length < MAX_PRODUCT_IMAGES && (
+                          <label className="flex flex-col items-center justify-center w-20 h-20 sm:w-24 sm:h-24 rounded-lg border-2 border-dashed border-gray-300 hover:border-green-500 cursor-pointer bg-gray-50">
+                            <Images className="w-6 h-6 text-gray-400" />
+                            <span className="text-xs text-gray-500 mt-1">Add</span>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              multiple
+                              onChange={addProductImages}
+                              className="sr-only"
+                            />
+                          </label>
+                        )}
+                      </div>
                     </div>
                     <div className="flex flex-col gap-1">
                       <div className="flex items-center gap-2">

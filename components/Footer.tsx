@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { Mail, Phone, MapPin, Facebook, Instagram, Youtube } from 'lucide-react'
+import { COMPANY } from '@/lib/company'
 
 const QUICK_LINKS = [
   { href: '/home/products', label: 'Shop All' },
@@ -12,9 +13,9 @@ const QUICK_LINKS = [
 ] as const
 
 const SOCIAL_LINKS = [
-  { href: '#', label: 'Facebook', icon: Facebook, color: 'text-[#1877F2]' },
-  { href: '#', label: 'Instagram', icon: Instagram, color: 'text-[#E4405F]' },
-  { href: '#', label: 'YouTube', icon: Youtube, color: 'text-[#FF0000]' },
+  { href: COMPANY.facebookUrl, label: 'Facebook', icon: Facebook, color: 'text-[#1877F2]' },
+  { href: COMPANY.instagramUrl, label: 'Instagram', icon: Instagram, color: 'text-[#E4405F]' },
+  { href: COMPANY.youtubeUrl, label: 'YouTube', icon: Youtube, color: 'text-[#FF0000]' },
 ] as const
 
 const LINK_CLASS = 'text-sm text-white/90 hover:text-white transition-colors'
@@ -33,7 +34,7 @@ export default function Footer() {
               className="inline-block focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#2a8f14] rounded"
             >
               <span className="text-xl sm:text-2xl font-bold tracking-tight text-white">
-                STN GOLDEN HEALTHY FOODS
+                {COMPANY.name}
               </span>
             </Link>
             <p className="mt-4 text-sm text-white/90 leading-relaxed max-w-sm">
@@ -43,7 +44,13 @@ export default function Footer() {
               <span className="text-xs font-medium uppercase tracking-wider text-white/80">Follow</span>
               <div className="flex gap-2">
                 {SOCIAL_LINKS.map(({ href, label, icon: Icon, color }) => (
-                  <a key={label} href={href} aria-label={label} className={`${ICON_BTN_CLASS} ${color}`}>
+                  <a
+                    key={label}
+                    href={href}
+                    aria-label={label}
+                    className={`${ICON_BTN_CLASS} ${color}`}
+                    {...(href.startsWith('http') ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                  >
                     <Icon className="w-5 h-5" />
                   </a>
                 ))}
@@ -68,33 +75,33 @@ export default function Footer() {
             <ul className="space-y-4">
               <li>
                 <a
-                  href="mailto:info@stngoldenhealthyfoods.com"
+                  href={`mailto:${COMPANY.email}`}
                   className="flex items-start gap-3 text-sm text-white/90 hover:text-white transition-colors group"
                 >
                   <span className="w-9 h-9 rounded-full bg-white flex items-center justify-center shrink-0 group-hover:opacity-90 transition-opacity shadow-sm">
                     <Mail className="w-4 h-4 text-[#2a8f14]" />
                   </span>
-                  <span className="break-all pt-0.5">info@stngoldenhealthyfoods.com</span>
+                  <span className="break-all pt-0.5">{COMPANY.email}</span>
                 </a>
               </li>
-              <li>
-                <a
-                  href="tel:+919942590202"
-                  className="flex items-start gap-3 text-sm text-white/90 hover:text-white transition-colors group"
-                >
-                  <span className="w-9 h-9 rounded-full bg-white flex items-center justify-center shrink-0 group-hover:opacity-90 transition-opacity shadow-sm">
-                    <Phone className="w-4 h-4 text-[#2a8f14]" />
-                  </span>
-                  <span className="pt-0.5">+91 99425 90202</span>
-                </a>
-              </li>
+              {COMPANY.phones.map((phone, i) => (
+                <li key={i}>
+                  <a
+                    href={`tel:+91${COMPANY.phoneNumbers[i]}`}
+                    className="flex items-start gap-3 text-sm text-white/90 hover:text-white transition-colors group"
+                  >
+                    <span className="w-9 h-9 rounded-full bg-white flex items-center justify-center shrink-0 group-hover:opacity-90 transition-opacity shadow-sm">
+                      <Phone className="w-4 h-4 text-[#2a8f14]" />
+                    </span>
+                    <span className="pt-0.5">{phone}</span>
+                  </a>
+                </li>
+              ))}
               <li className="flex items-start gap-3 text-sm text-white/90">
                 <span className="w-9 h-9 rounded-full bg-white flex items-center justify-center shrink-0">
                   <MapPin className="w-4 h-4 text-[#2a8f14]" />
                 </span>
-                <span className="pt-0.5">
-                  46/1, Kongu Nagar, Opp. Power House, Pollachi Main Road, Dharapuram, Tiruppur – 638 656
-                </span>
+                <span className="pt-0.5 whitespace-pre-line">{COMPANY.address}</span>
               </li>
             </ul>
           </div>
@@ -103,7 +110,7 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="mt-12 sm:mt-14 pt-8 border-t border-white/20 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <p className="text-xs text-white/80">
-            © {currentYear} STN GOLDEN HEALTHY FOODS. All rights reserved.
+            © {currentYear} {COMPANY.name}. All rights reserved.
           </p>
           <nav className="flex flex-wrap items-center justify-center sm:justify-end gap-x-6 gap-y-1 text-xs text-white/80">
             <Link href="/home/privacy" className="hover:text-white transition-colors">

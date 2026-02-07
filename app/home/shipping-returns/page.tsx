@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { COMPANY } from '@/lib/company'
 
 export default function ShippingReturnsPage() {
   return (
@@ -78,13 +79,18 @@ export default function ShippingReturnsPage() {
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 mt-8">Contact Us</h2>
               <p className="leading-relaxed">
                 For any shipping or returns queries, reach us at{' '}
-                <a href="mailto:info@stngoldenhealthyfoods.com" className="text-[var(--primary-green)] hover:underline">
-                  info@stngoldenhealthyfoods.com
+                <a href={`mailto:${COMPANY.email}`} className="text-[var(--primary-green)] hover:underline">
+                  {COMPANY.email}
                 </a>
                 {' '}or call{' '}
-                <a href="tel:+919942590202" className="text-[var(--primary-green)] hover:underline">
-                  +91 99425 90202
-                </a>
+                {COMPANY.phones.map((phone, i) => (
+                  <span key={i}>
+                    {i > 0 && ' / '}
+                    <a href={`tel:+91${COMPANY.phoneNumbers[i]}`} className="text-[var(--primary-green)] hover:underline">
+                      {phone}
+                    </a>
+                  </span>
+                ))}
                 . We are happy to help.
               </p>
             </section>

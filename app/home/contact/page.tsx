@@ -4,10 +4,7 @@ import { useCallback, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-
-const CONTACT_EMAIL = 'info@stngoldenhealthyfoods.com'
-const CONTACT_PHONE = '+919942590202'
-const CONTACT_ADDRESS = '46/1, Kongu Nagar, Opp. Power House,\nPollachi Main Road, Dharapuram,\nTiruppur - 638 656'
+import { COMPANY } from '@/lib/company'
 
 type ContactFormState = { name: string; email: string; phone: string; message: string }
 
@@ -52,19 +49,23 @@ export default function ContactPage() {
               <div className="space-y-6">
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-2">Email</h3>
-                  <a href={`mailto:${CONTACT_EMAIL}`} className="text-neutral-700 hover:underline">
-                    {CONTACT_EMAIL}
+                  <a href={`mailto:${COMPANY.email}`} className="text-neutral-700 hover:underline">
+                    {COMPANY.email}
                   </a>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900 mb-2">Phone</h3>
-                  <a href={`tel:${CONTACT_PHONE.replace(/\s/g, '')}`} className="text-neutral-700 hover:underline">
-                    {CONTACT_PHONE}
-                  </a>
+                  <h3 className="font-semibold text-gray-900 mb-2">Mobile</h3>
+                  <div className="flex flex-col gap-1">
+                    {COMPANY.phones.map((phone, i) => (
+                      <a key={i} href={`tel:+91${COMPANY.phoneNumbers[i]}`} className="text-neutral-700 hover:underline">
+                        {phone}
+                      </a>
+                    ))}
+                  </div>
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-2">Address</h3>
-                  <p className="text-gray-700 whitespace-pre-line">{CONTACT_ADDRESS}</p>
+                  <p className="text-gray-700 whitespace-pre-line">{COMPANY.address}</p>
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-4">Follow Us</h3>

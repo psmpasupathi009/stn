@@ -1,5 +1,17 @@
-import { redirect } from 'next/navigation'
+'use client'
 
-export default function RootPage() {
-  redirect('/home')
+import CategoryMarquee from '@/components/CategoryMarquee'
+import HeroSection from '@/components/homepage/HeroSection'
+import ProductsByCategory from '@/components/homepage/ProductsByCategory'
+import TrustSection from '@/components/homepage/TrustSection'
+
+export default function LandingPage() {
+  return (
+    <div className="min-h-screen bg-white">
+      <HeroSection />
+      <CategoryMarquee />
+      <ProductsByCategory />
+      <TrustSection />
+    </div>
+  )
 }

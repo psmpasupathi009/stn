@@ -25,10 +25,7 @@ function pathIsAdmin(pathname: string): boolean {
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Root → /home; profile is in header dropdown, so /home/profile → /home
-  if (pathname === '/') {
-    return NextResponse.redirect(new URL('/home', request.url))
-  }
+  // Landing page is at / ; profile is in header dropdown, so /home/profile → /home
   if (pathname === '/home/profile' || pathname.startsWith('/home/profile/')) {
     return NextResponse.redirect(new URL('/home', request.url))
   }
