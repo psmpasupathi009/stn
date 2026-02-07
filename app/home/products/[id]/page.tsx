@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback, useMemo } from 'react'
+import { useEffect, useState, useCallback, useMemo, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
@@ -46,19 +46,67 @@ export default function ProductDetailPage() {
   const [hoverRating, setHoverRating] = useState(0)
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
   const [zoomHover, setZoomHover] = useState(false)
-  const [zoomOrigin, setZoomOrigin] = useState({ x: 50, y: 50 })
+  const [zoomLens, setZoomLens] = useState({
+    x: 0.5,
+    y: 0.5,
+    cursorX: 0,
+    cursorY: 0,
+    width: 0,
+    height: 0,
+  })
+  const imageContainerRef = useRef<HTMLDivElement>(null)
 
   const productId = params.id as string
 
   const allImages = useMemo(() => getProductImages(product), [product])
   const mainImageUrl = allImages[selectedImageIndex] ?? null
 
+  const LENS_WIDTH = 220
+  const LENS_HEIGHT = 220
+  const ZOOM_LEVEL = 4
+
   const handleMainImageMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect()
-    setZoomOrigin({
-      x: ((e.clientX - rect.left) / rect.width) * 100,
-      y: ((e.clientY - rect.top) / rect.height) * 100,
+    const el = e.currentTarget
+    const rect = el.getBoundingClientRect()
+    const x = (e.clientX - rect.left) / rect.width
+    const y = (e.clientY - rect.top) / rect.height
+    const halfW = LENS_WIDTH / 2
+    const halfH = LENS_HEIGHT / 2
+    let cursorX = e.clientX - rect.left
+    let cursorY = e.clientY - rect.top
+    cursorX = Math.max(halfW, Math.min(rect.width - halfW, cursorX))
+    cursorY = Math.max(halfH, Math.min(rect.height - halfH, cursorY))
+    setZoomLens({
+      x,
+      y,
+      cursorX,
+      cursorY,
+      width: rect.width,
+      height: rect.height,
     })
+  }, [])
+
+  const handleMainImageMouseEnter = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    setZoomHover(true)
+    const rect = e.currentTarget.getBoundingClientRect()
+    const x = (e.clientX - rect.left) / rect.width
+    const y = (e.clientY - rect.top) / rect.height
+    const halfW = LENS_WIDTH / 2
+    const halfH = LENS_HEIGHT / 2
+    const cursorX = Math.max(halfW, Math.min(rect.width - halfW, e.clientX - rect.left))
+    const cursorY = Math.max(halfH, Math.min(rect.height - halfH, e.clientY - rect.top))
+    setZoomLens({
+      x,
+      y,
+      cursorX,
+      cursorY,
+      width: rect.width,
+      height: rect.height,
+    })
+  }, [])
+
+  const handleMainImageMouseLeave = useCallback(() => {
+    setZoomHover(false)
   }, [])
 
   const fetchProduct = useCallback(async () => {
@@ -249,33 +297,53 @@ export default function ProductDetailPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
-          {/* Product Images: main with hover zoom + thumbnails to switch */}
+          {/* Product Images: main with Amazon-style hover zoom lens */}
           <div className="min-w-0 space-y-4">
             <div
-              className="aspect-square bg-white border border-neutral-200 rounded-2xl overflow-hidden shadow-sm relative"
-              onMouseEnter={() => setZoomHover(true)}
-              onMouseLeave={() => setZoomHover(false)}
+              ref={imageContainerRef}
+              className="aspect-square bg-white border border-neutral-200 rounded-2xl overflow-hidden shadow-sm relative select-none"
+              onMouseEnter={handleMainImageMouseEnter}
+              onMouseLeave={handleMainImageMouseLeave}
               onMouseMove={handleMainImageMouseMove}
             >
               {mainImageUrl ? (
-                <Image
-                  src={mainImageUrl}
-                  alt={product.name}
-                  fill
-                  className="object-cover select-none pointer-events-none transition-transform duration-150"
-                  style={
-                    zoomHover
-                      ? {
-                          transform: 'scale(2)',
-                          transformOrigin: `${zoomOrigin.x}% ${zoomOrigin.y}%`,
-                        }
-                      : undefined
-                  }
-                  unoptimized
-                  priority
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                  draggable={false}
-                />
+                <>
+                  <Image
+                    src={mainImageUrl}
+                    alt={product.name}
+                    fill
+                    className="object-cover pointer-events-none"
+                    unoptimized
+                    priority
+                    sizes="(max-width: 1024px) 100vw, 50vw"
+                    draggable={false}
+                  />
+                  {/* Zoom box: follows cursor, shows 4x zoom of the area under it */}
+                  {zoomHover && zoomLens.width > 0 && (
+                    <div
+                      className="absolute overflow-hidden rounded-lg border-2 border-white bg-white shadow-xl ring-2 ring-neutral-900/10 pointer-events-none"
+                      style={{
+                        width: LENS_WIDTH,
+                        height: LENS_HEIGHT,
+                        left: zoomLens.cursorX - LENS_WIDTH / 2,
+                        top: zoomLens.cursorY - LENS_HEIGHT / 2,
+                      }}
+                    >
+                      <div
+                        className="absolute bg-cover bg-no-repeat"
+                        style={{
+                          width: zoomLens.width * ZOOM_LEVEL,
+                          height: zoomLens.height * ZOOM_LEVEL,
+                          left: LENS_WIDTH / 2 - zoomLens.x * zoomLens.width * ZOOM_LEVEL,
+                          top: LENS_HEIGHT / 2 - zoomLens.y * zoomLens.height * ZOOM_LEVEL,
+                          backgroundImage: `url(${mainImageUrl})`,
+                          backgroundSize: `${zoomLens.width * ZOOM_LEVEL}px ${zoomLens.height * ZOOM_LEVEL}px`,
+                          backgroundPosition: '0 0',
+                        }}
+                      />
+                    </div>
+                  )}
+                </>
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-gray-400 text-5xl sm:text-6xl">
                   🛢️
