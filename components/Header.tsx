@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useAuth } from '@/lib/context'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useCartStore, useCartCount } from '@/lib/stores/cart-store'
 import {
   User,
@@ -11,6 +11,7 @@ import {
   Menu,
   LayoutDashboard,
   X,
+  LogOut,
 } from 'lucide-react'
 import {
   Sheet,
@@ -32,10 +33,24 @@ const NAV_LINK_CLASS =
   'px-5 py-3.5 text-sm font-medium text-neutral-800 hover:bg-neutral-100 hover:text-neutral-900 transition-colors border-b border-neutral-100 uppercase tracking-wide'
 
 export default function Header() {
-  const { user, isAuthenticated } = useAuth()
+  const { user, isAuthenticated, logout } = useAuth()
   const [menuOpen, setMenuOpen] = useState(false)
+  const [profileOpen, setProfileOpen] = useState(false)
+  const profileRef = useRef<HTMLDivElement>(null)
   const cartCount = useCartCount()
   const fetchCart = useCartStore((s) => s.fetchCart)
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
+        setProfileOpen(false)
+      }
+    }
+    if (profileOpen) {
+      document.addEventListener('click', handleClickOutside)
+      return () => document.removeEventListener('click', handleClickOutside)
+    }
+  }, [profileOpen])
 
   useEffect(() => {
     if (isAuthenticated) fetchCart()
@@ -130,23 +145,83 @@ export default function Header() {
             </h1>
           </Link>
 
-          {/* Right: Profile, Admin, My Orders (bag), Cart */}
+          {/* Right: Profile dropdown, Admin, My Orders (bag), Cart */}
           <div className="flex items-center gap-1">
             {isAuthenticated ? (
-              <Link
-                href="/home/profile"
-                className={`${iconButtonClass} relative`}
-                aria-label="Profile"
-                title="Profile"
-              >
-                <User size={ICON_SIZE} strokeWidth={2} />
-                {user?.role?.toUpperCase() === 'ADMIN' && (
-                  <span
-                    className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white bg-white"
-                    aria-hidden
-                  />
+              <div className="relative" ref={profileRef}>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setProfileOpen((o) => !o)
+                  }}
+                  className={`${iconButtonClass} relative`}
+                  aria-label="Profile"
+                  aria-expanded={profileOpen}
+                  aria-haspopup="true"
+                  title="Profile"
+                >
+                  <User size={ICON_SIZE} strokeWidth={2} />
+                  {user?.role?.toUpperCase() === 'ADMIN' && (
+                    <span
+                      className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white bg-white"
+                      aria-hidden
+                    />
+                  )}
+                </button>
+                {profileOpen && user && (
+                  <div
+                    className="absolute right-0 top-full mt-2 w-[min(calc(100vw-2rem),320px)] sm:w-80 rounded-xl border border-[var(--primary-green)]/20 bg-white shadow-xl z-[100] overflow-hidden"
+                    role="menu"
+                  >
+                    {/* Account block - white card */}
+                    <div className="px-4 py-3 border-b border-neutral-100 bg-white">
+                      <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-neutral-500 mb-1.5">
+                        Account
+                      </p>
+                      <p className="text-sm sm:text-base font-medium text-neutral-900 truncate" title={user.email}>
+                        {user.email}
+                      </p>
+                      <p className="text-xs sm:text-sm text-neutral-600 truncate mt-0.5">{user.name || '—'}</p>
+                    </div>
+                    {/* Actions - green theme buttons */}
+                    <div className="p-2 sm:p-3 space-y-1">
+                      {user.role?.toUpperCase() === 'ADMIN' && (
+                        <Link
+                          href="/admin/dashboard"
+                          className="flex items-center gap-3 w-full px-3 py-2.5 sm:py-3 rounded-lg text-sm font-medium text-[var(--primary-green)] bg-[var(--primary-green)]/10 hover:bg-[var(--primary-green)]/20 border border-[var(--primary-green)]/30 transition-colors"
+                          onClick={() => setProfileOpen(false)}
+                          role="menuitem"
+                        >
+                          <LayoutDashboard size={18} strokeWidth={2} className="shrink-0" />
+                          Admin Dashboard
+                        </Link>
+                      )}
+                      <Link
+                        href="/home/orders"
+                        className="flex items-center gap-3 w-full px-3 py-2.5 sm:py-3 rounded-lg text-sm font-medium text-white bg-[var(--primary-green)] hover:opacity-90 transition-opacity"
+                        onClick={() => setProfileOpen(false)}
+                        role="menuitem"
+                      >
+                        <ShoppingBasket size={18} strokeWidth={2} className="shrink-0" />
+                        My Orders
+                      </Link>
+                      <button
+                        type="button"
+                        className="flex items-center gap-3 w-full px-3 py-2.5 sm:py-3 rounded-lg text-sm font-medium text-neutral-600 bg-neutral-100 hover:bg-neutral-200 border border-neutral-200 transition-colors"
+                        onClick={() => {
+                          setProfileOpen(false)
+                          logout()
+                        }}
+                        role="menuitem"
+                      >
+                        <LogOut size={18} strokeWidth={2} className="shrink-0" />
+                        Logout
+                      </button>
+                    </div>
+                  </div>
                 )}
-              </Link>
+              </div>
             ) : (
               <Link
                 href="/home/login"

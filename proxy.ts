@@ -6,7 +6,6 @@ import { getSessionFromRequest } from '@/lib/session'
 const AUTH_REQUIRED_PATHS = [
   '/home/cart',
   '/home/checkout',
-  '/home/profile',
   '/home/orders',
 ] as const
 
@@ -26,8 +25,11 @@ function pathIsAdmin(pathname: string): boolean {
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Root → /home
+  // Root → /home; profile is in header dropdown, so /home/profile → /home
   if (pathname === '/') {
+    return NextResponse.redirect(new URL('/home', request.url))
+  }
+  if (pathname === '/home/profile' || pathname.startsWith('/home/profile/')) {
     return NextResponse.redirect(new URL('/home', request.url))
   }
 
