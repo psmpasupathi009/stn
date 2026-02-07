@@ -29,64 +29,29 @@ export async function POST(request: NextRequest) {
     }
 
     const orders = await prisma.order.findMany({
-      where: { 
+      where: {
         id: { in: orderIds },
-        paymentStatus: 'paid', // Only paid orders
+        paymentStatus: 'paid',
       },
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            phoneNumber: true,
-          },
-        },
-        items: {
-          include: {
-            product: {
-              select: {
-                id: true,
-                name: true,
-                itemCode: true,
-                weight: true,
-                image: true,
-              },
-            },
-          },
-        },
+      select: {
+        id: true,
+        shippingAddress: true,
+        trackingNumber: true,
+        courierName: true,
+        user: { select: { name: true } },
+        items: { select: { quantity: true } },
       },
       orderBy: { createdAt: 'desc' },
     })
 
-    // Format order data for label generation
+    // Label data: only what is needed for shipping label (compliance / safety – no PII or financial data)
     const labelData = orders.map((order) => ({
       orderId: order.id,
-      orderDate: order.createdAt,
-      
-      // Customer details
-      customerName: order.user.name || 'Customer',
-      customerEmail: order.user.email,
-      customerPhone: order.user.phoneNumber || '',
-      shippingAddress: order.shippingAddress,
-      
-      // Order details
-      totalAmount: order.totalAmount,
       itemCount: order.items.reduce((sum, item) => sum + item.quantity, 0),
-      
-      // Products
-      items: order.items.map((item) => ({
-        name: item.product.name,
-        itemCode: item.product.itemCode,
-        weight: item.product.weight,
-        quantity: item.quantity,
-        price: item.price,
-      })),
-      
-      // Shipping details
-      trackingNumber: order.trackingNumber,
-      courierName: order.courierName,
-      expectedDelivery: order.expectedDelivery,
+      customerName: order.user.name || 'Customer',
+      shippingAddress: order.shippingAddress,
+      trackingNumber: order.trackingNumber ?? undefined,
+      courierName: order.courierName ?? undefined,
     }))
 
     return NextResponse.json({ labels: labelData })

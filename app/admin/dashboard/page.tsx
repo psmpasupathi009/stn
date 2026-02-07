@@ -36,6 +36,7 @@ import {
 } from 'lucide-react'
 import SortableGalleryList from '@/components/admin/SortableGalleryList'
 import { getAboutTemplateForIndex } from '@/lib/about-sections'
+import { COMPANY } from '@/lib/company'
 import type { AboutSection } from '@/lib/types'
 
 interface Product {
@@ -1133,7 +1134,6 @@ export default function AdminDashboard() {
       toast.error('Please select orders to download labels')
       return
     }
-
     try {
       const res = await fetch('/api/admin/orders/labels', {
         method: 'POST',
@@ -1141,106 +1141,199 @@ export default function AdminDashboard() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ orderIds: ids }),
       })
-
-      if (res.ok) {
-        const { labels } = await res.json()
-        // Dynamic import jspdf only when user downloads (smaller initial admin bundle)
-        const { default: jsPDF } = await import('jspdf')
-        const pdf = generateLabelsPDF(jsPDF, labels)
-        const filename = `shipping-labels-${new Date().toISOString().slice(0, 10)}.pdf`
-        pdf.save(filename)
-        toast.success(`Downloaded ${ids.length} label(s) as PDF`)
-      } else {
+      if (!res.ok) {
         toast.error('Failed to generate labels')
+        return
       }
+      const { labels } = await res.json()
+      const refs = labels.map((l: ShippingLabelData) => getOrderRef(l))
+      const [jsPDFModule, QRCode, JsBarcodeModule, fragileIcon] = await Promise.all([
+        import('jspdf'),
+        import('qrcode'),
+        import('jsbarcode'),
+        loadImageAsDataUrl('/glass.png'),
+      ])
+      const JsBarcode = JsBarcodeModule.default ?? JsBarcodeModule
+      const [qrDataUrls, barcodeDataUrls] = await Promise.all([
+        Promise.all(refs.map((ref) => QRCode.toDataURL(ref, { width: 100, margin: 1 }))),
+        Promise.all(refs.map((ref) => getBarcodeDataUrl(JsBarcode, ref))),
+      ])
+      const pdf = generateLabelsPDF(jsPDFModule.default, labels, { qrDataUrls, barcodeDataUrls, fragileIcon })
+      pdf.save(`shipping-labels-${new Date().toISOString().slice(0, 10)}.pdf`)
+      toast.success(`Downloaded ${ids.length} label(s) as PDF`)
     } catch (error) {
       console.error('Error downloading labels:', error)
       toast.error('Failed to generate labels')
     }
   }
 
-  const generateLabelsPDF = (
-    JsPDFClass: typeof import('jspdf').default,
-    labels: Array<{
+  type ShippingLabelData = {
     orderId: string
-    orderDate: string
-    customerName: string
-    customerEmail: string
-    customerPhone: string
-    shippingAddress: string
-    totalAmount: number
     itemCount: number
-    items: Array<{ name: string; itemCode: string; weight: string; quantity: number; price: number }>
+    customerName: string
+    shippingAddress: string
     trackingNumber?: string
     courierName?: string
-  }>
-  ) => {
-    const doc = new JsPDFClass({ unit: 'mm', format: 'a4' })
-    const pageWidth = doc.internal.pageSize.getWidth()
-    const margin = 15
-    let y = margin
+  }
+
+  function getOrderRef(label: { orderId: string; trackingNumber?: string }) {
+    return label.trackingNumber ?? `Order #${label.orderId.slice(-8).toUpperCase()}`
+  }
+
+  function getBarcodeDataUrl(
+    JsBarcodeLib: (el: HTMLCanvasElement, text: string, opts?: Record<string, unknown>) => void,
+    ref: string
+  ): string {
+    if (typeof document === 'undefined') return ''
+    const canvas = document.createElement('canvas')
+    try {
+      JsBarcodeLib(canvas, ref, { format: 'CODE128', width: 1.2, height: 28, displayValue: false, margin: 2 })
+      return canvas.toDataURL('image/png')
+    } catch {
+      return ''
+    }
+  }
+
+  async function loadImageAsDataUrl(url: string): Promise<string> {
+    try {
+      const res = await fetch(url)
+      if (!res.ok) return ''
+      const blob = await res.blob()
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onloadend = () => resolve((reader.result as string) ?? '')
+        reader.onerror = reject
+        reader.readAsDataURL(blob)
+      })
+    } catch {
+      return ''
+    }
+  }
+
+  const LABEL_LAYOUT = {
+    widthMm: 4 * 25.4,
+    margin: 6,
+    lineH: 4,
+    sectionGap: 3,
+    headerQr: 12,
+    fragileBox: 10,
+    fragileIcon: 8,
+    fragileGap: 2,
+    barcodeH: 12,
+    barcodeW: 70,
+    footerH: 10,
+    buffer: 6,
+  } as const
+
+  function generateLabelsPDF(
+    JsPDFClass: typeof import('jspdf').default,
+    labels: ShippingLabelData[],
+    assets: { qrDataUrls: string[]; barcodeDataUrls: string[]; fragileIcon: string }
+  ) {
+    const L = LABEL_LAYOUT
+    const maxW = L.widthMm - 2 * L.margin
+    const fromLines = COMPANY.address.split('\n').filter(Boolean).length + 1
+    const headerH = L.margin + L.headerQr + L.fragileGap + L.fragileBox + L.sectionGap
+
+    function calcHeight(label: ShippingLabelData) {
+      const toLines = Math.max(1, Math.ceil((label.customerName.length + label.shippingAddress.length + 1) / 28))
+      const packageH = 5 + 3 * L.lineH
+      const fromH = 5 + fromLines * L.lineH
+      const toH = 5 + toLines * L.lineH
+      const barcodeH = L.barcodeH + 11
+      return L.margin + headerH + 2 + packageH + 2 + fromH + 2 + toH + 2 + barcodeH + L.footerH + L.margin + L.buffer
+    }
+
+    const doc = new JsPDFClass({ unit: 'mm', format: [L.widthMm, calcHeight(labels[0])] })
+    const pageW = doc.internal.pageSize.getWidth()
+
+    function line(y: number) {
+      doc.setLineWidth(0.2)
+      doc.line(L.margin, y, pageW - L.margin, y)
+    }
+
+    function blockTitle(title: string, y: number) {
+      doc.setFontSize(9)
+      doc.setFont('helvetica', 'bold')
+      doc.text(title, L.margin, y)
+      return y + 5
+    }
+
+    function blockText(lines: string[], y: number) {
+      doc.setFont('helvetica', 'normal')
+      doc.setFontSize(8)
+      doc.text(lines, L.margin, y)
+      return y + lines.length * L.lineH
+    }
 
     labels.forEach((label, idx) => {
-      if (idx > 0) {
-        doc.addPage()
-        y = margin
-      }
+      if (idx > 0) doc.addPage([L.widthMm, calcHeight(label)], 'p')
+      const pageH = doc.internal.pageSize.getHeight()
+      let y = L.margin
 
-      // Header
-      doc.setFontSize(20)
-      doc.setFont('helvetica', 'bold')
-      doc.text('STN PRODUCTS', margin, y)
-      y += 6
-      doc.setFontSize(10)
-      doc.setFont('helvetica', 'normal')
-      doc.setTextColor(100, 100, 100)
-      doc.text('Premium Quality Traditional Products', margin, y)
-      y += 10
-      doc.setTextColor(0, 0, 0)
+      doc.setDrawColor(180, 170, 160)
+      doc.setLineDashPattern([1, 1], 0)
+      doc.rect(2, 2, pageW - 4, pageH - 4)
+      doc.setLineDashPattern([], 0)
+      doc.setDrawColor(0, 0, 0)
 
-      // Order ID & Date
-      doc.setFontSize(10)
-      doc.setFont('helvetica', 'normal')
-      doc.text(`Order #${label.orderId.slice(-8).toUpperCase()}`, margin, y)
-      doc.text(new Date(label.orderDate).toLocaleDateString('en-IN'), pageWidth - margin, y, { align: 'right' })
-      y += 8
-
-      // Ship To
-      doc.setFontSize(12)
-      doc.setFont('helvetica', 'bold')
-      doc.text('SHIP TO:', margin, y)
-      y += 6
-      doc.setFont('helvetica', 'normal')
       doc.setFontSize(11)
-      const shipLines = doc.splitTextToSize(`${label.customerName}\n${label.shippingAddress}\nPhone: ${label.customerPhone || 'N/A'}`, pageWidth - 2 * margin)
-      doc.text(shipLines, margin, y)
-      y += shipLines.length * 5 + 8
-
-      // Items table
-      doc.setFontSize(10)
       doc.setFont('helvetica', 'bold')
-      doc.text(`ITEMS (${label.itemCount}):`, margin, y)
-      y += 6
+      doc.text(COMPANY.name.toUpperCase(), L.margin, y)
+      const qrX = pageW - L.margin - L.headerQr
+      if (assets.qrDataUrls[idx]) {
+        doc.addImage(assets.qrDataUrls[idx], 'PNG', qrX, L.margin - 1, L.headerQr, L.headerQr)
+      }
+      const boxX = pageW - L.margin - L.fragileBox
+      const boxY = L.margin + L.headerQr + L.fragileGap
+      if (assets.fragileIcon) {
+        doc.setDrawColor(0, 0, 0)
+        doc.setLineWidth(0.25)
+        doc.rect(boxX, boxY, L.fragileBox, L.fragileBox)
+        const pad = (L.fragileBox - L.fragileIcon) / 2
+        doc.addImage(assets.fragileIcon, 'PNG', boxX + pad, boxY + pad, L.fragileIcon, L.fragileIcon)
+      }
+      y = headerH
+      line(y)
+      y += L.sectionGap
+
+      y = blockTitle('PACKAGE DETAILS:', y)
+      y = blockText(
+        [
+          `No. of items: ${label.itemCount}`,
+          `Shipping: ${label.courierName || 'Standard'}`,
+          `Tracking: ${label.trackingNumber ?? '—'}`,
+        ],
+        y
+      )
+      y += L.sectionGap
+      line(y)
+      y += L.sectionGap
+
+      y = blockTitle('FROM:', y)
+      y = blockText([COMPANY.name, ...doc.splitTextToSize(COMPANY.addressInline, maxW)], y)
+      y += L.sectionGap
+      line(y)
+      y += L.sectionGap
+
+      y = blockTitle('TO:', y)
+      y = blockText(doc.splitTextToSize(`${label.customerName}\n${label.shippingAddress}`, maxW), y)
+      y += L.sectionGap
+      line(y)
+      y += L.sectionGap
+
+      const ref = getOrderRef(label)
+      if (assets.barcodeDataUrls[idx]) {
+        doc.addImage(assets.barcodeDataUrls[idx], 'PNG', (pageW - L.barcodeW) / 2, y, L.barcodeW, L.barcodeH)
+      }
+      y += L.barcodeH + 3
+      doc.setFontSize(8)
       doc.setFont('helvetica', 'normal')
-      label.items.forEach((item) => {
-        doc.text(`${item.name} (${item.itemCode})`, margin, y)
-        doc.text(`Qty: ${item.quantity} | ${item.weight}`, pageWidth - margin, y, { align: 'right' })
-        y += 5
-      })
-      y += 5
-
-      // Total & Courier
-      doc.setFont('helvetica', 'bold')
-      doc.text(`Total: ₹${label.totalAmount.toLocaleString('en-IN')}`, margin, y)
-      if (label.courierName) {
-        doc.text(`Courier: ${label.courierName}`, pageWidth - margin, y, { align: 'right' })
-      }
+      doc.text(ref, pageW / 2, y, { align: 'center' })
       y += 6
-      if (label.trackingNumber) {
-        doc.setFont('helvetica', 'normal')
-        doc.text(`Tracking: ${label.trackingNumber}`, margin, y)
-        y += 6
-      }
+      doc.setFont('helvetica', 'bold')
+      doc.setFontSize(9)
+      doc.text('PLEASE HANDLE WITH CARE.', pageW / 2, y, { align: 'center' })
     })
 
     return doc

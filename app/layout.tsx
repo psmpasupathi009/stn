@@ -5,7 +5,6 @@ import { AuthProvider } from "@/lib/context";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
-import { PageLoadingOverlay } from "@/components/PageLoadingOverlay";
 import { Toaster } from "sonner";
 
 const geistSans = Geist({
@@ -43,7 +42,6 @@ export default function RootLayout({
       >
         <AuthProvider>
           <Toaster position="top-center" richColors closeButton />
-          <PageLoadingOverlay />
           <Header />
           <main className="min-h-screen min-w-0 overflow-x-hidden pt-14 sm:pt-16 md:pt-[4.25rem]">
             {children}
