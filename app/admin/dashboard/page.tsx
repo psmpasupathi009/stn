@@ -137,6 +137,8 @@ const CATEGORIES = [
   'Essential Millets',
 ]
 
+const MAX_PRODUCT_IMAGES = 5
+
 interface GalleryItem {
   id: string
   url: string
@@ -179,6 +181,8 @@ export default function AdminDashboard() {
   const [newCategoryName, setNewCategoryName] = useState('')
   const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set())
   const [bulkStockUpdating, setBulkStockUpdating] = useState(false)
+
+  const canAddMoreImages = productImages.length < MAX_PRODUCT_IMAGES
 
   // Hero sections state
   const [heroSections, setHeroSections] = useState<HeroSection[]>([])
@@ -305,8 +309,6 @@ export default function AdminDashboard() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchProducts when category/search change only
   }, [selectedCategory, searchQuery])
-
-  const MAX_PRODUCT_IMAGES = 5
 
   const addProductImages = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files ? Array.from(e.target.files) : []
@@ -1463,7 +1465,7 @@ export default function AdminDashboard() {
                             </button>
                           </div>
                         ))}
-                        {productImages.length < MAX_PRODUCT_IMAGES && (
+                        {canAddMoreImages && (
                           <label className="flex flex-col items-center justify-center w-20 h-20 sm:w-24 sm:h-24 rounded-lg border-2 border-dashed border-gray-300 hover:border-green-500 cursor-pointer bg-gray-50">
                             <Images className="w-6 h-6 text-gray-400" />
                             <span className="text-xs text-gray-500 mt-1">Add</span>

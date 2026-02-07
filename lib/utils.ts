@@ -22,3 +22,16 @@ export function sortProductsByRatingAndDate<T extends { rating?: number; created
     return bDate.localeCompare(aDate)
   })
 }
+
+/** Product image + images merged, deduped. First item is primary. */
+export function getProductImages(product: { image?: string | null; images?: string[] | null } | null): string[] {
+  if (!product) return []
+  const list: string[] = []
+  if (product.image) list.push(product.image)
+  if (product.images?.length) {
+    for (const url of product.images) {
+      if (url && !list.includes(url)) list.push(url)
+    }
+  }
+  return list
+}

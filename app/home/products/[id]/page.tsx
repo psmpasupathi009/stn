@@ -1,17 +1,17 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { useAuth } from '@/lib/context'
 import { useCartStore } from '@/lib/stores/cart-store'
 import { toast } from 'sonner'
 import { Star, MessageSquare, User, ChevronLeft, Share2 } from 'lucide-react'
 import Link from 'next/link'
-import { cn } from '@/lib/utils'
+import { cn, getProductImages } from '@/lib/utils'
 import type { Product, Review } from '@/lib/types'
 
 function StarRating({ value, size = 'md' }: { value: number; size?: 'sm' | 'md' }) {
@@ -44,8 +44,22 @@ export default function ProductDetailPage() {
   const [reviewRating, setReviewRating] = useState(0)
   const [reviewComment, setReviewComment] = useState('')
   const [hoverRating, setHoverRating] = useState(0)
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0)
+  const [zoomHover, setZoomHover] = useState(false)
+  const [zoomOrigin, setZoomOrigin] = useState({ x: 50, y: 50 })
 
   const productId = params.id as string
+
+  const allImages = useMemo(() => getProductImages(product), [product])
+  const mainImageUrl = allImages[selectedImageIndex] ?? null
+
+  const handleMainImageMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect()
+    setZoomOrigin({
+      x: ((e.clientX - rect.left) / rect.width) * 100,
+      y: ((e.clientY - rect.top) / rect.height) * 100,
+    })
+  }, [])
 
   const fetchProduct = useCallback(async () => {
     if (!productId) return
@@ -91,6 +105,10 @@ export default function ProductDetailPage() {
     })
     return () => { cancelled = true }
   }, [productId, fetchProduct, fetchReviews])
+
+  useEffect(() => {
+    setSelectedImageIndex(0)
+  }, [productId])
 
   const addToCart = async () => {
     if (!isAuthenticated) {
@@ -231,18 +249,32 @@ export default function ProductDetailPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
-          {/* Product Images */}
+          {/* Product Images: main with hover zoom + thumbnails to switch */}
           <div className="min-w-0 space-y-4">
-            <div className="aspect-square bg-white border border-neutral-200 rounded-2xl overflow-hidden shadow-sm relative">
-              {product.image ? (
+            <div
+              className="aspect-square bg-white border border-neutral-200 rounded-2xl overflow-hidden shadow-sm relative"
+              onMouseEnter={() => setZoomHover(true)}
+              onMouseLeave={() => setZoomHover(false)}
+              onMouseMove={handleMainImageMouseMove}
+            >
+              {mainImageUrl ? (
                 <Image
-                  src={product.image}
+                  src={mainImageUrl}
                   alt={product.name}
                   fill
-                  className="object-cover"
+                  className="object-cover select-none pointer-events-none transition-transform duration-150"
+                  style={
+                    zoomHover
+                      ? {
+                          transform: 'scale(2)',
+                          transformOrigin: `${zoomOrigin.x}% ${zoomOrigin.y}%`,
+                        }
+                      : undefined
+                  }
                   unoptimized
                   priority
                   sizes="(max-width: 1024px) 100vw, 50vw"
+                  draggable={false}
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-gray-400 text-5xl sm:text-6xl">
@@ -250,12 +282,19 @@ export default function ProductDetailPage() {
                 </div>
               )}
             </div>
-            {product.images && product.images.length > 0 && (
-              <div className="grid grid-cols-4 gap-2 sm:gap-3">
-                {product.images.map((img, idx) => (
-                  <div
+            {allImages.length > 0 && (
+              <div className="grid grid-cols-4 sm:grid-cols-5 gap-2 sm:gap-3">
+                {allImages.map((img, idx) => (
+                  <button
                     key={idx}
-                    className="aspect-square bg-neutral-100 rounded-lg overflow-hidden cursor-pointer hover:opacity-80 transition-opacity relative"
+                    type="button"
+                    onClick={() => setSelectedImageIndex(idx)}
+                    className={cn(
+                      'aspect-square bg-neutral-100 rounded-lg overflow-hidden cursor-pointer transition-all relative ring-2 ring-offset-2 ring-offset-white',
+                      selectedImageIndex === idx
+                        ? 'ring-neutral-900 opacity-100'
+                        : 'ring-transparent hover:opacity-90 opacity-70'
+                    )}
                   >
                     <Image
                       src={img}
@@ -265,7 +304,7 @@ export default function ProductDetailPage() {
                       unoptimized
                       sizes="120px"
                     />
-                  </div>
+                  </button>
                 ))}
               </div>
             )}
