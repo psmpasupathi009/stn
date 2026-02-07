@@ -14,7 +14,7 @@ export const DEFAULT_ABOUT_SECTIONS: Omit<AboutSection, 'id'>[] = [
     title: 'Our Vision and Mission',
     content:
       'With the 21st century witnessing ever-growing awareness on eating healthy, we concentrate on giving traditional oil to people the same way our ancients used it. At STN GOLDEN HEALTHY FOODS, we are dedicated to producing pure, natural, and traditionally extracted wood-pressed oils that preserve the true goodness of nature. Rooted in age-old methods and modern quality standards, our oils deliver authentic taste, nutrition, and wellness.',
-    image: '/stn loading image.png',
+    image: '/STN LOGO.png',
     imageLeft: true,
     order: 1,
   },

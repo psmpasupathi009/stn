@@ -1157,8 +1157,8 @@ export default function AdminDashboard() {
       ])
       const JsBarcode = JsBarcodeModule.default ?? JsBarcodeModule
       const [qrDataUrls, barcodeDataUrls] = await Promise.all([
-        Promise.all(refs.map((ref) => QRCode.toDataURL(ref, { width: 100, margin: 1 }))),
-        Promise.all(refs.map((ref) => getBarcodeDataUrl(JsBarcode, ref))),
+        Promise.all(refs.map((ref: string) => QRCode.toDataURL(ref, { width: 100, margin: 1 }))),
+        Promise.all(refs.map((ref: string) => getBarcodeDataUrl(JsBarcode, ref))),
       ])
       const pdf = generateLabelsPDF(jsPDFModule.default, labels, { qrDataUrls, barcodeDataUrls, fragileIcon })
       pdf.save(`shipping-labels-${new Date().toISOString().slice(0, 10)}.pdf`)
@@ -1289,7 +1289,7 @@ export default function AdminDashboard() {
     labels.forEach((label, idx) => {
       if (idx > 0) doc.addPage([L.widthMm, calcHeight(label)], 'p')
       const pageH = doc.internal.pageSize.getHeight()
-      let y = L.margin
+      let y: number = L.margin
 
       doc.setDrawColor(180, 170, 160)
       doc.setLineDashPattern([1, 1], 0)
