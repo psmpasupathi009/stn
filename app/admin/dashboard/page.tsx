@@ -36,6 +36,7 @@ import {
   FileText,
 } from 'lucide-react'
 import SortableGalleryList from '@/components/admin/SortableGalleryList'
+import RichTextEditor from '@/components/admin/RichTextEditor'
 import { getAboutTemplateForIndex } from '@/lib/about-sections'
 import { COMPANY } from '@/lib/company'
 import { generateInvoicePDF, type InvoiceOrder } from '@/lib/invoice-pdf'
@@ -1443,7 +1444,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="bg-white min-h-screen">
-      <div className="container mx-auto w-full min-w-0 max-w-7xl px-3 sm:px-4 md:px-6 py-6 sm:py-8 overflow-x-auto">
+      <div className="container mx-auto w-full min-w-0 max-w-7xl px-3 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8 md:py-10 overflow-x-auto">
         {/* Header */}
         <div className="mb-6 sm:mb-8">
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">Admin Dashboard</h1>
@@ -1581,16 +1582,16 @@ export default function AdminDashboard() {
 
             {/* Product Form */}
             {showForm && (
-              <Card className="mb-6 sm:mb-8 shadow-lg overflow-hidden">
-                <CardHeader className="bg-neutral-50 p-4 sm:p-6">
+              <Card className="mb-6 sm:mb-8 md:mb-10 shadow-lg overflow-hidden">
+                <CardHeader className="bg-neutral-50 p-4 sm:p-6 md:p-6">
                   <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
                     {editingProduct ? <Pencil className="w-5 h-5 shrink-0" /> : <Plus className="w-5 h-5 shrink-0" />}
                     {editingProduct ? 'Edit Product' : 'Create New Product'}
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="pt-4 sm:pt-6 p-4 sm:p-6">
-                  <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 min-w-0">
+                <CardContent className="pt-4 sm:pt-6 md:pt-6 p-4 sm:p-6 md:p-8">
+                  <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5 md:space-y-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 md:gap-5 min-w-0">
                       <div className="min-w-0">
                         <Label className="text-sm sm:text-base">Product Name *</Label>
                         <Input
@@ -1696,12 +1697,12 @@ export default function AdminDashboard() {
                     </div>
                     <div className="min-w-0">
                       <Label className="text-sm sm:text-base">Description</Label>
-                      <textarea
-                        className="w-full min-w-0 rounded-md border border-gray-300 px-3 py-2 mt-1 text-sm sm:text-base min-h-[100px] sm:min-h-[120px]"
-                        rows={4}
+                      <RichTextEditor
                         value={formData.description}
-                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                        onChange={(value) => setFormData({ ...formData, description: value })}
                         placeholder="Product description..."
+                        className="mt-1"
+                        minHeight="160px"
                       />
                     </div>
                     <div className="min-w-0">

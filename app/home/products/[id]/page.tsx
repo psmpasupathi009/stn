@@ -282,10 +282,16 @@ export default function ProductDetailPage() {
     )
   }
 
+  const htmlTagRegex = /<[a-z][\s\S]*>/i
+  const descriptionHtml = product.description
+    ? htmlTagRegex.test(product.description)
+      ? product.description
+      : `<p>${String(product.description).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>`
+    : ''
+
   return (
     <div className="min-h-screen bg-white w-full min-w-0 overflow-x-hidden">
-      <div className="container mx-auto w-full min-w-0 px-3 sm:px-4 md:px-6 py-6 sm:py-8 md:py-10 lg:py-12 max-w-7xl">
-        {/* Back link */}
+      <div className="container mx-auto w-full min-w-0 px-3 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8 md:py-10 lg:py-12 max-w-7xl">
         <div className="mb-4 sm:mb-6">
           <Link
             href="/home/products"
@@ -296,7 +302,7 @@ export default function ProductDetailPage() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 md:gap-10 lg:gap-12">
           {/* Product Images: main with Amazon-style hover zoom lens */}
           <div className="min-w-0 space-y-4">
             <div
@@ -468,7 +474,7 @@ export default function ProductDetailPage() {
             </div>
 
             {/* Actions */}
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-6 sm:mb-8">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 md:gap-4 mb-6 sm:mb-8">
               <button
                 onClick={addToCart}
                 disabled={!product.inStock}
@@ -488,18 +494,25 @@ export default function ProductDetailPage() {
               </button>
             </div>
 
-            {product.description && (
-              <div className="border-t border-neutral-200 pt-5 sm:pt-6">
-                <h2 className="text-base sm:text-lg font-semibold text-neutral-900 mb-2">Description</h2>
-                <p className="text-neutral-700 text-sm sm:text-base leading-relaxed">{product.description}</p>
-              </div>
-            )}
-
             {!product.inStock && (
               <p className="text-red-600 text-sm sm:text-base mt-4">This product is currently out of stock.</p>
             )}
           </div>
         </div>
+
+        {/* Description - full width, above Reviews */}
+        {product.description && (
+          <div className="mt-8 pt-6 border-t border-neutral-200 w-full min-w-0">
+            <h2 className="text-base sm:text-lg md:text-lg font-semibold text-neutral-900 mb-2 sm:mb-3">Description</h2>
+            <div className="w-full min-w-0 max-w-full rounded-lg border border-neutral-200 bg-neutral-50/50 px-3 py-2.5 sm:px-4 sm:py-3 md:px-5 md:py-4 overflow-x-hidden">
+              <div
+                className="prose prose-sm sm:prose-base md:prose-base text-neutral-700 leading-relaxed [&_p]:mb-2 [&_p]:whitespace-normal [&_ul]:list-disc [&_ol]:list-decimal [&_ul]:pl-5 [&_ol]:pl-5 [&_strong]:font-semibold [&_a]:text-[#3CB31A] [&_a]:underline [&_*]:max-w-full"
+                style={{ wordBreak: 'normal', overflowWrap: 'break-word' } as React.CSSProperties}
+                dangerouslySetInnerHTML={{ __html: descriptionHtml }}
+              />
+            </div>
+          </div>
+        )}
 
         {/* Reviews section - compact */}
         <section className="mt-8 pt-6 border-t border-neutral-200" aria-label="Reviews">
@@ -565,7 +578,7 @@ export default function ProductDetailPage() {
                     {submittingReview ? '…' : 'Submit'}
                   </Button>
                 </div>
-                <p className="text-[10px] text-gray-500">{reviewComment.length}/500</p>
+                <p className="text-[10px] text-gray-500">{`${reviewComment.length}/500`}</p>
               </CardContent>
             </Card>
           ) : (
