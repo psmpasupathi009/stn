@@ -13,6 +13,10 @@ import {
 } from 'lucide-react'
 import type { HeroSlide } from './types'
 
+/** Recommended hero image size for sharp display (container is full width, height 400–650px). */
+export const HERO_IMAGE_RECOMMENDED_WIDTH = 1920
+export const HERO_IMAGE_RECOMMENDED_HEIGHT = 650
+
 const HERO_ICONS: Record<string, React.ComponentType<{ className?: string; strokeWidth?: number }>> = {
   Droplets,
   Wheat,
@@ -97,12 +101,13 @@ export default function HeroSection() {
                   <>
                     <div className="absolute inset-0">
                       <div className="relative w-full h-full">
+                        {/* Use images at 1920×650 px (or 1920×800) for best quality; landscape, object-cover. */}
                         <Image
                           src={imageUrl}
                           alt={slide.title || 'Hero banner'}
                           fill
                           className="object-cover object-center"
-                          sizes="100vw"
+                          sizes="(max-width: 1280px) 100vw, 1280px"
                           unoptimized={!imageUrl.includes('res.cloudinary.com')}
                           onError={() => setHeroImageErrors((prev) => new Set(prev).add(index))}
                         />
