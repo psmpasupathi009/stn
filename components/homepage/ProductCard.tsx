@@ -13,6 +13,7 @@ export interface ProductCardProps {
     salePrice: number
     mrp: number
     image?: string
+    images?: string[]
     itemCode?: string
     rating?: number
     reviewCount?: number
@@ -28,28 +29,29 @@ function ProductCard({ product, onAddToCart, onBuyNow, className = '' }: Product
     ? Math.round(((product.mrp - product.salePrice) / product.mrp) * 100)
     : 0
   const rating = product.rating ?? 0
+  const displayImage = product.image ?? product.images?.[0]
 
   return (
     <div
       className={`group relative bg-white rounded-2xl border border-gray-100 hover:border-neutral-200 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 ease-out overflow-hidden min-w-0 w-full ${className}`}
     >
       {/* Image Container */}
-      <div className="relative aspect-square bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
+      <div className="relative aspect-square bg-linear-to-br from-gray-50 to-gray-100 overflow-hidden">
         <Link href={`/home/products/${product.id}`} className="block size-full">
-          {product.image ? (
+          {displayImage ? (
             <>
               <Image
-                src={product.image}
+                src={displayImage}
                 alt={product.name || 'Product'}
                 fill
                 sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
                 className="object-cover group-hover:scale-110 transition-transform duration-500 ease-out"
                 unoptimized
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+              <div className="absolute inset-0 bg-linear-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
             </>
           ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+            <div className="w-full h-full flex items-center justify-center bg-linear-to-br from-gray-50 to-gray-100">
               <Droplets className="w-12 h-12 sm:w-16 sm:h-16 text-neutral-300" />
             </div>
           )}
@@ -74,7 +76,7 @@ function ProductCard({ product, onAddToCart, onBuyNow, className = '' }: Product
       {/* Product Info */}
       <div className="p-4 sm:p-5">
         <Link href={`/home/products/${product.id}`}>
-          <h3 className="font-semibold text-gray-900 text-sm sm:text-base leading-snug mb-2 line-clamp-2 hover:text-neutral-700 transition-colors min-h-[2.25rem] sm:min-h-[2.5rem] text-left">
+          <h3 className="font-semibold text-gray-900 text-sm sm:text-base leading-snug mb-2 line-clamp-2 hover:text-neutral-700 transition-colors min-h-9 sm:min-h-10 text-left">
             {product.name || 'Unnamed Product'}
           </h3>
         </Link>
@@ -108,7 +110,7 @@ function ProductCard({ product, onAddToCart, onBuyNow, className = '' }: Product
               e.stopPropagation()
               onBuyNow(product.id)
             }}
-            className="flex-1 min-w-0 bg-[var(--primary-green)] hover:opacity-90 text-white text-xs sm:text-sm font-semibold py-2.5 sm:py-3 rounded-xl flex items-center justify-center shadow-md transition-all touch-manipulation"
+            className="flex-1 min-w-0 bg-(--primary-green) hover:opacity-90 text-white text-xs sm:text-sm font-semibold py-2.5 sm:py-3 rounded-xl flex items-center justify-center shadow-md transition-all touch-manipulation"
           >
             <span className="truncate">Buy Now</span>
           </button>
@@ -120,7 +122,7 @@ function ProductCard({ product, onAddToCart, onBuyNow, className = '' }: Product
             }}
             className="flex-1 min-w-0 bg-white border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-gray-800 text-xs sm:text-sm font-semibold py-2.5 sm:py-3 rounded-xl flex items-center justify-center transition-all touch-manipulation shrink-0"
           >
-            <ShoppingCart className="w-4 h-4 text-[var(--primary-green)]" />
+            <ShoppingCart className="w-4 h-4 text-(--primary-green)" />
           </button>
         </div>
       </div>

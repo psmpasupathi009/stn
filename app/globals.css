@@ -131,6 +131,19 @@ a, button {
   --sidebar-ring: hsl(217.2 91.2% 59.8%);
 }
 
+/* OTP input - no number spinners, no scrollbar */
+.otp-input-root {
+  overflow: hidden;
+}
+.otp-input-root [data-input-otp] {
+  -moz-appearance: textfield;
+}
+.otp-input-root [data-input-otp]::-webkit-outer-spin-button,
+.otp-input-root [data-input-otp]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
 @layer base {
   * {
     border-color: hsl(220 13% 91%);

@@ -131,7 +131,7 @@ export default function CategoryPage() {
           <div className="text-center py-12">
             <p className="text-gray-600 mb-4">No products found in this category.</p>
             <Link href="/home/products">
-              <button className="bg-[var(--primary-green)] text-white px-6 py-2 rounded hover:opacity-90">
+              <button className="bg-(--primary-green) text-white px-6 py-2 rounded hover:opacity-90">
                 View All Products
               </button>
             </Link>
@@ -142,9 +142,9 @@ export default function CategoryPage() {
               <div key={product.id} className="group">
                 <Link href={`/home/products/${product.id}`}>
                   <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden mb-4 group-hover:opacity-90 transition-opacity relative">
-                    {product.image ? (
+                    {(product.image ?? product.images?.[0]) ? (
                       <Image
-                        src={product.image}
+                        src={product.image ?? product.images?.[0] ?? ''}
                         alt={product.name}
                         fill
                         className="object-cover"

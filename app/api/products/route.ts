@@ -76,6 +76,9 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const imageUrls = Array.isArray(images) ? images : []
+    const mainImage = image ?? imageUrls[0] ?? null
+
     const product = await prisma.product.create({
       data: {
         name,
@@ -86,8 +89,8 @@ export async function POST(request: NextRequest) {
         salePrice: parseFloat(salePrice),
         gst: parseFloat(gst || 0),
         hsnCode: hsnCode || '',
-        image: image || null,
-        images: images || [],
+        image: mainImage,
+        images: imageUrls,
         description: description || null,
         inStock: inStock !== undefined ? inStock : true,
       },

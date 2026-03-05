@@ -52,6 +52,9 @@ export async function PUT(
       inStock,
     } = body
 
+    const imageUrls = Array.isArray(images) ? images : undefined
+    const mainImage = image !== undefined ? image : (imageUrls?.length ? imageUrls[0] : undefined)
+
     const product = await prisma.product.update({
       where: { id },
       data: {
@@ -63,8 +66,8 @@ export async function PUT(
         ...(salePrice && { salePrice: parseFloat(salePrice) }),
         ...(gst !== undefined && { gst: parseFloat(gst) }),
         ...(hsnCode && { hsnCode }),
-        ...(image !== undefined && { image }),
-        ...(images && { images }),
+        ...(mainImage !== undefined && { image: mainImage }),
+        ...(imageUrls && { images: imageUrls }),
         ...(description !== undefined && { description }),
         ...(inStock !== undefined && { inStock }),
       },
