@@ -1,35 +1,51 @@
 'use client'
 
-import { memo } from 'react'
+import { memo, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Droplets, ShoppingCart, ArrowRight, Star } from 'lucide-react'
 
+export type ProductCardProduct = {
+  id: string
+  name: string
+  category?: string
+  salePrice: number
+  mrp: number
+  image?: string
+  images?: string[]
+  itemCode?: string
+  weight?: string
+  rating?: number
+  reviewCount?: number
+}
+
 export interface ProductCardProps {
-  product: {
-    id: string
-    name: string
-    category?: string
-    salePrice: number
-    mrp: number
-    image?: string
-    images?: string[]
-    itemCode?: string
-    rating?: number
-    reviewCount?: number
-  }
+  /** Single product: show one card. */
+  product?: ProductCardProduct
+  /** Same product name, different variants (e.g. 500g, 1kg). One card with variant selector. */
+  variants?: ProductCardProduct[]
   onAddToCart: (id: string) => void
   onBuyNow: (id: string) => void
   className?: string
 }
 
-function ProductCard({ product, onAddToCart, onBuyNow, className = '' }: ProductCardProps) {
-  const hasDiscount = product.mrp > product.salePrice
-  const discountPercent = hasDiscount
-    ? Math.round(((product.mrp - product.salePrice) / product.mrp) * 100)
+function ProductCard({ product: singleProduct, variants, onAddToCart, onBuyNow, className = '' }: ProductCardProps) {
+  const isVariantMode = Array.isArray(variants) && variants.length > 0
+  const list = isVariantMode ? variants : singleProduct ? [singleProduct] : []
+  // With multiple variants: no selection initially; price shows only after user clicks a variant
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(
+    isVariantMode && list.length > 1 ? null : 0
+  )
+  const current = selectedIndex !== null ? list[selectedIndex] : list[0]
+  const variantPicked = selectedIndex !== null
+  if (!list.length) return null
+
+  const hasDiscount = current ? current.mrp > current.salePrice : false
+  const discountPercent = hasDiscount && current
+    ? Math.round(((current.mrp - current.salePrice) / current.mrp) * 100)
     : 0
-  const rating = product.rating ?? 0
-  const displayImage = product.image ?? product.images?.[0]
+  const rating = (current?.rating ?? 0) as number
+  const displayImage = current?.image ?? current?.images?.[0]
 
   return (
     <div
@@ -37,12 +53,12 @@ function ProductCard({ product, onAddToCart, onBuyNow, className = '' }: Product
     >
       {/* Image Container */}
       <div className="relative aspect-square bg-linear-to-br from-gray-50 to-gray-100 overflow-hidden">
-        <Link href={`/home/products/${product.id}`} className="block size-full">
+        <Link href={`/home/products/${current?.id ?? list[0].id}`} className="block size-full">
           {displayImage ? (
             <>
               <Image
                 src={displayImage}
-                alt={product.name || 'Product'}
+                alt={current?.name || list[0].name || 'Product'}
                 fill
                 sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
                 className="object-cover group-hover:scale-110 transition-transform duration-500 ease-out"
@@ -75,26 +91,69 @@ function ProductCard({ product, onAddToCart, onBuyNow, className = '' }: Product
 
       {/* Product Info */}
       <div className="p-4 sm:p-5">
-        <Link href={`/home/products/${product.id}`}>
+        <Link href={`/home/products/${current?.id ?? list[0].id}`}>
           <h3 className="font-semibold text-gray-900 text-sm sm:text-base leading-snug mb-2 line-clamp-2 hover:text-neutral-700 transition-colors min-h-9 sm:min-h-10 text-left">
-            {product.name || 'Unnamed Product'}
+            {current?.name || list[0].name || 'Unnamed Product'}
           </h3>
         </Link>
 
-        {/* Price and Explore */}
+        {/* Variant selector: clickable options; price shows only after a variant is picked */}
+        {isVariantMode && variants!.length > 1 && (
+          <div className="mb-3">
+            <label className="text-xs font-medium text-gray-500 block mb-1.5">Variant</label>
+            <div className="flex flex-wrap gap-2">
+              {variants!.map((v, i) => (
+                <button
+                  key={v.id}
+                  type="button"
+                  onClick={() => setSelectedIndex(i)}
+                  className={`rounded-lg border px-3 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[#3CB31A] focus:ring-offset-1 ${
+                    selectedIndex === i
+                      ? 'border-[#3CB31A] bg-[#3CB31A]/10 text-gray-900'
+                      : 'border-gray-200 bg-gray-50 text-gray-700 hover:border-gray-300 hover:bg-gray-100'
+                  }`}
+                  aria-label={`Select ${v.weight?.trim() || v.itemCode || 'variant'}`}
+                >
+                  {v.weight?.trim() || v.itemCode || `Variant ${i + 1}`}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Price and Explore - only show when variant is picked (or single product) */}
         <div className="flex items-end justify-between gap-2 mb-4 min-w-0">
           <div className="flex items-baseline gap-2 flex-wrap min-w-0">
-            <span className="text-lg sm:text-xl font-bold text-gray-900 tabular-nums">
-              ₹{product.salePrice?.toLocaleString('en-IN') || '0'}
-            </span>
-            {hasDiscount && (
-              <span className="text-sm text-gray-400 line-through tabular-nums">
-                ₹{product.mrp?.toLocaleString('en-IN')}
-              </span>
+            {variantPicked && current ? (
+              <>
+                <span className="text-lg sm:text-xl font-bold text-gray-900 tabular-nums">
+                  ₹{current.salePrice?.toLocaleString('en-IN') || '0'}
+                </span>
+                {hasDiscount && (
+                  <span className="text-sm text-gray-400 line-through tabular-nums">
+                    ₹{current.mrp?.toLocaleString('en-IN')}
+                  </span>
+                )}
+              </>
+            ) : isVariantMode && list.length > 1 ? (
+              <span className="text-sm text-gray-500">Select variant for price</span>
+            ) : (
+              current && (
+                <>
+                  <span className="text-lg sm:text-xl font-bold text-gray-900 tabular-nums">
+                    ₹{current.salePrice?.toLocaleString('en-IN') || '0'}
+                  </span>
+                  {hasDiscount && (
+                    <span className="text-sm text-gray-400 line-through tabular-nums">
+                      ₹{current.mrp?.toLocaleString('en-IN')}
+                    </span>
+                  )}
+                </>
+              )
             )}
           </div>
           <Link
-            href={`/home/products/${product.id}`}
+            href={`/home/products/${current?.id ?? list[0].id}`}
             className="inline-flex items-center gap-1 text-sm font-semibold text-neutral-600 hover:text-neutral-900 transition-colors shrink-0 group/link"
           >
             Explore
@@ -102,13 +161,14 @@ function ProductCard({ product, onAddToCart, onBuyNow, className = '' }: Product
           </Link>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex gap-2">
+        {/* Action Buttons - only when a variant is selected (or single product) */}
+        {variantPicked && current && (
+          <div className="flex gap-2">
           <button
             onClick={(e) => {
               e.preventDefault()
               e.stopPropagation()
-              onBuyNow(product.id)
+              onBuyNow(current.id)
             }}
             className="flex-1 min-w-0 bg-(--primary-green) hover:opacity-90 text-white text-xs sm:text-sm font-semibold py-2.5 sm:py-3 rounded-xl flex items-center justify-center shadow-md transition-all touch-manipulation"
           >
@@ -118,13 +178,14 @@ function ProductCard({ product, onAddToCart, onBuyNow, className = '' }: Product
             onClick={(e) => {
               e.preventDefault()
               e.stopPropagation()
-              onAddToCart(product.id)
+              onAddToCart(current.id)
             }}
             className="flex-1 min-w-0 bg-white border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-gray-800 text-xs sm:text-sm font-semibold py-2.5 sm:py-3 rounded-xl flex items-center justify-center transition-all touch-manipulation shrink-0"
           >
             <ShoppingCart className="w-4 h-4 text-(--primary-green)" />
           </button>
         </div>
+        )}
       </div>
     </div>
   )

@@ -34,6 +34,7 @@ import {
   RotateCcw,
   BookOpen,
   FileText,
+  ExternalLink,
 } from 'lucide-react'
 import SortableGalleryList from '@/components/admin/SortableGalleryList'
 import RichTextEditor from '@/components/admin/RichTextEditor'
@@ -399,7 +400,6 @@ export default function AdminDashboard() {
     const imageUrl = allUrls[0] || editingProduct?.image || null
     const images = allUrls
 
-    setUploading(true)
     try {
       const url = editingProduct
         ? `/api/products/${editingProduct.id}`
@@ -485,13 +485,32 @@ export default function AdminDashboard() {
 
       if (res.ok) {
         fetchProducts()
-        alert('Product deleted successfully!')
+        toast.success('Product deleted successfully!')
       } else {
         toast.error('Failed to delete product')
       }
     } catch (error) {
       console.error('Error deleting product:', error)
       toast.error('Failed to delete product')
+    }
+  }
+
+  const handleQuickStockToggle = async (product: Product) => {
+    try {
+      const res = await fetch(`/api/products/${product.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ inStock: !product.inStock }),
+      })
+      if (res.ok) {
+        fetchProducts()
+        toast.success(product.inStock ? 'Set to Out of Stock' : 'Set to In Stock')
+      } else {
+        toast.error('Failed to update stock')
+      }
+    } catch {
+      toast.error('Failed to update stock')
     }
   }
 
@@ -1518,17 +1537,60 @@ export default function AdminDashboard() {
         {/* Products Tab */}
         {activeTab === 'products' && (
           <>
-            <div className="flex flex-col sm:flex-row justify-end items-stretch sm:items-center gap-3 mb-4 sm:mb-6">
-              <Button
-                onClick={() => {
-                  if (showForm) resetForm()
-                  else setShowForm(true)
-                }}
-                className="w-full sm:w-auto bg-[#3CB31A] hover:opacity-90 text-white"
-              >
-                <Plus className="w-4 h-4 mr-2 shrink-0" />
-                {showForm ? 'Cancel' : 'Add New Product'}
-              </Button>
+            <div className="mb-4 sm:mb-6 flex flex-col gap-4 min-w-0">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div>
+                  <h2 className="text-lg sm:text-xl font-bold text-gray-900">Products</h2>
+                  <p className="text-sm text-gray-500 mt-0.5">Add, edit, and manage inventory. Use search and category to filter.</p>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => fetchProducts()}
+                    disabled={loading}
+                    className="gap-2 shrink-0"
+                  >
+                    <RefreshCw className={`w-4 h-4 shrink-0 ${loading ? 'animate-spin' : ''}`} />
+                    Refresh
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      if (showForm) resetForm()
+                      else setShowForm(true)
+                    }}
+                    className="shrink-0 bg-[#3CB31A] hover:opacity-90 text-white"
+                  >
+                    <Plus className="w-4 h-4 mr-2 shrink-0" />
+                    {showForm ? 'Cancel' : 'Add New Product'}
+                  </Button>
+                </div>
+              </div>
+
+              {/* Search and category filter */}
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 min-w-0">
+                <div className="relative flex-1 min-w-0 max-w-md">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                  <Input
+                    type="text"
+                    placeholder="Search by name or item code..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-9 bg-white w-full min-w-0 h-9 sm:h-10"
+                  />
+                </div>
+                <select
+                  className="rounded-md border border-gray-300 px-3 py-2 bg-white text-sm h-9 sm:h-10 min-w-0 sm:w-56"
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  aria-label="Filter by category"
+                >
+                  <option value="">All categories</option>
+                  {[...new Set([...CATEGORIES, ...categories])].filter(Boolean).sort().map((cat) => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             {/* Bulk stock actions */}
@@ -1558,27 +1620,6 @@ export default function AdminDashboard() {
                 </Button>
               </div>
             )}
-
-            {/* Search and Filter */}
-            <div className="mb-4 sm:mb-6 grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 min-w-0">
-              <Input
-                type="text"
-                placeholder="Search products..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="bg-white w-full min-w-0"
-              />
-              <select
-                className="w-full min-w-0 rounded-md border border-gray-300 px-3 py-2 bg-white text-sm sm:text-base h-9 sm:h-10"
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-              >
-                <option value="">All Categories</option>
-                {categories.map((cat) => (
-                  <option key={cat} value={cat}>{cat}</option>
-                ))}
-              </select>
-            </div>
 
             {/* Product Form */}
             {showForm && (
@@ -1813,8 +1854,9 @@ export default function AdminDashboard() {
                             </th>
                             <th className="py-3 px-3 font-semibold text-gray-700">Image</th>
                             <th className="py-3 px-3 font-semibold text-gray-700">Name</th>
-                            <th className="py-3 px-3 font-semibold text-gray-700">Item Code</th>
-                            <th className="py-3 px-3 font-semibold text-gray-700">Category</th>
+<th className="py-3 px-3 font-semibold text-gray-700">Item Code</th>
+                                            <th className="py-3 px-3 font-semibold text-gray-700">Weight / Variant</th>
+                                            <th className="py-3 px-3 font-semibold text-gray-700">Category</th>
                             <th className="py-3 px-3 font-semibold text-gray-700">Price</th>
                             <th className="py-3 px-3 font-semibold text-gray-700">Stock</th>
                             <th className="py-3 px-3 font-semibold text-gray-700 text-right">Actions</th>
@@ -1855,6 +1897,7 @@ export default function AdminDashboard() {
                                 <span className="line-clamp-2">{product.name}</span>
                               </td>
                               <td className="py-2 px-3 text-gray-600">{product.itemCode}</td>
+                              <td className="py-2 px-3 text-gray-600">{product.weight || '—'}</td>
                               <td className="py-2 px-3 text-gray-600 max-w-[140px]">
                                 <span className="line-clamp-1">{product.category}</span>
                               </td>
@@ -1865,16 +1908,36 @@ export default function AdminDashboard() {
                                 )}
                               </td>
                               <td className="py-2 px-3">
-                                <span className={`inline-block text-xs font-medium px-2 py-0.5 rounded ${product.inStock ? 'bg-[#3CB31A]/15 text-[#3CB31A]' : 'bg-red-100 text-red-700'}`}>
-                                  {product.inStock ? 'In Stock' : 'Out of Stock'}
-                                </span>
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                  <span className={`inline-block text-xs font-medium px-2 py-0.5 rounded ${product.inStock ? 'bg-[#3CB31A]/15 text-[#3CB31A]' : 'bg-red-100 text-red-700'}`}>
+                                    {product.inStock ? 'In Stock' : 'Out of Stock'}
+                                  </span>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleQuickStockToggle(product)}
+                                    className="p-1 rounded hover:bg-gray-200 text-gray-500 hover:text-gray-700"
+                                    title={product.inStock ? 'Set Out of Stock' : 'Set In Stock'}
+                                    aria-label={product.inStock ? 'Set Out of Stock' : 'Set In Stock'}
+                                  >
+                                    {product.inStock ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                                  </button>
+                                </div>
                               </td>
                               <td className="py-2 px-3 text-right">
-                                <div className="flex items-center justify-end gap-1">
-                                  <Button variant="outline" size="sm" onClick={() => handleEdit(product)}>
+                                <div className="flex items-center justify-end gap-1 flex-wrap">
+                                  <a
+                                    href={`/home/products/${product.id}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white p-2 text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                                    title="View on site"
+                                  >
+                                    <ExternalLink className="w-3.5 h-3.5" />
+                                  </a>
+                                  <Button variant="outline" size="sm" onClick={() => handleEdit(product)} title="Edit">
                                     <Pencil className="w-3.5 h-3.5" />
                                   </Button>
-                                  <Button variant="destructive" size="sm" onClick={() => handleDelete(product.id)}>
+                                  <Button variant="destructive" size="sm" onClick={() => handleDelete(product.id)} title="Delete">
                                     <Trash2 className="w-3.5 h-3.5" />
                                   </Button>
                                 </div>

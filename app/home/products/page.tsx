@@ -18,11 +18,33 @@ function ProductsPageContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const categoryFromUrl = searchParams.get('category') ?? ''
+  const itemCodeFromUrl = searchParams.get('itemCode')?.trim() ?? ''
   const [allProducts, setAllProducts] = useState<Product[]>([])
   const [categories, setCategories] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const { isAuthenticated } = useAuth()
+
+  // Scan / barcode: ?itemCode=XXX → redirect to that product's page (same name, correct variant)
+  useEffect(() => {
+    if (!itemCodeFromUrl) return
+    const ac = new AbortController()
+    fetch(`/api/products?itemCode=${encodeURIComponent(itemCodeFromUrl)}`, {
+      credentials: 'include',
+      signal: ac.signal,
+    })
+      .then((r) => {
+        if (r.ok) return r.json()
+        return null
+      })
+      .then((product) => {
+        if (product?.id) {
+          router.replace(`/home/products/${product.id}`)
+        }
+      })
+      .catch(() => {})
+    return () => ac.abort()
+  }, [itemCodeFromUrl, router])
 
   useEffect(() => {
     const ac = new AbortController()
@@ -76,6 +98,18 @@ function ProductsPageContent() {
     }
     return sortProductsByRatingAndDate(list)
   }, [allProducts, categoryFromUrl, searchQuery])
+
+  // Group by product name so same name + different variant (e.g. 1kg, 500g) show as one card with variant selector
+  const productGroups = useMemo(() => {
+    const byName = new Map<string, Product[]>()
+    for (const p of displayedProducts) {
+      const key = (p.name || '').trim().toLowerCase()
+      if (!key) continue
+      if (!byName.has(key)) byName.set(key, [])
+      byName.get(key)!.push(p)
+    }
+    return Array.from(byName.values())
+  }, [displayedProducts])
 
   const addToCart = useCallback(
     async (productId: string) => {
@@ -223,7 +257,7 @@ function ProductsPageContent() {
         </div>
 
         {/* Product grid - 1 col mobile, 2 sm, 3 lg */}
-        {displayedProducts.length === 0 ? (
+        {productGroups.length === 0 ? (
           <div className="rounded-xl sm:rounded-2xl border border-gray-200 bg-white p-8 sm:p-12 md:p-16 text-center min-w-0">
             <Package className="w-12 h-12 sm:w-14 sm:h-14 text-gray-300 mx-auto mb-3 sm:mb-4" />
             <p className="text-gray-600 font-medium text-sm sm:text-base">No products found</p>
@@ -234,14 +268,23 @@ function ProductsPageContent() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6 min-w-0">
-            {displayedProducts.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                onAddToCart={addToCart}
-                onBuyNow={buyNow}
-              />
-            ))}
+            {productGroups.map((group) =>
+              group.length === 1 ? (
+                <ProductCard
+                  key={group[0].id}
+                  product={group[0]}
+                  onAddToCart={addToCart}
+                  onBuyNow={buyNow}
+                />
+              ) : (
+                <ProductCard
+                  key={group.map((p) => p.id).join('-')}
+                  variants={group}
+                  onAddToCart={addToCart}
+                  onBuyNow={buyNow}
+                />
+              )
+            )}
           </div>
         )}
 

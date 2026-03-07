@@ -36,6 +36,8 @@ export default function ProductDetailPage() {
   const router = useRouter()
   const { isAuthenticated } = useAuth()
   const [product, setProduct] = useState<Product | null>(null)
+  const [otherVariants, setOtherVariants] = useState<Product[]>([])
+  const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null)
   const [reviews, setReviews] = useState<Review[]>([])
   const [reviewsLoading, setReviewsLoading] = useState(false)
   const [quantity, setQuantity] = useState(1)
@@ -58,7 +60,30 @@ export default function ProductDetailPage() {
 
   const productId = params.id as string
 
-  const allImages = useMemo(() => getProductImages(product), [product])
+  // All variants: current product + same-name others (Amazon-style: select variant on same page)
+  const allVariants = useMemo(() => {
+    if (!product) return []
+    const name = (product.name || '').trim().toLowerCase()
+    const others = otherVariants.filter(
+      (p) => (p.name || '').trim().toLowerCase() === name && p.id !== product.id
+    )
+    return [product, ...others]
+  }, [product, otherVariants])
+
+  const displayProduct = useMemo(() => {
+    if (selectedVariantId && allVariants.length) {
+      const found = allVariants.find((p) => p.id === selectedVariantId)
+      if (found) return found
+    }
+    return product
+  }, [product, allVariants, selectedVariantId])
+
+  // Keep selected variant in sync with URL (e.g. when navigating to this product)
+  useEffect(() => {
+    if (product && productId) setSelectedVariantId(productId)
+  }, [productId, product?.id])
+
+  const allImages = useMemo(() => getProductImages(displayProduct), [displayProduct])
   const mainImageUrl = allImages[selectedImageIndex] ?? null
 
   const LENS_WIDTH = 220
@@ -116,6 +141,21 @@ export default function ProductDetailPage() {
       if (res.ok) {
         const data = await res.json()
         setProduct(data)
+        // Fetch same-name variants (e.g. 500g, 1kg) for "Other variants" section
+        const name = (data.name || '').trim()
+        if (name) {
+          fetch(`/api/products?search=${encodeURIComponent(name)}`)
+            .then((r) => r.ok ? r.json() : [])
+            .then((arr: Product[]) => {
+              const sameName = Array.isArray(arr)
+                ? arr.filter((p) => (p.name || '').trim().toLowerCase() === name.toLowerCase() && p.id !== data.id)
+                : []
+              setOtherVariants(sameName)
+            })
+            .catch(() => setOtherVariants([]))
+        } else {
+          setOtherVariants([])
+        }
       }
     } catch (error) {
       console.error('Error fetching product:', error)
@@ -156,7 +196,7 @@ export default function ProductDetailPage() {
 
   useEffect(() => {
     setSelectedImageIndex(0)
-  }, [productId])
+  }, [productId, displayProduct?.id])
 
   const addToCart = async () => {
     if (!isAuthenticated) {
@@ -169,7 +209,7 @@ export default function ProductDetailPage() {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ productId: product?.id, quantity }),
+        body: JSON.stringify({ productId: displayProduct?.id, quantity }),
       })
 
       if (res.ok) {
@@ -227,8 +267,8 @@ export default function ProductDetailPage() {
     }
   }
 
-  const displayRating = product?.rating ?? 0
-  const displayReviewCount = product?.reviewCount ?? 0
+  const displayRating = displayProduct?.rating ?? 0
+  const displayReviewCount = displayProduct?.reviewCount ?? 0
 
   const shareProduct = async () => {
     const url = typeof window !== 'undefined' ? window.location.href : ''
@@ -316,7 +356,7 @@ export default function ProductDetailPage() {
                 <>
                   <Image
                     src={mainImageUrl}
-                    alt={product.name}
+                    alt={displayProduct?.name ?? product.name}
                     fill
                     className="object-cover pointer-events-none"
                     unoptimized
@@ -387,9 +427,16 @@ export default function ProductDetailPage() {
           {/* Product Info */}
           <div className="min-w-0 flex flex-col">
             <div className="flex items-start justify-between gap-3 mb-2 sm:mb-3">
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-neutral-900 leading-tight min-w-0 flex-1">
-                {product.name}
-              </h1>
+              <div className="min-w-0 flex-1">
+                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-neutral-900 leading-tight">
+                  {product.name}
+                </h1>
+                {(displayProduct?.weight || displayProduct?.itemCode) && (
+                  <p className="text-sm text-neutral-500 mt-1">
+                    {[displayProduct.weight, displayProduct.itemCode].filter(Boolean).join(' · ')}
+                  </p>
+                )}
+              </div>
               <button
                 type="button"
                 onClick={shareProduct}
@@ -408,25 +455,57 @@ export default function ProductDetailPage() {
               </span>
             </div>
 
-            {/* Price */}
+            {/* Amazon-style variant selector: all variants on same page, select to see price */}
+            {allVariants.length > 1 && (
+              <div className="mb-4 sm:mb-5">
+                <label className="block text-sm font-medium text-neutral-900 mb-2">Select variant</label>
+                <div className="flex flex-wrap gap-2">
+                  {allVariants.map((v) => (
+                    <button
+                      key={v.id}
+                      type="button"
+                      onClick={() => {
+                        setSelectedVariantId(v.id)
+                        router.replace(`/home/products/${v.id}`, { scroll: false })
+                      }}
+                      className={cn(
+                        'rounded-lg border-2 px-4 py-2.5 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[#3CB31A] focus:ring-offset-2',
+                        selectedVariantId === v.id
+                          ? 'border-[#3CB31A] bg-[#3CB31A]/10 text-neutral-900'
+                          : 'border-neutral-300 bg-white text-neutral-700 hover:border-neutral-400 hover:bg-neutral-50'
+                      )}
+                      aria-pressed={selectedVariantId === v.id}
+                      aria-label={`${v.weight?.trim() || v.itemCode || 'Variant'} — ₹${v.salePrice?.toLocaleString('en-IN')}`}
+                    >
+                      <span className="font-medium">{v.weight?.trim() || v.itemCode || `Variant`}</span>
+                      <span className="ml-1.5 text-neutral-500">₹{v.salePrice?.toLocaleString('en-IN')}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Price - reflects selected variant */}
             <div className="flex flex-wrap items-center gap-3 mb-4 sm:mb-5">
               <span className="text-2xl sm:text-3xl font-bold text-neutral-900">
-                ₹{product.salePrice.toLocaleString('en-IN')}
+                ₹{(displayProduct?.salePrice ?? 0).toLocaleString('en-IN')}
               </span>
-              {product.mrp > product.salePrice && (
-                  <span className="text-lg sm:text-xl text-neutral-500 line-through">
-                    ₹{product.mrp.toLocaleString('en-IN')}
-                  </span>
-                )}
-              <span
-                className={`text-xs sm:text-sm font-medium px-2.5 py-1 rounded-md ${
-                  product.inStock
-                    ? 'bg-[#3CB31A] text-white'
-                    : 'bg-neutral-400 text-white'
-                }`}
-              >
-                {product.inStock ? 'In Stock' : 'Out of Stock'}
-              </span>
+              {displayProduct && displayProduct.mrp > displayProduct.salePrice && (
+                <span className="text-lg sm:text-xl text-neutral-500 line-through">
+                  ₹{displayProduct.mrp.toLocaleString('en-IN')}
+                </span>
+              )}
+              {displayProduct && (
+                <span
+                  className={`text-xs sm:text-sm font-medium px-2.5 py-1 rounded-md ${
+                    displayProduct.inStock
+                      ? 'bg-[#3CB31A] text-white'
+                      : 'bg-neutral-400 text-white'
+                  }`}
+                >
+                  {displayProduct.inStock ? 'In Stock' : 'Out of Stock'}
+                </span>
+              )}
             </div>
             <p className="text-sm text-neutral-600 mb-5 sm:mb-6">Shipping calculated at checkout.</p>
 
@@ -477,7 +556,7 @@ export default function ProductDetailPage() {
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 md:gap-4 mb-6 sm:mb-8">
               <button
                 onClick={addToCart}
-                disabled={!product.inStock}
+                disabled={!displayProduct?.inStock}
                 className="flex-1 min-w-0 border-2 border-neutral-300 text-neutral-700 py-3 px-5 sm:px-6 rounded-xl font-semibold hover:bg-neutral-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Add to cart
@@ -487,15 +566,15 @@ export default function ProductDetailPage() {
                   addToCart()
                   router.push('/home/cart')
                 }}
-                disabled={!product.inStock}
-                className="flex-1 min-w-0 bg-[var(--primary-green)] text-white py-3 px-5 sm:px-6 rounded-xl font-semibold hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={!displayProduct?.inStock}
+                className="flex-1 min-w-0 bg-(--primary-green) text-white py-3 px-5 sm:px-6 rounded-xl font-semibold hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Buy now
               </button>
             </div>
 
-            {!product.inStock && (
-              <p className="text-red-600 text-sm sm:text-base mt-4">This product is currently out of stock.</p>
+            {displayProduct && !displayProduct.inStock && (
+              <p className="text-red-600 text-sm sm:text-base mt-4">This variant is currently out of stock.</p>
             )}
           </div>
         </div>
@@ -506,7 +585,7 @@ export default function ProductDetailPage() {
             <h2 className="text-base sm:text-lg md:text-lg font-semibold text-neutral-900 mb-2 sm:mb-3">Description</h2>
             <div className="w-full min-w-0 max-w-full rounded-lg border border-neutral-200 bg-neutral-50/50 px-3 py-2.5 sm:px-4 sm:py-3 md:px-5 md:py-4 overflow-x-hidden">
               <div
-                className="prose prose-sm sm:prose-base md:prose-base text-neutral-700 leading-relaxed [&_p]:mb-2 [&_p]:whitespace-normal [&_ul]:list-disc [&_ol]:list-decimal [&_ul]:pl-5 [&_ol]:pl-5 [&_strong]:font-semibold [&_a]:text-[#3CB31A] [&_a]:underline [&_*]:max-w-full"
+                className="prose prose-sm sm:prose-base md:prose-base text-neutral-700 leading-relaxed [&_p]:mb-2 [&_p]:whitespace-normal [&_ul]:list-disc [&_ol]:list-decimal [&_ul]:pl-5 [&_ol]:pl-5 [&_strong]:font-semibold [&_a]:text-[#3CB31A] [&_a]:underline **:max-w-full"
                 style={{ wordBreak: 'normal', overflowWrap: 'break-word' } as React.CSSProperties}
                 dangerouslySetInnerHTML={{ __html: descriptionHtml }}
               />
@@ -616,7 +695,7 @@ export default function ProductDetailPage() {
               >
                 <ul className="space-y-2 p-0.5 list-none m-0 pb-1">
                   {reviews.map((r, index) => (
-                    <li key={r.id ? String(r.id) : `review-${index}`} className="flex-shrink-0">
+                    <li key={r.id ? String(r.id) : `review-${index}`} className="shrink-0">
                       <Card className="rounded-md border-gray-200 overflow-hidden">
                         <CardContent className="p-2.5">
                           <div className="flex items-start gap-2">

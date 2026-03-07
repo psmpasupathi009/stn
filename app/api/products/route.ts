@@ -8,6 +8,16 @@ export async function GET(request: NextRequest) {
     const category = searchParams.get('category')
     const search = searchParams.get('search')
     const limit = searchParams.get('limit')
+    const itemCode = searchParams.get('itemCode')?.trim()
+
+    // Scan / barcode lookup: exact itemCode returns single product (for same name, different variant)
+    if (itemCode) {
+      const product = await prisma.product.findUnique({
+        where: { itemCode },
+      })
+      if (product) return NextResponse.json(product)
+      return NextResponse.json({ error: 'Product not found for this code' }, { status: 404 })
+    }
 
     let products = await prisma.product.findMany({
       orderBy: { createdAt: 'desc' },
