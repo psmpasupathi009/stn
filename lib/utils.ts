@@ -35,3 +35,29 @@ export function getProductImages(product: { image?: string | null; images?: stri
   }
   return list
 }
+
+/** Use variant's images; if none, use first variant in list that has images (one upload can show for all variants). */
+export function getProductImagesWithVariantFallback(
+  product: { image?: string | null; images?: string[] | null } | null,
+  variantList: { image?: string | null; images?: string[] | null }[] = []
+): string[] {
+  const own = getProductImages(product)
+  if (own.length > 0) return own
+  for (const v of variantList) {
+    if (v && v !== product) {
+      const imgs = getProductImages(v)
+      if (imgs.length > 0) return imgs
+    }
+  }
+  return []
+}
+
+/** Display name for variant: variantLabel (e.g. "Small") or weight or itemCode. */
+export function getVariantDisplayName(p: { variantLabel?: string | null; weight?: string | null; itemCode?: string | null } | null): string {
+  if (!p) return ''
+  const v = (p as { variantLabel?: string | null }).variantLabel?.trim()
+  if (v) return v
+  const w = p.weight?.trim()
+  if (w) return w
+  return p.itemCode?.trim() || ''
+}

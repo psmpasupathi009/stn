@@ -4,6 +4,7 @@ import { memo, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Droplets, ShoppingCart, ArrowRight, Star } from 'lucide-react'
+import { getProductImagesWithVariantFallback, getVariantDisplayName } from '@/lib/utils'
 
 export type ProductCardProduct = {
   id: string
@@ -15,6 +16,7 @@ export type ProductCardProduct = {
   images?: string[]
   itemCode?: string
   weight?: string
+  variantLabel?: string | null
   rating?: number
   reviewCount?: number
 }
@@ -45,7 +47,8 @@ function ProductCard({ product: singleProduct, variants, onAddToCart, onBuyNow, 
     ? Math.round(((current.mrp - current.salePrice) / current.mrp) * 100)
     : 0
   const rating = (current?.rating ?? 0) as number
-  const displayImage = current?.image ?? current?.images?.[0]
+  const variantImages = getProductImagesWithVariantFallback(current, list)
+  const displayImage = variantImages[0]
 
   return (
     <div
@@ -112,9 +115,9 @@ function ProductCard({ product: singleProduct, variants, onAddToCart, onBuyNow, 
                       ? 'border-[#3CB31A] bg-[#3CB31A]/10 text-gray-900'
                       : 'border-gray-200 bg-gray-50 text-gray-700 hover:border-gray-300 hover:bg-gray-100'
                   }`}
-                  aria-label={`Select ${v.weight?.trim() || v.itemCode || 'variant'}`}
+                  aria-label={`Select ${getVariantDisplayName(v) || 'variant'}`}
                 >
-                  {v.weight?.trim() || v.itemCode || `Variant ${i + 1}`}
+                  {getVariantDisplayName(v) || `Variant ${i + 1}`}
                 </button>
               ))}
             </div>

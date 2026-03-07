@@ -2,6 +2,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSessionFromRequest } from '@/lib/session'
 
+/** Ensure image URLs are valid for frontend (live site). Empty string from DB -> null. */
+function sanitizeProductImages<T extends { image?: string | null; images?: string[] | null }>(p: T): T {
+  const image = p.image && p.image.trim() ? p.image.trim() : null
+  const images = Array.isArray(p.images) ? p.images.filter((u): u is string => typeof u === 'string' && u.trim() !== '') : []
+  return { ...p, image: image || null, images }
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -16,7 +23,7 @@ export async function GET(
       return NextResponse.json({ error: 'Product not found' }, { status: 404 })
     }
 
-    return NextResponse.json(product)
+    return NextResponse.json(sanitizeProductImages(product))
   } catch (error: unknown) {
     console.error('Get product error:', error)
     return NextResponse.json(
@@ -42,6 +49,7 @@ export async function PUT(
       category,
       itemCode,
       weight,
+      variantLabel,
       mrp,
       salePrice,
       gst,
@@ -52,8 +60,10 @@ export async function PUT(
       inStock,
     } = body
 
-    const imageUrls = Array.isArray(images) ? images : undefined
-    const mainImage = image !== undefined ? image : (imageUrls?.length ? imageUrls[0] : undefined)
+    const imageUrls = Array.isArray(images) ? images.filter((u: unknown) => typeof u === 'string' && u.trim()) : []
+    const mainImageRaw = image !== undefined ? image : (imageUrls.length > 0 ? imageUrls[0] : null)
+    const mainImage = typeof mainImageRaw === 'string' && mainImageRaw.trim() ? mainImageRaw.trim() : null
+    const hasImagesPayload = images !== undefined
 
     const product = await prisma.product.update({
       where: { id },
@@ -61,19 +71,19 @@ export async function PUT(
         ...(name && { name }),
         ...(category && { category }),
         ...(itemCode && { itemCode }),
-        ...(weight && { weight }),
+        ...(weight !== undefined && { weight }),
+        ...(variantLabel !== undefined && { variantLabel: variantLabel != null && String(variantLabel).trim() !== '' ? String(variantLabel).trim() : null }),
         ...(mrp && { mrp: parseFloat(mrp) }),
         ...(salePrice && { salePrice: parseFloat(salePrice) }),
         ...(gst !== undefined && { gst: parseFloat(gst) }),
         ...(hsnCode && { hsnCode }),
-        ...(mainImage !== undefined && { image: mainImage }),
-        ...(imageUrls && { images: imageUrls }),
+        ...(hasImagesPayload && { image: mainImage, images: imageUrls }),
         ...(description !== undefined && { description }),
         ...(inStock !== undefined && { inStock }),
       },
     })
 
-    return NextResponse.json(product)
+    return NextResponse.json(sanitizeProductImages(product))
   } catch (error: unknown) {
     console.error('Update product error:', error)
     return NextResponse.json(

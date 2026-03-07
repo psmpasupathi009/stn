@@ -49,6 +49,7 @@ interface Product {
   category: string
   itemCode: string
   weight: string
+  variantLabel?: string | null
   mrp: number
   salePrice: number
   gst: number
@@ -176,6 +177,7 @@ export default function AdminDashboard() {
     category: '',
     itemCode: '',
     weight: '',
+    variantLabel: '',
     mrp: '',
     salePrice: '',
     gst: '',
@@ -366,7 +368,7 @@ export default function AdminDashboard() {
   }
 
   const uploadProductImages = async (): Promise<string[]> => {
-    const existing = productImages.filter((i): i is { type: 'existing'; url: string } => i.type === 'existing').map((i) => i.url)
+    const existing = productImages.filter((i): i is { type: 'existing'; url: string } => i.type === 'existing').map((i) => i.url).filter(Boolean)
     const newItems = productImages.filter((i): i is { type: 'new'; file: File; preview: string } => i.type === 'new')
     if (newItems.length === 0) return existing
 
@@ -376,14 +378,17 @@ export default function AdminDashboard() {
         const fd = new FormData()
         fd.append('file', item.file)
         const res = await fetch('/api/upload', { method: 'POST', body: fd, credentials: 'include' })
-        if (res.ok) {
-          const data = await res.json()
-          uploaded.push(data.url)
+        const data = await res.json().catch(() => ({}))
+        if (res.ok && data.url && typeof data.url === 'string' && data.url.trim()) {
+          uploaded.push(data.url.trim())
+        } else {
+          toast.error(data.error || 'Image upload failed')
         }
       }
       return [...existing, ...uploaded].slice(0, MAX_PRODUCT_IMAGES)
     } catch (error) {
       console.error('Error uploading images:', error)
+      toast.error('Failed to upload images')
       return existing
     }
   }
@@ -397,7 +402,7 @@ export default function AdminDashboard() {
     }
     setUploading(true)
     const allUrls = await uploadProductImages()
-    const imageUrl = allUrls[0] || editingProduct?.image || null
+    const imageUrl = allUrls.length > 0 ? allUrls[0] : null
     const images = allUrls
 
     try {
@@ -418,6 +423,7 @@ export default function AdminDashboard() {
           mrp: parseFloat(formData.mrp),
           salePrice: parseFloat(formData.salePrice),
           gst: parseFloat(formData.gst || '0'),
+          variantLabel: formData.variantLabel?.trim() || null,
         }),
       })
 
@@ -430,6 +436,7 @@ export default function AdminDashboard() {
           category: '',
           itemCode: '',
           weight: '',
+          variantLabel: '',
           mrp: '',
           salePrice: '',
           gst: '',
@@ -460,6 +467,7 @@ export default function AdminDashboard() {
       category: product.category,
       itemCode: product.itemCode,
       weight: product.weight,
+      variantLabel: product.variantLabel ?? '',
       mrp: product.mrp.toString(),
       salePrice: product.salePrice.toString(),
       gst: product.gst.toString(),
@@ -571,6 +579,7 @@ export default function AdminDashboard() {
       category: '',
       itemCode: '',
       weight: '',
+      variantLabel: '',
       mrp: '',
       salePrice: '',
       gst: '',
@@ -1688,6 +1697,16 @@ export default function AdminDashboard() {
                         />
                       </div>
                       <div className="min-w-0">
+                        <Label className="text-sm sm:text-base">Variant label (website)</Label>
+                        <Input
+                          value={formData.variantLabel}
+                          onChange={(e) => setFormData({ ...formData, variantLabel: e.target.value })}
+                          placeholder="e.g., Small, Family Pack (shows instead of weight)"
+                          className="mt-1 w-full min-w-0"
+                        />
+                        <p className="text-xs text-gray-500 mt-0.5">Optional. Shown on product card and detail instead of weight when set.</p>
+                      </div>
+                      <div className="min-w-0">
                         <Label className="text-sm sm:text-base">MRP (₹) *</Label>
                         <Input
                           type="number"
@@ -1897,7 +1916,7 @@ export default function AdminDashboard() {
                                 <span className="line-clamp-2">{product.name}</span>
                               </td>
                               <td className="py-2 px-3 text-gray-600">{product.itemCode}</td>
-                              <td className="py-2 px-3 text-gray-600">{product.weight || '—'}</td>
+                              <td className="py-2 px-3 text-gray-600">{product.variantLabel?.trim() || product.weight || '—'}</td>
                               <td className="py-2 px-3 text-gray-600 max-w-[140px]">
                                 <span className="line-clamp-1">{product.category}</span>
                               </td>

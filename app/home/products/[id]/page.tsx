@@ -11,7 +11,7 @@ import { useCartStore } from '@/lib/stores/cart-store'
 import { toast } from 'sonner'
 import { Star, MessageSquare, User, ChevronLeft, Share2 } from 'lucide-react'
 import Link from 'next/link'
-import { cn, getProductImages } from '@/lib/utils'
+import { cn, getProductImagesWithVariantFallback, getVariantDisplayName } from '@/lib/utils'
 import type { Product, Review } from '@/lib/types'
 
 function StarRating({ value, size = 'md' }: { value: number; size?: 'sm' | 'md' }) {
@@ -83,7 +83,10 @@ export default function ProductDetailPage() {
     if (product && productId) setSelectedVariantId(productId)
   }, [productId, product?.id])
 
-  const allImages = useMemo(() => getProductImages(displayProduct), [displayProduct])
+  const allImages = useMemo(
+    () => getProductImagesWithVariantFallback(displayProduct, allVariants),
+    [displayProduct, allVariants]
+  )
   const mainImageUrl = allImages[selectedImageIndex] ?? null
 
   const LENS_WIDTH = 220
@@ -431,9 +434,9 @@ export default function ProductDetailPage() {
                 <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-neutral-900 leading-tight">
                   {product.name}
                 </h1>
-                {(displayProduct?.weight || displayProduct?.itemCode) && (
+                {(displayProduct?.variantLabel || displayProduct?.weight || displayProduct?.itemCode) && (
                   <p className="text-sm text-neutral-500 mt-1">
-                    {[displayProduct.weight, displayProduct.itemCode].filter(Boolean).join(' · ')}
+                    {getVariantDisplayName(displayProduct)}
                   </p>
                 )}
               </div>
@@ -475,9 +478,9 @@ export default function ProductDetailPage() {
                           : 'border-neutral-300 bg-white text-neutral-700 hover:border-neutral-400 hover:bg-neutral-50'
                       )}
                       aria-pressed={selectedVariantId === v.id}
-                      aria-label={`${v.weight?.trim() || v.itemCode || 'Variant'} — ₹${v.salePrice?.toLocaleString('en-IN')}`}
+                      aria-label={`${getVariantDisplayName(v)} — ₹${v.salePrice?.toLocaleString('en-IN')}`}
                     >
-                      <span className="font-medium">{v.weight?.trim() || v.itemCode || `Variant`}</span>
+                      <span className="font-medium">{getVariantDisplayName(v) || 'Variant'}</span>
                       <span className="ml-1.5 text-neutral-500">₹{v.salePrice?.toLocaleString('en-IN')}</span>
                     </button>
                   ))}

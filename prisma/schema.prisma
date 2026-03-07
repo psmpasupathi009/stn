@@ -44,26 +44,27 @@ model Otp {
 }
 
 model Product {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  name        String
-  category    String
-  itemCode    String   @unique
-  weight      String
-  mrp         Float
-  salePrice   Float
-  gst         Float
-  hsnCode     String
-  image       String?  // Cloudinary URL
-  images      String[] // Multiple images
-  description String?
-  inStock     Boolean  @default(true)
-  rating      Float    @default(0)
-  reviewCount Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  orderItems  OrderItem[]
-  cartItems   CartItem[]
-  reviews     Review[]
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  name         String
+  category     String
+  itemCode     String   @unique
+  weight       String
+  variantLabel String?  // Website-friendly name e.g. "Small", "Family Pack" (shows instead of weight)
+  mrp          Float
+  salePrice    Float
+  gst          Float
+  hsnCode      String
+  image        String?  // Cloudinary URL
+  images       String[] // Multiple images
+  description  String?
+  inStock      Boolean  @default(true)
+  rating       Float    @default(0)
+  reviewCount  Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  orderItems   OrderItem[]
+  cartItems    CartItem[]
+  reviews      Review[]
 }
 
 model Review {

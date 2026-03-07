@@ -24,8 +24,10 @@ export async function uploadImage(file: File | Buffer, folder?: string): Promise
       (error, result) => {
         if (error) {
           reject(error)
+        } else if (result?.secure_url) {
+          resolve(result.secure_url)
         } else {
-          resolve(result?.secure_url || '')
+          reject(new Error('Cloudinary did not return a URL'))
         }
       }
     )

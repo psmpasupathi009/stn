@@ -2,6 +2,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSessionFromRequest } from '@/lib/session'
 
+/** Ensure image URLs are valid for frontend (live site). Empty string from DB -> null. */
+function sanitizeProductImages<T extends { image?: string | null; images?: string[] | null }>(p: T): T {
+  const image = p.image && p.image.trim() ? p.image.trim() : null
+  const images = Array.isArray(p.images) ? p.images.filter((u): u is string => typeof u === 'string' && u.trim() !== '') : []
+  return { ...p, image: image || null, images }
+}
+
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams
@@ -15,7 +22,7 @@ export async function GET(request: NextRequest) {
       const product = await prisma.product.findUnique({
         where: { itemCode },
       })
-      if (product) return NextResponse.json(product)
+      if (product) return NextResponse.json(sanitizeProductImages(product))
       return NextResponse.json({ error: 'Product not found for this code' }, { status: 404 })
     }
 
@@ -47,7 +54,7 @@ export async function GET(request: NextRequest) {
       if (!Number.isNaN(n) && n > 0) products = products.slice(0, n)
     }
 
-    return NextResponse.json(products)
+    return NextResponse.json(products.map(sanitizeProductImages))
   } catch (error: unknown) {
     console.error('Get products error:', error)
     return NextResponse.json(
@@ -69,6 +76,7 @@ export async function POST(request: NextRequest) {
       category,
       itemCode,
       weight,
+      variantLabel,
       mrp,
       salePrice,
       gst,
@@ -86,8 +94,9 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const imageUrls = Array.isArray(images) ? images : []
-    const mainImage = image ?? imageUrls[0] ?? null
+    const imageUrls = Array.isArray(images) ? images.filter((u: unknown) => typeof u === 'string' && u.trim()) : []
+    const mainImageRaw = image ?? imageUrls[0] ?? null
+    const mainImage = typeof mainImageRaw === 'string' && mainImageRaw.trim() ? mainImageRaw.trim() : null
 
     const product = await prisma.product.create({
       data: {
@@ -95,6 +104,7 @@ export async function POST(request: NextRequest) {
         category,
         itemCode,
         weight: weight || '',
+        variantLabel: variantLabel != null && String(variantLabel).trim() !== '' ? String(variantLabel).trim() : null,
         mrp: parseFloat(mrp),
         salePrice: parseFloat(salePrice),
         gst: parseFloat(gst || 0),

@@ -54,6 +54,7 @@ export interface Product {
   images?: string[]
   itemCode?: string
   weight?: string
+  variantLabel?: string | null
   description?: string
   inStock?: boolean
   gst?: number
